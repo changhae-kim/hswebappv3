@@ -32,14 +32,16 @@ w2[ind2] = w2[ind2] / numpy.sum(w2[ind2])
 y2 = calc.get_gasphase(w2)
 
 print()
+print('Gas-Phase Mole Fractions to Liquid-Phase Mass Fractions')
 print('T = {:g} K'.format(T))
 print('P = {:g} atm'.format(P))
-print()
 print('{:>5s} {:>10s} {:>10s} {:>10s}'.format('', 'Hv', 'y1', 'w1'))
 print('-' * 38)
 for ( name, Hi, value1, value2 ) in zip( calc.names, calc.Hv, y1, w1 ):
     print('{:>5s} {:10.1f} {:10f} {:10f}'.format( name, Hi, value1, value2 ))
 print()
+print('Liquid-Phase Mass Fractions to Gas-Phase Mole Fractions')
+print('T = {:g} K'.format(T))
 print('{:>5s} {:>10s} {:>10s} {:>10s}'.format('', 'Hv', 'w2', 'y2'))
 print('-' * 38)
 for ( name, Hi, value1, value2 ) in zip( calc.names, calc.Hv, w2, y2 ):
@@ -55,7 +57,7 @@ print('H2 C1 C2 C3 C4 C5 C6 C7 C8 C2H4 iC4')
 print('The values must be numbers.')
 print('If the mass/mole fraction of a species is 0, then you may omit its entry.')
 print('Here, we choose a random number n of species and generate n random numbers that add to 1.')
-print('See Lines 60-81.')
+print('See Lines 62-83.')
 
 T = 573.15
 P = 1.0
@@ -81,14 +83,16 @@ w2 = { names[ii]: w2[i] for i, ii in enumerate(ind2) }
 y2 = calc.get_gasphase(w2, diction=True)
 
 print()
+print('Gas-Phase Mole Fractions to Liquid-Phase Mass Fractions')
 print('T = {:g} K'.format(T))
 print('P = {:g} atm'.format(P))
-print()
 print('{:>5s} {:>10s} {:>10s} {:>10s}'.format('', 'Hv', 'y1', 'w1'))
 print('-' * 38)
 for ( Hi, ( name, value1 ), ( _, value2 ) ) in zip( calc.Hv, y1.items(), w1.items() ):
     print('{:>5s} {:10.1f} {:10f} {:10f}'.format( name, Hi, value1, value2 ))
 print()
+print('Liquid-Phase Mass Fractions to Gas-Phase Mole Fractions')
+print('T = {:g} K'.format(T))
 print('{:>5s} {:>10s} {:>10s} {:>10s}'.format('', 'Hv', 'w2', 'y2'))
 print('-' * 38)
 for ( Hi, ( name, value1 ), ( _, value2 ) ) in zip( calc.Hv, w2.items(), y2.items() ):
