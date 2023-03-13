@@ -62,7 +62,7 @@ P = 1.0
 
 calc = Calculator(temp=T, pressure=P)
 
-m = numpy.array([ 2.016, 16.04, 30.07, 44.09, 58.12, 72.15, 86.17, 100.20, 114.22, 28.05, 58.12 ])
+m = calc.MW
 
 y3 = 1.0/m / numpy.sum(1.0/m)
 w3 = calc.get_liquidphase(y3)
