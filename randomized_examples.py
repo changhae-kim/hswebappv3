@@ -11,7 +11,7 @@ print('For an example with gas-phase mole fractions as the starting point,')
 print('we choose a random number n of species and generate n random numbers that add to 1.')
 print('For an example with liquid-phase mass fractions as the starting point,')
 print('we choose a random number n of species and generate n random numbers that add to a random number w < 1.')
-print('Indeed, most of the liquid-phase mass should be long-chain hydrocarbons that do not vaporize.')
+print('Indeed, a lot of the melt should be long hydrocarbons (C20-C30) that do not vaporize.')
 print('See Lines 17-37 of \'randomized_examples.py\' script.')
 
 T = 473.15
@@ -70,7 +70,7 @@ print('For an example with gas-phase mole fractions as the starting point,')
 print('we choose a random number n of species and generate n random numbers that add to 1.')
 print('For an example with liquid-phase mass fractions as the starting point,')
 print('we choose a random number n of species and generate n random numbers that add to a random number w < 1.')
-print('Indeed, most of the liquid-phase mass should be long-chain hydrocarbons that do not vaporize.')
+print('Indeed, a lot of the melt should be long hydrocarbons (C20-C30) that do not vaporize.')
 print('See Lines 76-100 of \'randomized_examples.py\' script.')
 
 T = 473.15
