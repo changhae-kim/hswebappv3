@@ -17,7 +17,7 @@ P = 1.0
 
 calc = Calculator(temp=T, pressure=P)
 
-n1 = numpy.random.randint( 1, 12 )
+n1 = numpy.random.randint(1, 12)
 i1 = list(sorted( numpy.random.choice( list(range(11)), n1, replace=False ) ))
 y1 = numpy.zeros(11)
 y1[i1] = numpy.random.rand(n1)
@@ -25,7 +25,7 @@ y1 = y1 / numpy.sum(y1)
 
 w1 = calc.get_liquidphase(y1)
 
-n2 = numpy.random.randint( 1, 12 )
+n2 = numpy.random.randint(1, 12)
 i2 = list(sorted( numpy.random.choice( list(range(11)), n2, replace=False ) ))
 W2 = numpy.random.rand(1)
 w2 = numpy.zeros(11)
@@ -76,7 +76,7 @@ calc = Calculator(temp=T, pressure=P)
 
 names = ['H2', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C2H4', 'iC4']
 
-n1 = numpy.random.randint( 1, 12 )
+n1 = numpy.random.randint(1, 12)
 i1 = list(sorted( numpy.random.choice( list(range(11)), n1, replace=False ) ))
 y1 = numpy.zeros(11)
 y1[i1] = numpy.random.rand(n1)
@@ -85,7 +85,7 @@ y1 = { names[i]: y1[i] for i in i1 }
 
 w1 = calc.get_liquidphase(y1, diction=True)
 
-n2 = numpy.random.randint( 1, 12 )
+n2 = numpy.random.randint(1, 12)
 i2 = list(sorted( numpy.random.choice( list(range(11)), n2, replace=False ) ))
 W2 = numpy.random.rand(1)
 w2 = numpy.zeros(11)
