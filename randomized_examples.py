@@ -34,7 +34,7 @@ w2 = numpy.zeros(11)
 w2[i2] = numpy.random.rand(n2)
 w2 = W2 * w2 / numpy.sum(w2)
 
-y2 = calc.get_gasphase(w2)
+y2, P2 = calc.get_gasphase(w2, get_pressure=True)
 
 print()
 print('Gas-Phase Mole Fractions (y1) to Liquid-Phase Mass Fractions (w1)')
@@ -49,7 +49,7 @@ print('{:>5s} {:>10s} {:10f} {:10f}'.format( 'Total', '', numpy.sum(y1), numpy.s
 print()
 print('Liquid-Phase Mass Fractions (w2) to Gas-Phase Mole Fractions (y2)')
 print('T = {:g} K'.format(T))
-print('P = TBD')
+print('P = {:g} atm (est.)'.format(P2))
 print('{:>5s} {:>10s} {:>10s} {:>10s}'.format('', 'Hv', 'w2', 'y2'))
 print('-' * 38)
 for ( name, Hi, value1, value2 ) in zip( calc.names, calc.Hv, w2, y2 ):
@@ -97,7 +97,7 @@ w2[i2] = numpy.random.rand(n2)
 w2 = W2 * w2 / numpy.sum(w2)
 w2 = { names[i]: w2[i] for i in i2 }
 
-y2 = calc.get_gasphase(w2, diction=True)
+y2, P2 = calc.get_gasphase(w2, diction=True, get_pressure=True)
 
 print()
 print('Gas-Phase Mole Fractions (y1) to Liquid-Phase Mass Fractions (w1)')
@@ -112,7 +112,7 @@ print('{:>5s} {:>10s} {:10f} {:10f}'.format( 'Total', '', sum(y1.values()), sum(
 print()
 print('Liquid-Phase Mass Fractions (w2) to Gas-Phase Mole Fractions (y2)')
 print('T = {:g} K'.format(T))
-print('P = TBD')
+print('P = {:g} atm (est.)'.format(P2))
 print('{:>5s} {:>10s} {:>10s} {:>10s}'.format('', 'Hv', 'w2', 'y2'))
 print('-' * 38)
 for ( Hi, ( name, value1 ), ( _, value2 ) ) in zip( calc.Hv, w2.items(), y2.items() ):
