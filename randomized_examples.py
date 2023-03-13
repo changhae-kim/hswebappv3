@@ -7,10 +7,12 @@ print()
 print('Case 1: Array-like Input, Array-like Output')
 print('For the input, construct an array-like object with mole/mass fractions in the order:')
 print('H2 C1 C2 C3 C4 C5 C6 C7 C8 C2H4 iC4')
-print('For examples of gas-phase mole fractions, we choose a random number n of species and generate n random numbers that add to 1.')
-print('For examples of liquid-phase mass fractions, we choose a random number n of species and generate n random numbers that add to a random number w < 1;')
-print('indeed, most of the liquid-phase mass should be long-chain hydrocarbons that do not vaporize.')
-print('See Lines 15-35 of \'randomized_examples.py\' script.')
+print('For an example with gas-phase mole fractions as the starting point,')
+print('we choose a random number n of species and generate n random numbers that add to 1.')
+print('For an example with liquid-phase mass fractions as the starting point,')
+print('we choose a random number n of species and generate n random numbers that add to a random number w < 1.')
+print('Indeed, most of the liquid-phase mass should be long-chain hydrocarbons that do not vaporize.')
+print('See Lines 17-37 of \'randomized_examples.py\' script.')
 
 T = 473.15
 P = 1.0
@@ -64,10 +66,12 @@ print('The keys must be chosen from:')
 print('H2 C1 C2 C3 C4 C5 C6 C7 C8 C2H4 iC4')
 print('The values must be numbers.')
 print('If the mass/mole fraction of a species is 0, then you may omit its entry.')
-print('For examples of gas-phase mole fractions, we choose a random number n of species and generate n random numbers that add to 1.')
-print('For examples of liquid-phase mass fractions, we choose a random number n of species and generate n random numbers that add to a random number w < 1;')
-print('indeed, most of the liquid-phase mass should be long-chain hydrocarbons that do not vaporize.')
-print('See Lines 72-96 of \'randomized_examples.py\' script.')
+print('For an example with gas-phase mole fractions as the starting point,')
+print('we choose a random number n of species and generate n random numbers that add to 1.')
+print('For an example with liquid-phase mass fractions as the starting point,')
+print('we choose a random number n of species and generate n random numbers that add to a random number w < 1.')
+print('Indeed, most of the liquid-phase mass should be long-chain hydrocarbons that do not vaporize.')
+print('See Lines 76-100 of \'randomized_examples.py\' script.')
 
 T = 473.15
 P = 1.0
