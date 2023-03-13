@@ -46,7 +46,7 @@ class Calculator():
         diction = { name: vector[i] for i, name in enumerate(self.names) if vector[i] > 0.0 }
         return diction
 
-    def get_gasphase( self, w, temp=None, diction=False ):
+    def get_gasphase( self, w, temp=None, diction=False, get_pressure=False, set_pressure=False ):
 
         if temp is None:
             temp = self.temp
@@ -61,12 +61,22 @@ class Calculator():
             w = numpy.array(w)
 
         p = w * Hv
-        y = p / numpy.sum(p)
+        P = numpy.sum(p)
+        y = p / P
+
+        if set_pressure:
+            self.pressure = P
 
         if diction:
-            return self.get_diction(y)
+            if get_pressure:
+                return self.get_diction(y), P
+            else:
+                return self.get_diction(y)
         else:
-            return y
+            if get_pressure:
+                return y, P
+            else:
+                return y
 
     def get_liquidphase( self, y, temp=None, pressure=None, diction=False ):
 
