@@ -44,6 +44,7 @@ ax1 = fig.subplots()
 ax2 = ax1.twinx()
 color = 'tab:blue'
 ax1.bar(x, y3, width=-0.4, align='edge', color=color)
+ax1.set_yscale('log')
 ax1.set_ylabel('Gas-Phase Mole Fractions', color=color)
 ax1.tick_params(axis='y', labelcolor=color)
 color = 'tab:orange'
@@ -59,6 +60,7 @@ ax1 = fig.subplots()
 ax2 = ax1.twinx()
 color = 'tab:blue'
 ax1.bar(x, y4, width=-0.4, align='edge', color=color)
+ax1.set_yscale('log')
 ax1.set_ylabel('Gas-Phase Mole Fractions', color=color)
 ax1.tick_params(axis='y', labelcolor=color)
 color = 'tab:orange'

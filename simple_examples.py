@@ -49,13 +49,13 @@ print()
 
 
 print()
-print('Case 2: Linear/Reciprocal Mole/Mass Fractions')
+print('Case 2: Poisson/Gaussian Mole/Mass Fractions')
 print('For an example with gas-phase mole fractions as the starting point,')
-print('suppose that the mole fraction of each species in the gas phase is proportional to the reciprocal molar mass.')
+print('suppose that the mole fractions in the gas phase exhibit a Poisson distribution in the molar masses (lambda = 14.0266).')
 print('For an example with liquid-phase mass fractions as the starting point,')
-print('suppose that the mass fraction of each species in the liquid phase is proportional to the molar mass.')
-print('We normalize so that total mass fraction of the volatiles species in the melt does not exceed 0.11.')
-print('Lines 60-71 of \'simple_examples.py\' script.')
+print('suppose that the mass fractions in the liquid phase exhibit a Gaussian distribution in the molar masses (mu = 30*14.0266, sigma = 10*14.266).')
+print('We normalize so that the mass fractions of the volatiles species in the liquid phase add to 0.11.')
+print('Lines 60-73 of \'simple_examples.py\' script.')
 
 T = 473.15
 P = 1.0
@@ -64,10 +64,12 @@ calc = Calculator(temp=T, pressure=P)
 
 m = calc.MW
 
-y3 = 1.0/m / numpy.sum(1.0/m)
+y3 = numpy.exp(-m/14.0266)
+y3 = y3 / numpy.sum(y3)
 w3 = calc.get_liquidphase(y3)
 
-w4 = 0.11 * m / numpy.sum(m)
+w4 = numpy.exp(-0.5*((m-30*14.0266)/(10*14.0266))**2)
+w4 = 0.11 * w4 / numpy.sum(w4)
 y4, P4 = calc.get_gasphase(w4, get_pressure=True)
 
 print()
