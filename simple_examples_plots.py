@@ -19,7 +19,7 @@ ax2.bar(x, w1, width=+0.4, align='edge', color=color)
 ax2.set_yscale('log')
 ax2.set_ylabel('Liquid-Phase Mass Fractions', color=color)
 ax2.tick_params(axis='y', labelcolor=color)
-pyplot.title('Gas-Phase Mole Fractions\nto Liquid-Phase Mass Fractions')
+pyplot.title('Gas-Phase Mole Fractions to Liquid-Phase Mass Fractions')
 pyplot.tight_layout()
 pyplot.savefig('simple_examples_y1w1.png')
 
@@ -35,7 +35,7 @@ color = 'tab:orange'
 ax2.bar(x, w2, width=+0.4, align='edge', color=color)
 ax2.set_ylabel('Liquid-Phase Mass Fractions', color=color)
 ax2.tick_params(axis='y', labelcolor=color)
-pyplot.title('Liquid-Phase Mass Fractions\nto Gas-Phase Mole Fractions')
+pyplot.title('Liquid-Phase Mass Fractions to Gas-Phase Mole Fractions')
 pyplot.tight_layout()
 pyplot.savefig('simple_examples_y2w2.png')
 
@@ -51,7 +51,7 @@ color = 'tab:orange'
 ax2.bar(x, w3, width=+0.4, align='edge', color=color)
 ax2.set_ylabel('Liquid-Phase Mass Fractions', color=color)
 ax2.tick_params(axis='y', labelcolor=color)
-pyplot.title('Gas-Phase Mole Fractions\nto Liquid-Phase Mass Fractions')
+pyplot.title('Gas-Phase Mole Fractions to Liquid-Phase Mass Fractions')
 pyplot.tight_layout()
 pyplot.savefig('simple_examples_y3w3.png')
 
@@ -67,7 +67,7 @@ color = 'tab:orange'
 ax2.bar(x, w4, width=+0.4, align='edge', color=color)
 ax2.set_ylabel('Liquid-Phase Mass Fractions', color=color)
 ax2.tick_params(axis='y', labelcolor=color)
-pyplot.title('Liquid-Phase Mass Fractions\nto Gas-Phase Mole Fractions')
+pyplot.title('Liquid-Phase Mass Fractions to Gas-Phase Mole Fractions')
 pyplot.tight_layout()
 pyplot.savefig('simple_examples_y4w4.png')
 
