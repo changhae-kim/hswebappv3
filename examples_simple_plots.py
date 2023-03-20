@@ -3,7 +3,7 @@ import numpy
 from matplotlib import pyplot
 pyplot.rcParams.update({'font.size': 14})
 
-from simple_examples import calc, y1, w1, y2, w2, y3, w3, y4, w4
+from examples_simple import calc, y1, w1, y2, w2, y3, w3, y4, w4
 
 x = calc.names
 
@@ -21,7 +21,7 @@ ax2.set_ylabel('Liquid-Phase Mass Fractions', color=color)
 ax2.tick_params(axis='y', labelcolor=color)
 pyplot.title('Gas-Phase Mole Fractions to Liquid-Phase Mass Fractions')
 pyplot.tight_layout()
-pyplot.savefig('simple_examples_y1w1.png')
+pyplot.savefig('examples_simple_y1w1.png')
 
 fig = pyplot.figure(figsize=(9.6, 4.8), dpi=150)
 ax1 = fig.subplots()
@@ -37,7 +37,7 @@ ax2.set_ylabel('Liquid-Phase Mass Fractions', color=color)
 ax2.tick_params(axis='y', labelcolor=color)
 pyplot.title('Liquid-Phase Mass Fractions to Gas-Phase Mole Fractions')
 pyplot.tight_layout()
-pyplot.savefig('simple_examples_y2w2.png')
+pyplot.savefig('examples_simple_y2w2.png')
 
 fig = pyplot.figure(figsize=(9.6, 4.8), dpi=150)
 ax1 = fig.subplots()
@@ -53,7 +53,7 @@ ax2.set_ylabel('Liquid-Phase Mass Fractions', color=color)
 ax2.tick_params(axis='y', labelcolor=color)
 pyplot.title('Gas-Phase Mole Fractions to Liquid-Phase Mass Fractions')
 pyplot.tight_layout()
-pyplot.savefig('simple_examples_y3w3.png')
+pyplot.savefig('examples_simple_y3w3.png')
 
 fig = pyplot.figure(figsize=(9.6, 4.8), dpi=150)
 ax1 = fig.subplots()
@@ -69,5 +69,5 @@ ax2.set_ylabel('Liquid-Phase Mass Fractions', color=color)
 ax2.tick_params(axis='y', labelcolor=color)
 pyplot.title('Liquid-Phase Mass Fractions to Gas-Phase Mole Fractions')
 pyplot.tight_layout()
-pyplot.savefig('simple_examples_y4w4.png')
+pyplot.savefig('examples_simple_y4w4.png')
 
