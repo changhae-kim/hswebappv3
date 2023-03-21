@@ -18,14 +18,22 @@ compounds = {
 
 class Calculator():
 
-    def __init__( self, temp=573.0, pressure=1.0 ):
-        self.temp      = temp
-        self.pressure  = pressure
-        self.names     = [ key for key in compounds.keys() ]
-        self.H0        = numpy.array([ value['H0'    ] for value in compounds.values() ])
-        self.Hsol_R    = numpy.array([ value['Hsol/R'] for value in compounds.values() ])
-        self.MW        = numpy.array([ value['MW'    ] for value in compounds.values() ])
-        self.Hv        = self.get_henrysconst()
+    def __init__( self, temp=573.0, pressure=1.0, mass=10.0, volume=1.0 ):
+
+        self.temp     = temp
+        self.pressure = pressure
+        self.mass     = mass
+        self.volume   = volume
+
+        self.names  = [ key for key in compounds.keys() ]
+        self.H0     = numpy.array([ value['H0'    ] for value in compounds.values() ])
+        self.Hsol_R = numpy.array([ value['Hsol/R'] for value in compounds.values() ])
+        self.MW     = numpy.array([ value['MW'    ] for value in compounds.values() ])
+        self.Hv     = self.get_henrysconst()
+
+        self.R = 0.082057366080960 # L atm / mol K
+        self.density = 940. # g / L
+
         return
 
     def get_henrysconst( self, temp=None ):
@@ -104,4 +112,60 @@ class Calculator():
             return self.get_diction(w)
         else:
             return w
+
+    def get_gaspart( self, temp=None, pressure=None, mass=None, volume=None ):
+
+        if temp is None:
+            temp = self.temp
+            Hv   = self.Hv
+        else:
+            temp = temp
+            Hv   = self.get_henrysconst(temp)
+
+        if pressure is None:
+            pressure = self.pressure
+        else:
+            pressure = pressure
+
+        if mass is None:
+            mass = self.mass
+        else:
+            mass = mass
+
+        if volume is None:
+            volume = self.volume
+        else:
+            volume = volume
+
+        alpha = 1.0 / (1.0 + (mass * self.R * temp) / (self.MW * self.Hv * volume))
+
+        return alpha
+
+    def get_liquidpart( self, temp=None, pressure=None, mass=None, volume=None ):
+
+        if temp is None:
+            temp = self.temp
+            Hv   = self.Hv
+        else:
+            temp = temp
+            Hv   = self.get_henrysconst(temp)
+
+        if pressure is None:
+            pressure = self.pressure
+        else:
+            pressure = pressure
+
+        if mass is None:
+            mass = self.mass
+        else:
+            mass = mass
+
+        if volume is None:
+            volume = self.volume
+        else:
+            volume = volume
+
+        beta = 1.0 / (1.0 + (self.MW * self.Hv * volume) / (mass * self.R * temp))
+
+        return beta
 
