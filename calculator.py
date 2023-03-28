@@ -18,12 +18,12 @@ compounds = {
 
 class Calculator():
 
-    def __init__( self, temp=573.0, pressure=1.0, mass=10.0, volume=1.0 ):
+    def __init__( self, temp=573.15, pressure=1.0, volume=1.0, mass=10.0 ):
 
         self.temp     = temp
         self.pressure = pressure
-        self.mass     = mass
         self.volume   = volume
+        self.mass     = mass
 
         self.names  = [ key for key in compounds.keys() ]
         self.H0     = numpy.array([ value['H0'    ] for value in compounds.values() ])
@@ -32,7 +32,6 @@ class Calculator():
         self.Hv     = self.get_henrysconst()
 
         self.R = 0.082057366080960 # L atm / mol K
-        self.density = 940. # g / L
 
         return
 
@@ -97,8 +96,6 @@ class Calculator():
 
         if pressure is None:
             pressure = self.pressure
-        else:
-            pressure = pressure
 
         if isinstance(y, dict):
             y = self.get_vector(y)
@@ -124,20 +121,12 @@ class Calculator():
 
         if pressure is None:
             pressure = self.pressure
-        else:
-            pressure = pressure
-
         if mass is None:
             mass = self.mass
-        else:
-            mass = mass
-
         if volume is None:
             volume = self.volume
-        else:
-            volume = volume
 
-        alpha = 1.0 / (1.0 + (mass * self.R * temp) / (self.MW * self.Hv * volume))
+        alpha = 1.0 / ( 1.0 + ( mass * self.R * temp ) / ( self.MW * self.Hv * volume ) )
 
         return alpha
 
@@ -152,20 +141,12 @@ class Calculator():
 
         if pressure is None:
             pressure = self.pressure
-        else:
-            pressure = pressure
-
         if mass is None:
             mass = self.mass
-        else:
-            mass = mass
-
         if volume is None:
             volume = self.volume
-        else:
-            volume = volume
 
-        beta = 1.0 / (1.0 + (self.MW * self.Hv * volume) / (mass * self.R * temp))
+        alpha1m = 1.0 / ( 1.0 + ( self.MW * self.Hv * volume ) / ( mass * self.R * temp ) )
 
-        return beta
+        return alpha1m
 

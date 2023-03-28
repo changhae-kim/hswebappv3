@@ -16,8 +16,8 @@ V = 10.0
 
 calc = Calculator(temp=T, pressure=P, mass=W, volume=V)
 
-alpha = calc.get_gaspart()
-beta = calc.get_liquidpart()
+alpha   = calc.get_gaspart()
+alpha1m = calc.get_liquidpart()
 
 print()
 print('Gas-Phase and Liquid-Phase Partition Coefficients')
@@ -25,9 +25,9 @@ print('T = {:g} K'.format(T))
 print('P = {:g} atm'.format(P))
 print('W = {:g} g'.format(W))
 print('V = {:g} L'.format(V))
-print('{:>5s} {:>10s} {:>10s} {:>10s} {:>10s}'.format('', 'Hv', 'MW', 'alpha', 'beta'))
+print('{:>5s} {:>10s} {:>10s} {:>10s} {:>10s}'.format('', 'Hv', 'MW', 'alpha', '1-alpha'))
 print('-' * 49)
-for ( name, Hi, Mi, value1, value2 ) in zip( calc.names, calc.Hv, calc.MW, alpha, beta ):
+for ( name, Hi, Mi, value1, value2 ) in zip( calc.names, calc.Hv, calc.MW, alpha, alpha1m ):
     print('{:>5s} {:10.1f} {:10.3f} {:10f} {:10f}'.format( name, Hi, Mi, value1, value2 ))
 print()
 
