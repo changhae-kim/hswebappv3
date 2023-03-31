@@ -58,12 +58,16 @@ print('This example also demonstrates the use of partial nondimensional input.')
 print('We provide the normalized concentrations,')
 print('but we enter the temperature in K, the headspace volume in L, the melt mass in g, and the monomer mass in g/mol.')
 print('Then, the code computes the nondimensional Henry\'s constants and the phase partition coefficients.')
-print('See lines 63-72 of \'examples_batch.py\' script.')
+print('See lines 63-76 of \'examples_batch.py\' script.')
 
-nmax = 100.0
-grid = 100
-rho = numpy.zeros(grid)
-rho[-1] = 0.01
+nmax = 105.0
+grid = 105
+n = numpy.linspace(1.0, nmax, grid)
+dn = n[1] - n[0]
+concs = numpy.exp(-0.5*(n-100.0)**2)
+w = numpy.ones_like(n)
+w[0] = w[-1] = 0.5
+rho = concs / numpy.einsum('i,i,i->', w, n, concs) * dn
 tmax = 100.0
 
 reactor = BatchReactor(nmax=nmax, grid=grid, rho=rho, temp=573.15, volume=1.0, mass=10.0, monomer=14.027)
@@ -80,12 +84,13 @@ print('This example also demonstrates the use of partial nondimensional input.')
 print('We provide the phase partition coefficients,')
 print('but we enter the concentrations in arbitrary units.')
 print('Then, the code normalizes them to the total number of monomer units.')
-print('See lines 85-94 of \'examples_batch.py\' script.')
+print('See lines 89-99 of \'examples_batch.py\' script.')
 
-nmax = 100.0
-grid = 100
-concs = numpy.zeros(grid)
-concs[-1] = 1.0
+nmax = 105.0
+grid = 105
+n = numpy.linspace(1.0, nmax, grid)
+dn = n[1] - n[0]
+concs = numpy.exp(-0.5*(n-100.0)**2)
 tmax = 100.0
 
 reactor = BatchReactor(nmax=nmax, grid=grid, concs=concs, alpha1m=numpy.ones(grid))
