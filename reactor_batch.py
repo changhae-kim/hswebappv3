@@ -23,7 +23,9 @@ class BatchReactor():
             if grid == 0:
                 rho = numpy.array(concs) / numpy.inner(n, concs)
             else:
-                rho = numpy.array(concs) / numpy.inner(n, concs) * dn
+                w = numpy.ones_like(n)
+                w[0] = w[-1] = 0.5
+                rho = numpy.array(concs) / numpy.einsum('i,i,i->', w, n, concs) * dn
         self.rho = rho
 
         if alpha1m is None:
