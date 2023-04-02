@@ -7,7 +7,7 @@ from reactor_batch import BatchReactor
 from examples_batch import t1, y1, n1, a1, t2, y2, n2, a2, t3, y3, n3, a3, t4, y4, n4, a4
 
 prune = 5
-nwin = 25
+nwin = 100 # 25
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()
 ax2 = ax1.twinx()
@@ -25,7 +25,7 @@ pyplot.tight_layout()
 pyplot.savefig('examples_batch_partition_exact.png')
 
 prune = 5
-nwin = 25
+nwin = 100 # 25
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()
 ax2 = ax1.twinx()
@@ -43,7 +43,7 @@ pyplot.tight_layout()
 pyplot.savefig('examples_batch_nopartition_exact.png')
 
 prune = 25
-nwin = 25.0
+nwin = 105.0 # 25.0
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()
 ax2 = ax1.twinx()
@@ -61,7 +61,7 @@ pyplot.tight_layout()
 pyplot.savefig('examples_batch_partition_continuum.png')
 
 prune = 250
-nwin = 25.0
+nwin = 105.0 # 25.0
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()
 ax2 = ax1.twinx()
