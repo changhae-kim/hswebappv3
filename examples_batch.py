@@ -64,7 +64,7 @@ nmax = 105.0
 grid = 521
 n = numpy.linspace(1.0, nmax, grid)
 dn = n[1] - n[0]
-concs = numpy.exp(-0.5*(n-100.0)**2)
+concs = numpy.exp(-0.5*((n-100.0)/(0.1))**2)
 w = numpy.ones_like(n)
 w[0] = w[-1] = 0.5
 rho = concs / numpy.einsum('i,i,i->', w, n, concs) * dn
@@ -90,7 +90,7 @@ nmax = 105.0
 grid = 521
 n = numpy.linspace(1.0, nmax, grid)
 dn = n[1] - n[0]
-concs = numpy.exp(-0.5*(n-100.0)**2)
+concs = numpy.exp(-0.5*((n-100.0)/(0.1))**2)
 tmax = 100.0
 
 reactor = BatchReactor(nmax=nmax, grid=grid, concs=concs, alpha1m=numpy.ones(grid))
