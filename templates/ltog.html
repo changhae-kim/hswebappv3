@@ -8,19 +8,21 @@
 </head>
 <body>
     <div id="content">
-        <h1>VLE Calculator</h1>
-        <form action="{{ url_for('calculategtol') }}" method="POST" id={{ compound }}>
+        <h1>Liquid wt. frac. to Gas mole frac.</h1>
+        <h2><a href="{{ url_for('gtolpage') }}">Gas to Liquid</a></h2>
+        <h3><a href="{{ url_for('index') }}">Home</a></h3>
+        <form action="{{ url_for('calculateltog') }}" method="POST" id={{ compound }}>
             <table id="input_table">
                 <tr>
                     <th>Compound </th>
+                    <th>Wi </th>
                     <th>Yi </th>
-                    <th>Xi </th>
                 </tr>
                 {% for compound in compound_list %}
                 <tr>
                     <td>{{ compound }}</td>
                     <td>{{ calculator[compound] }}</td>
-                    <td>{{ wtfrac.get(compound) }}</td>
+                    <td>{{ frac.get(compound) }}</td>
                 </tr>
                 {% endfor %}
             </table>
@@ -37,15 +39,10 @@
             <br>
             <br>
         </form>
-        <form action="{{ url_for('resetgtol') }}" method="POST" id="reset">
+        <form action="{{ url_for('resetltog') }}" method="POST" id="reset">
             {{ calculator.reset }}
         </form>
     </div>
     <br>
-    <div id="info-box">
-        This is a program to calculate the initial weight fraction of a gas within a polyethylene melt given gas
-        pressures, volume, mass, and temperature. A full writeup can be found
-        <a href="https://docs.google.com/document/d/18dAUgi2gyH9rdjAGX9a-F31dFFOwOo3wTm6ZPpMF6yg/">here</a>.
-    </div>
 </body>
 </html>

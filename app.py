@@ -5,7 +5,7 @@ from wtforms.validators import InputRequired
 import numpy
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '2389dh01'
+app.config['SECRET_KEY'] = 'doubledagger'
 
 compound_list = ['H2', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C2H4', 'iC4']
 compounds = {
@@ -22,7 +22,8 @@ compounds = {
     'iC4' : { 'H0':    626.8092598 , 'Hsol/R': -1631., 'MW':   58.12  },
 }
 
-wtfrac = {}
+frac = dict(list(enumerate(range(len(compound_list)))))
+fill_value = 1 / (len(compound_list))
 
 class Calc():
 
@@ -129,17 +130,33 @@ class Calculator(FlaskForm):
     TField = FloatField('T', validators=[InputRequired()])
     PtField = FloatField('Pt', validators=[InputRequired()])
 
+    fill = SubmitField('Fill')
     run = SubmitField('Run')
     reset = SubmitField('Reset')
 
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+# @app.route('/fill', methods=['GET'])
+# def fill():
+#     calculator = Calculator()
+#
+#     if calculator.fill.data:
+#         for compound in compound_list:
+#             calculator[compound].data = fill_value
+#
+#     return render_template('gtol.html', calculator=calculator, frac=frac, compound_list=compound_list)
+
+# GAS TO LIQUID
+
+@app.route('/gtolpage', methods=['GET', 'POST'])
+def gtolpage():
     calculator = Calculator()
+    return render_template('gtol.html', calculator=calculator, frac=frac, compound_list=compound_list)
 
-    return render_template('index.html', calculator=calculator, wtfrac=wtfrac, compound_list=compound_list)
-
-@app.route('/calculate', methods=['POST'])
-def calculate():
+@app.route('/calculategtol', methods=['POST'])
+def calculategtol():
     calculator = Calculator()
 
     T = calculator.TField.data
@@ -154,18 +171,57 @@ def calculate():
             y.append(calculator[compound].data) # Array of each gas-phase mole frac.
 
         w = calc.get_liquidphase(y) # Array of liquid-phase mass frac.
+
         for i in range(len(compound_list)):
-            wtfrac.update({compound_list[i]: w[i]}) # Dict of compound : liq. mass frac.
+            frac.update({compound_list[i]: w[i]}) # Dict of compound : liq. mass frac.
 
-    return render_template('index.html', calculator=calculator, wtfrac=wtfrac, compound_list=compound_list)
+    return render_template('gtol.html', calculator=calculator, frac=frac, compound_list=compound_list)
 
-@app.route('/reset', methods=['POST'])
-def reset():
+@app.route('/resetgtol', methods=['POST'])
+def resetgtol():
     calculator = Calculator()
 
     if calculator.reset.data:
-        wtfrac.clear()
-        return render_template('index.html', calculator=calculator, wtfrac=wtfrac, compound_list=compound_list)
+        frac.clear()
+        return render_template('gtol.html', calculator=calculator, frac=frac, compound_list=compound_list)
+
+# LIQUID TO GAS
+
+@app.route('/ltogpage', methods=['GET', 'POST'])
+def ltogpage():
+    calculator = Calculator()
+    return render_template('ltog.html', calculator=calculator, frac=frac, compound_list=compound_list)
+
+@app.route('/calculateltog', methods=['POST'])
+def calculateltog():
+    calculator = Calculator()
+
+    T = calculator.TField.data
+    Pt = calculator.PtField.data # Pt for total pressure
+
+    calc = Calc(temp=T, pressure=Pt)
+    w = []
+
+    if calculator.run.data:
+        # do wt frac calculation
+        for compound in compound_list:
+            w.append(calculator[compound].data) # Array of each liquid-phase mass frac.
+
+        y = calc.get_gasphase(w, get_pressure=True) # Array of gas-phase mole frac.
+
+        print(y[1])
+        for i in range(len(compound_list)):
+            frac.update({compound_list[i]: y[0][i]}) # Dict of compound : gas. mole frac.
+
+    return render_template('ltog.html', calculator=calculator, frac=frac, compound_list=compound_list)
+
+@app.route('/resetltog', methods=['POST'])
+def resetltog():
+    calculator = Calculator()
+
+    if calculator.reset.data:
+        frac.clear()
+        return render_template('ltog.html', calculator=calculator, frac=frac, compound_list=compound_list)
 
 if __name__ == '__main__':
     app.run(debug=True)
