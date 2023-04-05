@@ -1,51 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>VLE Calculator</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="stylesheet" href="/static/css/main.css">
+  <meta charset="UTF-8">
+  <title>$Title$</title>
 </head>
 <body>
-    <div id="content">
-        <h1>VLE Calculator</h1>
-        <form action="{{ url_for('calculate') }}" method="POST" id={{ compound }}>
-            <table id="input_table">
-                <tr>
-                    <th>Compound </th>
-                    <th>Yi </th>
-                    <th>Xi </th>
-                </tr>
-                {% for compound in compound_list %}
-                <tr>
-                    <td>{{ compound }}</td>
-                    <td>{{ calculator[compound] }}</td>
-                    <td>{{ wtfrac.get(compound) }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-            {{ calculator.csrf_token }}
-            <br>
-            Temperature (K):
-            {{ calculator.TField }}
-            <p>
-            Total Pressure (atm):
-            {{ calculator.PtField }}
-            </p>
-            <br>
-            {{ calculator.run }}
-            <br>
-            <br>
-        </form>
-        <form action="{{ url_for('reset') }}" method="POST" id="reset">
-            {{ calculator.reset }}
-        </form>
-    </div>
-    <br>
-    <div id="info-box">
-        This is a program to calculate the initial weight fraction of a gas within a polyethylene melt given gas
-        pressures, volume, mass, and temperature. A full writeup can be found
-        <a href="https://docs.google.com/document/d/18dAUgi2gyH9rdjAGX9a-F31dFFOwOo3wTm6ZPpMF6yg/">here</a>.
-    </div>
+$END$
 </body>
 </html>
