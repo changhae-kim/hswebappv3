@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VLE Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div id="content">
+        <h1>Gas mole frac. to Liquid wt. frac.</h1>
+        <h2><a href="{{ url_for('ltogpage') }}">Liquid to Gas</a></h2>
+        <h3><a href="{{ url_for('index') }}">Home</a></h3>
+        <form action="{{ url_for('calculategtol') }}" method="POST" id={{ compound }}>
+            <table id="input_table">
+                <tr>
+                    <th>Compound </th>
+                    <th>Yi </th>
+                    <th>Wi </th>
+                </tr>
+                {% for compound in compound_list %}
+                <tr>
+                    <td>{{ compound }}</td>
+                    <td>{{ calculator[compound] }}</td>
+                    <td>{{ frac.get(compound) }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {{ calculator.csrf_token }}
+            <br>
+            Temperature (K):
+            {{ calculator.TField }}
+            <p>
+            Total Pressure (atm):
+            {{ calculator.PtField }}
+            </p>
+            <br>
+            {{ calculator.run }}
+            <br>
+            <br>
+        </form>
+        <form action="{{ url_for('resetgtol') }}" method="POST" id="reset">
+            {{ calculator.reset }}
+        </form>
+    </div>
+    <br>
+</body>
+</html>
