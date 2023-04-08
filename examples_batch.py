@@ -61,8 +61,8 @@ print('Then, the code computes the nondimensional Henry\'s constants and the pha
 print('See lines 63-77 of \'examples_batch.py\' script.')
 
 nmax = 105.0
-mode = 'continuum'
 grid = 2*104+1
+mode = 'continuum'
 n = numpy.linspace(1.0, nmax, grid)
 dn = n[1] - n[0]
 concs = numpy.exp(-0.5*((n-100.0)/(0.5))**2)
@@ -71,7 +71,7 @@ w[0] = w[-1] = 0.5
 rho = concs / numpy.einsum('i,i,i->', w, n, concs) * dn
 tmax = 100.0
 
-reactor = BatchReactor(nmax=nmax, mode=mode, grid=grid, rho=rho, temp=573.15, volume=1.0, mass=10.0, monomer=14.027)
+reactor = BatchReactor(nmax=nmax, grid=grid, mode=mode, rho=rho, temp=573.15, volume=1.0, mass=10.0, monomer=14.027)
 t3, y3 = reactor.solve(tmax, rtol=1e-12, atol=1e-12)
 n3 = numpy.copy(reactor.n)
 a3 = numpy.copy(reactor.alpha1m)
@@ -88,13 +88,13 @@ print('Then, the code normalizes them to the total number of monomer units.')
 print('See lines 90-100 of \'examples_batch.py\' script.')
 
 nmax = 105.0
-mode = 'continuum'
 grid = 2*104+1
+mode = 'continuum'
 n = numpy.linspace(1.0, nmax, grid)
 concs = numpy.exp(-0.5*((n-100.0)/(0.5))**2)
 tmax = 100.0
 
-reactor = BatchReactor(nmax=nmax, mode=mode, grid=grid, concs=concs, alpha1m=numpy.ones(grid))
+reactor = BatchReactor(nmax=nmax, grid=grid, mode=mode, concs=concs, alpha1m=numpy.ones(grid))
 t4, y4 = reactor.solve(tmax, rtol=1e-12, atol=1e-12)
 n4 = numpy.copy(reactor.n)
 a4 = numpy.copy(reactor.alpha1m)
@@ -112,13 +112,13 @@ print('Then, the code normalizes them to the total number of monomer units.')
 print('See lines 114-124 of \'examples_batch.py\' script.')
 
 nmax = 10.0**2.10
-mode = 'log'
 grid = 2*105+1
+mode = 'log'
 n = numpy.logspace(0.0, numpy.log10(nmax), grid)
 concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2) # numpy.exp(-0.5*((n-100.0)/(0.5))**2)
 tmax = 100.0
 
-reactor = BatchReactor(nmax=nmax, mode=mode, grid=grid, concs=concs, temp=573.15, volume=1.0, mass=10.0, monomer=14.027)
+reactor = BatchReactor(nmax=nmax, grid=grid, mode=mode, concs=concs, temp=573.15, volume=1.0, mass=10.0, monomer=14.027)
 t5, y5 = reactor.solve(tmax, rtol=1e-12, atol=1e-12)
 n5 = numpy.copy(reactor.n)
 a5 = numpy.copy(reactor.alpha1m)
@@ -136,13 +136,13 @@ print('Then, the code normalizes them to the total number of monomer units.')
 print('See lines 114-124 of \'examples_batch.py\' script.')
 
 nmax = 10.0**2.10
-mode = 'log'
 grid = 521
+mode = 'log'
 n = numpy.logspace(0.0, numpy.log10(nmax), grid)
 concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2)
 tmax = 100.0
 
-reactor = BatchReactor(nmax=nmax, mode=mode, grid=grid, concs=concs, alpha1m=numpy.ones(grid))
+reactor = BatchReactor(nmax=nmax, grid=grid, mode=mode, concs=concs, alpha1m=numpy.ones(grid))
 t6, y6 = reactor.solve(tmax, rtol=1e-12, atol=1e-12)
 n6 = numpy.copy(reactor.n)
 a6 = numpy.copy(reactor.alpha1m)

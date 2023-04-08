@@ -5,7 +5,10 @@ from scipy.integrate import solve_ivp
 
 class BatchReactor():
 
-    def __init__( self, nmax=5, mode='discrete', grid=0, rho=None, alpha1m=None, H0=None, H1=None, concs=[0, 0, 0, 0, 1], temp=573.15, volume=1.0, mass=10.0, monomer=14.027 ):
+    def __init__( self, nmax=5, grid=0, mode='discrete',
+            rho=None, alpha1m=None, H0=None, H1=None,
+            concs=[0.0, 0.0, 0.0, 0.0, 1.0],
+            temp=573.15, volume=1.0, mass=10.0, monomer=14.027 ):
 
         if mode == 'discrete':
             self.n = numpy.arange(1, nmax+1, 1)
@@ -60,7 +63,7 @@ class BatchReactor():
 
         dy = numpy.empty_like(y)
         dy[1:-1] = y[2:] - y[1:-1]
-        dy[0   ] = y[1 ]
+        dy[0   ] = y[1 ] - y[0   ]
         dy[  -1] =       - y[  -1]
 
         rate = dy
