@@ -103,7 +103,7 @@ a4 = numpy.copy(reactor.alpha1m)
 print()
 print('Case 5: Log Scale Equation with Phase Partition / Dimensional Input')
 print('This example solves the population balance equations in a logarithmic scale with nonzero phase partition coefficients.')
-print('The logarithmic equations can be invoked by passing mode=\'log\' to the BatchReactor class.')
+print('The logarithmic equations can be invoked by passing mode=\'log_n\' to the BatchReactor class.')
 print('This example also demonstrates the use of dimensional input.')
 print('We enter the temperature in K, the headspace volume in L, the melt mass in g, and the monomer mass in g/mol.')
 print('Then, the code computes the nondimensional Henry\'s constants and the phase partition coefficients.')
@@ -112,8 +112,8 @@ print('Then, the code normalizes them to the total number of monomer units.')
 print('See lines 114-124 of \'examples_batch.py\' script.')
 
 nmax = 10.0**2.10
-grid = 2*105+1
-mode = 'log'
+grid = 2*104+1
+mode = 'log_n'
 n = numpy.logspace(0.0, numpy.log10(nmax), grid)
 concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2) # numpy.exp(-0.5*((n-100.0)/(0.5))**2)
 tmax = 100.0
@@ -127,7 +127,7 @@ a5 = numpy.copy(reactor.alpha1m)
 print()
 print('Case 6: Log Scale Equation with No Phase Partition / Dimensional Input')
 print('This example solves the population balance equations in a logarithmic scale with trivial phase partition coefficients.')
-print('The logarithmic equations can be invoked by passing mode=\'log\' to the BatchReactor class.')
+print('The logarithmic equations can be invoked by passing mode=\'log_n\' to the BatchReactor class.')
 print('This example also demonstrates the use of dimensional input.')
 print('We enter the temperature in K, the headspace volume in L, the melt mass in g, and the monomer mass in g/mol.')
 print('Then, the code computes the nondimensional Henry\'s constants and the phase partition coefficients.')
@@ -137,7 +137,7 @@ print('See lines 114-124 of \'examples_batch.py\' script.')
 
 nmax = 10.0**2.10
 grid = 521
-mode = 'log'
+mode = 'log_n'
 n = numpy.logspace(0.0, numpy.log10(nmax), grid)
 concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2)
 tmax = 100.0
@@ -147,3 +147,6 @@ t6, y6 = reactor.solve(tmax, rtol=1e-12, atol=1e-12)
 n6 = numpy.copy(reactor.n)
 a6 = numpy.copy(reactor.alpha1m)
 '''
+
+print()
+
