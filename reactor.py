@@ -6,38 +6,36 @@ from scipy.optimize import minimize
 
 class BatchReactor():
 
-    def __init__( self, nmax=5, grid=0, mode='discrete',
+    def __init__( self, nmax=5, mesh=0, grid='discrete',
             rho=None, alpha1m=None, H0=None, H1=None,
-            randomness=0.0, concs=[0.0, 0.0, 0.0, 0.0, 1.0],
+            concs=[0.0, 0.0, 0.0, 0.0, 1.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0 ):
 
-        if mode == 'discrete':
+        if grid == 'discrete':
             self.n = numpy.arange(1, nmax+1, 1)
             self.get_partition = self.get_discrete_partition
             self.get_rate = self.get_discrete_rate
-        elif mode == 'continuum':
-            self.n = numpy.linspace(1.0, nmax, grid)
+        elif grid == 'continuum':
+            self.n = numpy.linspace(1.0, nmax, mesh)
             self.get_partition = self.get_continuum_partition
             self.get_rate = self.get_continuum_rate
-        elif mode == 'log_n':
-            self.n = numpy.logspace(0.0, numpy.log10(nmax), grid)
+        elif grid == 'log_n':
+            self.n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
             self.get_partition = self.get_log_n_partition
             self.get_rate = self.get_log_n_rate
-
-        self.randomness = randomness
 
         if rho is None:
             n = self.n
             if concs is None:
                 concs = numpy.ones_like(n)
-            if mode == 'discrete':
+            if grid == 'discrete':
                 rho = numpy.array(concs) / numpy.inner(n, concs)
-            elif mode == 'continuum':
+            elif grid == 'continuum':
                 dn = n[1] - n[0]
                 w = numpy.ones_like(n)
                 w[0] = w[-1] = 0.5
                 rho = numpy.array(concs) / ( numpy.einsum('i,i,i->', w, n, concs) * dn )
-            elif mode == 'log_n':
+            elif grid == 'log_n':
                 r = numpy.log(n)
                 dr = r[1] - r[0]
                 w = numpy.ones_like(n)
@@ -143,7 +141,7 @@ class BatchReactor():
 
         return numpy.exp(solver.x)
 
-    def get_discrete_rate( self, n=None, rho=None, alpha1m=None, randomness=None ):
+    def get_discrete_rate( self, n=None, rho=None, alpha1m=None ):
 
         if n is None:
             n = self.n
@@ -151,8 +149,6 @@ class BatchReactor():
             rho = self.rho
         if alpha1m is None:
             alpha1m = self.alpha1m
-        if randomness is None:
-            randomness = self.randomness
 
         y = alpha1m * rho
 
@@ -165,7 +161,7 @@ class BatchReactor():
 
         return rate
 
-    def get_continuum_rate( self, n=None, rho=None, alpha1m=None, randomness=None ):
+    def get_continuum_rate( self, n=None, rho=None, alpha1m=None ):
 
         if n is None:
             n = self.n
@@ -173,8 +169,6 @@ class BatchReactor():
             rho = self.rho
         if alpha1m is None:
             alpha1m = self.alpha1m
-        if randomness is None:
-            randomness = self.randomness
 
         y = alpha1m * rho
         dn = n[1] - n[0]
@@ -193,7 +187,7 @@ class BatchReactor():
 
         return rate
 
-    def get_log_n_rate( self, n=None, rho=None, alpha1m=None, randomness=None ):
+    def get_log_n_rate( self, n=None, rho=None, alpha1m=None ):
 
         if n is None:
             n = self.n
@@ -201,8 +195,6 @@ class BatchReactor():
             rho = self.rho
         if alpha1m is None:
             alpha1m = self.alpha1m
-        if randomness is None:
-            randomness = self.randomness
 
         y = alpha1m * rho
 
