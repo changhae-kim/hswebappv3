@@ -8,7 +8,7 @@ class BatchReactor():
 
     def __init__( self, nmax=5, mesh=0, grid='discrete',
             rho=None, alpha1m=None, H0=None, H1=None,
-            concs=[0.0, 0.0, 0.0, 0.0, 1.0],
+            mode=[1.0, 0.0, 0.0], concs=[0.0, 0.0, 0.0, 0.0, 1.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0 ):
 
         if grid == 'discrete':
@@ -23,6 +23,8 @@ class BatchReactor():
             self.n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
             self.get_partition = self.get_log_n_partition
             self.get_rate = self.get_log_n_rate
+
+        self.mode=mode
 
         if rho is None:
             n = self.n
@@ -175,13 +177,21 @@ class BatchReactor():
 
         dydn = numpy.empty_like(y)
         dydn[1:-1] = ( y[2:  ] - y[ :-2] ) / ( 2.0 * dn )
-        dydn[0   ] = ( y[2   ] - y[0   ] ) / ( 2.0 * dn )
-        dydn[  -1] = ( y[  -1] - y[  -3] ) / ( 2.0 * dn )
+        #dydn[0   ] = ( y[1   ] - y[0   ] ) / ( dn )
+        #dydn[  -1] = ( y[  -1] - y[  -2] ) / ( dn )
+        dydn[0   ] = dydn[1   ]
+        dydn[  -1] = dydn[  -2]
+        #dydn[ 0] = 2.0 * dydn[ 1] - dydn[ 2]
+        #dydn[-1] = 2.0 * dydn[-2] - dydn[-3]
 
         d2ydn2 = numpy.empty_like(y)
         d2ydn2[1:-1] = ( y[2:  ] - 2.0 * y[1:-1] + y[ :-2] ) / ( dn**2.0 )
-        d2ydn2[0   ] = ( y[2   ] - 2.0 * y[1   ] + y[0   ] ) / ( dn**2.0 )
-        d2ydn2[  -1] = ( y[  -1] - 2.0 * y[  -2] + y[  -3] ) / ( dn**2.0 )
+        #d2ydn2[0   ] = 0.0
+        #d2ydn2[  -1] = 0.0
+        d2ydn2[0   ] = d2ydn2[1   ]
+        d2ydn2[  -1] = d2ydn2[  -2]
+        #d2ydn2[ 0] = 2.0 * d2ydn2[ 1] - d2ydn2[ 2]
+        #d2ydn2[-1] = 2.0 * d2ydn2[-2] - d2ydn2[-3]
 
         rate = dydn + 0.5 * d2ydn2
 
@@ -203,13 +213,21 @@ class BatchReactor():
 
         dydx = numpy.empty_like(y)
         dydx[1:-1] = ( y[2:  ] - y[ :-2] ) / ( 2.0 * dx )
-        dydx[0   ] = ( y[2   ] - y[0   ] ) / ( 2.0 * dx )
-        dydx[  -1] = ( y[  -1] - y[  -3] ) / ( 2.0 * dx )
+        dydx[0   ] = ( y[1   ] - y[0   ] ) / ( dx )
+        dydx[  -1] = ( y[  -1] - y[  -2] ) / ( dx )
+        #dydx[0   ] = dydx[1   ]
+        #dydx[  -1] = dydx[  -2]
+        #dydx[ 0] = 2.0 * dydx[ 1] - dydx[ 2]
+        #dydx[-1] = 2.0 * dydx[-2] - dydx[-3]
 
         d2ydx2 = numpy.empty_like(y)
         d2ydx2[1:-1] = ( y[2:  ] - 2.0 * y[1:-1] + y[ :-2] ) / ( dx**2.0 )
-        d2ydx2[0   ] = ( y[2   ] - 2.0 * y[1   ] + y[0   ] ) / ( dx**2.0 )
-        d2ydx2[  -1] = ( y[  -1] - 2.0 * y[  -2] + y[  -3] ) / ( dx**2.0 )
+        d2ydx2[0   ] = 0.0
+        d2ydx2[  -1] = 0.0
+        #d2ydx2[0   ] = d2ydx2[1   ]
+        #d2ydx2[  -1] = d2ydx2[  -2]
+        #d2ydx2[ 0] = 2.0 * d2ydx2[ 1] - d2ydx2[ 2]
+        #d2ydx2[-1] = 2.0 * d2ydx2[-2] - d2ydx2[-3]
 
         rate = ( numpy.exp(-x) - 0.5 * numpy.exp(-2.0*x) ) * dydx + 0.5 * numpy.exp(-2.0*x) * d2ydx2
 
@@ -227,7 +245,7 @@ class BatchReactor():
         def fun( t, y ):
             return self.get_rate(n, y, alpha1m)
 
-        solver = solve_ivp(fun, [0.0, t], rho, rtol=rtol, atol=atol)
+        solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
         return solver.t, solver.y
 

@@ -61,7 +61,7 @@ print('Then, the code computes the nondimensional Henry\'s constants and the pha
 print('See lines 63-77 of \'examples_batch.py\' script.')
 
 nmax = 105.0
-mesh = 2*104+1
+mesh = 500
 grid = 'continuum'
 n = numpy.linspace(1.0, nmax, mesh)
 dn = n[1] - n[0]
@@ -88,7 +88,7 @@ print('Then, the code normalizes them to the total number of monomer units.')
 print('See lines 90-100 of \'examples_batch.py\' script.')
 
 nmax = 105.0
-mesh = 2*104+1
+mesh = 500
 grid = 'continuum'
 n = numpy.linspace(1.0, nmax, mesh)
 concs = numpy.exp(-0.5*((n-100.0)/(0.5))**2)
@@ -109,13 +109,14 @@ print('We enter the temperature in K, the headspace volume in L, the melt mass i
 print('Then, the code computes the nondimensional Henry\'s constants and the phase partition coefficients.')
 print('The concentrations can be entered in arbitrary units.')
 print('Then, the code normalizes them to the total number of monomer units.')
-print('See lines 114-124 of \'examples_batch.py\' script.')
+print('For reference, we also solve the discrete equations.')
+print('See lines 115-137 of \'examples_batch.py\' script.')
 
 nmax = 10.0**2.10
-mesh = 2*104+1
+mesh = 500
 grid = 'log_n'
 n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
-concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2) # numpy.exp(-0.5*((n-100.0)/(0.5))**2)
+concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2)
 tmax = 100.0
 
 reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, temp=573.15, volume=1.0, mass=10.0, monomer=14.027)
@@ -123,20 +124,32 @@ t5, y5 = reactor.solve(tmax, rtol=1e-12, atol=1e-12)
 n5 = numpy.copy(reactor.n)
 a5 = numpy.copy(reactor.alpha1m)
 
-'''
+nmax = int(10.0**2.10)+1
+mesh = 0
+grid = 'discrete'
+n = numpy.arange(1, nmax+1, 1)
+concs = (1.0/n) * numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2)
+tmax = 100.0
+
+reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, temp=573.15, volume=1.0, mass=10.0, monomer=14.027)
+t5b, y5b = reactor.solve(tmax, rtol=1e-12, atol=1e-12)
+n5b = numpy.copy(reactor.n)
+a5b = numpy.copy(reactor.alpha1m)
+
+
 print()
-print('Case 6: Log Scale Equation with No Phase Partition / Dimensional Input')
+print('Case 6: Log Scale Equation with No Phase Partition / Mixed Dimensional & Nondimensional Input')
 print('This example solves the population balance equations in a logarithmic scale with trivial phase partition coefficients.')
 print('The logarithmic equations can be invoked by passing grid=\'log_n\' to the BatchReactor class.')
-print('This example also demonstrates the use of dimensional input.')
-print('We enter the temperature in K, the headspace volume in L, the melt mass in g, and the monomer mass in g/mol.')
-print('Then, the code computes the nondimensional Henry\'s constants and the phase partition coefficients.')
-print('The concentrations can be entered in arbitrary units.')
+print('This example also demonstrates the use of partial nondimensional input.')
+print('We provide the phase partition coefficients,')
+print('but we enter the concentrations in arbitrary units.')
 print('Then, the code normalizes them to the total number of monomer units.')
-print('See lines 114-124 of \'examples_batch.py\' script.')
+print('For reference, we also solve the discrete equations.')
+print('See lines 151-173 of \'examples_batch.py\' script.')
 
 nmax = 10.0**2.10
-mesh = 521
+mesh = 500
 grid = 'log_n'
 n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
 concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2)
@@ -146,7 +159,19 @@ reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, alpha1m=num
 t6, y6 = reactor.solve(tmax, rtol=1e-12, atol=1e-12)
 n6 = numpy.copy(reactor.n)
 a6 = numpy.copy(reactor.alpha1m)
-'''
+
+nmax = int(10.0**2.10)+1
+mesh = 0
+grid = 'discrete'
+n = numpy.arange(1, nmax+1, 1)
+concs = (1.0/n) * numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2)
+tmax = 100.0
+
+reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, alpha1m=numpy.ones(nmax))
+t6b, y6b = reactor.solve(tmax, rtol=1e-12, atol=1e-12)
+n6b = numpy.copy(reactor.n)
+a6b = numpy.copy(reactor.alpha1m)
+
 
 print()
 
