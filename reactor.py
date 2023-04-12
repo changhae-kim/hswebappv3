@@ -8,7 +8,7 @@ class BatchReactor():
 
     def __init__( self, nmax=5, mesh=0, grid='discrete',
             rho=None, alpha1m=None, H0=None, H1=None,
-            mode=[1.0, 0.0, 0.0], concs=[0.0, 0.0, 0.0, 0.0, 1.0],
+            concs=[0.0, 0.0, 0.0, 0.0, 1.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0 ):
 
         if grid == 'discrete':
@@ -24,12 +24,8 @@ class BatchReactor():
             self.get_partition = self.get_log_n_partition
             self.get_rate = self.get_log_n_rate
 
-        self.mode=mode
-
         if rho is None:
             n = self.n
-            if concs is None:
-                concs = numpy.ones_like(n)
             if grid == 'discrete':
                 rho = numpy.array(concs) / numpy.inner(n, concs)
             elif grid == 'continuum':
@@ -45,6 +41,8 @@ class BatchReactor():
                 rho = numpy.array(concs) / ( numpy.einsum('i,i,i->', w, concs, numpy.exp(2.0*r)) * dr )
         self.rho = rho
 
+        self.rho_M = dens / ( mass / volume )
+
         if alpha1m is None:
             n = self.n
             if H0 is None:
@@ -52,7 +50,6 @@ class BatchReactor():
             if H1 is None:
                 H1 = numpy.exp( 0.327292343 - 536.5152612 / temp )
             alpha1m = 1.0 / ( 1.0 + n * H0 * H1**n )
-        self.rho_M = dens / ( mass / volume )
         self.H0 = H0
         self.H1 = H1
         self.alpha1m = alpha1m
@@ -248,4 +245,49 @@ class BatchReactor():
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
         return solver.t, solver.y
+
+
+class CSTReactor(BatchReactor):
+
+    def __init__( self, nmax=5, mesh=0, grid='discrete',
+            rho=None, alpha=None, alpha1m=None, H0=None, H1=None, fin=None, fout=None,
+            concs=[0.0, 0.0, 0.0, 0.0, 1.0], influx=[0.0, 0.0, 0.0, 0.0, 0.0], outflux=[0.0, 0.0],
+            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0 ):
+
+        super().__init__(nmax, mesh, grid, rho, alpha1m, H0, H1, concs, temp, volume, mass, monomer, dens)
+
+        self.get_batch_rate = self.get_rate
+        self.get_rate = self.get_flux_rate
+
+        if alpha is None:
+            n = self.n
+            H0 = self.H0
+            H1 = self.H1
+            alpha = 1.0 / ( 1.0 + 1.0 / ( n * H0 * H1**n ) )
+        self.alpha = alpha
+
+        if fin is None:
+            n = self.n
+            if grid == 'discrete':
+                fin = numpy.array(influx) / numpy.inner(n, concs)
+            elif grid == 'continuum':
+                dn = n[1] - n[0]
+                w = numpy.ones_like(n)
+                w[0] = w[-1] = 0.5
+                fin = numpy.array(influx) / ( numpy.einsum('i,i,i->', w, n, concs) * dn )
+            elif grid == 'log_n':
+                r = numpy.log(n)
+                dr = r[1] - r[0]
+                w = numpy.ones_like(n)
+                w[0] = w[-1] = 0.5
+                fin = numpy.array(influx) / ( numpy.einsum('i,i,i->', w, concs, numpy.exp(2.0*r)) * dr )
+        self.fin = fin
+
+        self.fout = numpy.array(outflux)
+
+        return
+
+    def get_flux_rate( self, n=None, rho=None, alpha=None, alpha1m=None, fin=None, fout=None ):
+        rate = self.get_batch_rate(n, rho, alpha1m) + fin - fout[0] * alpha * rho - fout[1] * alpha1m * rho
+        return rate
 
