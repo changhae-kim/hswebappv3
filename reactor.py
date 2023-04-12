@@ -48,9 +48,9 @@ class BatchReactor():
         if alpha1m is None:
             n = self.n
             if H0 is None:
-                H0 = ( monomer * volume ) / ( mass * 0.082057366080960 * temp ) * numpy.exp( 8.09559982139232E+00 + 4.59679345240217E+02 / temp )
+                H0 = ( monomer * volume ) / ( mass * 0.082057366080960 * temp ) * numpy.exp( 8.124149532 + 472.8315525 / temp )
             if H1 is None:
-                H1 = numpy.exp( 3.31727830327662E-01 - 5.34127400185307E+02 / temp )
+                H1 = numpy.exp( 0.327292343 - 536.5152612 / temp )
             alpha1m = 1.0 / ( 1.0 + n * H0 * H1**n )
         self.rho_M = dens / ( mass / volume )
         self.H0 = H0
