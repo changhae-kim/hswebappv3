@@ -32,13 +32,13 @@ class BatchReactor():
                 dn = n[1] - n[0]
                 w = numpy.ones_like(n)
                 w[0] = w[-1] = 0.5
-                rho = numpy.array(concs) / ( numpy.einsum('i,i,i->', w, n, concs) * dn )
+                rho = numpy.array(concs) / ( numpy.einsum('i,i,i->', n, concs, w) * dn )
             elif grid == 'log_n':
                 r = numpy.log(n)
                 dr = r[1] - r[0]
                 w = numpy.ones_like(n)
                 w[0] = w[-1] = 0.5
-                rho = numpy.array(concs) / ( numpy.einsum('i,i,i->', w, concs, numpy.exp(2.0*r)) * dr )
+                rho = numpy.array(concs) / ( numpy.einsum('i,i,i,i->', n, concs, n, w) * dr )
         self.rho = rho
 
         self.rho_melt = ( dens * volume ) / ( mass )
