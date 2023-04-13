@@ -13,15 +13,15 @@ class BatchReactor():
 
         if grid == 'discrete':
             self.n = numpy.arange(1, nmax+1, 1)
-            self.get_partition = self.get_discrete_partition
+            self.get_melt = self.get_discrete_melt
             self.get_rate = self.get_discrete_rate
         elif grid == 'continuum':
             self.n = numpy.linspace(1.0, nmax, mesh)
-            self.get_partition = self.get_continuum_partition
+            self.get_melt = self.get_continuum_melt
             self.get_rate = self.get_continuum_rate
         elif grid == 'log_n':
             self.n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
-            self.get_partition = self.get_log_n_partition
+            self.get_melt = self.get_log_n_melt
             self.get_rate = self.get_log_n_rate
 
         if rho is None:
@@ -41,7 +41,7 @@ class BatchReactor():
                 rho = numpy.array(concs) / ( numpy.einsum('i,i,i->', w, concs, numpy.exp(2.0*r)) * dr )
         self.rho = rho
 
-        self.rho_M = dens / ( mass / volume )
+        self.rho_melt = ( dens * volume ) / ( mass )
 
         if alpha1m is None:
             n = self.n
@@ -56,39 +56,59 @@ class BatchReactor():
 
         return
 
-    def get_discrete_partition( self, n=None, rho=None, rho_M=None, H0=None, H1=None, gtol=1e-6 ):
+    def get_part( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
-        if rho_M is None:
-            rho_M = self.rho_M
+        if rho_melt is None:
+            rho_melt = self.rho_melt
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+
+        W = self.get_melt( n, rho, rho_melt, H0, H1, gtol=1e-6 )
+
+        alpha1m = 1.0 / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
+
+        return alpha1m
+
+    def get_discrete_melt( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if rho_melt is None:
+            rho_melt = self.rho_melt
         if H0 is None:
             H0 = self.H0
         if H1 is None:
             H1 = self.H1
 
         def fun(x):
-            W_M = numpy.einsum('i,i,i->', n, numpy.exp(x), rho)
-            d = 1.0 / ( 1.0 + n * ( 1.0/W_M - 1.0/rho_M ) * H0 * H1**n ) - numpy.exp(x)
-            f = numpy.inner(d, d)
-            dfdx = 2.0 * ( ( n * ( n * numpy.exp(x) * rho / W_M**2 ) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W_M - 1.0/rho_M ) * H0 * H1**n )**2 - numpy.exp(x) ) * d
+            W = numpy.exp(x)
+            dW = numpy.sum( ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n ) ) - W
+            dWdx = numpy.sum( ( n * rho * n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2 ) - W
+            f = dW**2
+            dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
-        x = numpy.log( 1.0 / ( 1.0 + n * H0 * H1**n ) )
+        x = numpy.log( numpy.sum( ( n * rho ) / ( 1.0 + n * H0 * H1**n ) ) )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
 
         return numpy.exp(solver.x)
 
-    def get_continuum_partition( self, n=None, rho=None, rho_M=None, H0=None, H1=None, gtol=1e-6 ):
+    def get_continuum_melt( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
-        if rho_M is None:
-            rho_M = self.rho_M
+        if rho_melt is None:
+            rho_melt = self.rho_melt
         if H0 is None:
             H0 = self.H0
         if H1 is None:
@@ -99,25 +119,26 @@ class BatchReactor():
         w[0] = w[-1] = 0.5
 
         def fun(x):
-            W_M = numpy.einsum('i,i,i,i->', w, n, numpy.exp(x), rho) * dn
-            d = 1.0 / ( 1.0 + n * ( 1.0/W_M - 1.0/rho_M ) * H0 * H1**n ) - numpy.exp(x)
-            f = numpy.inner(d, d)
-            dfdx = 2.0 * ( ( n * ( w * n * numpy.exp(x) * rho * dn / W_M**2 ) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W_M - 1.0/rho_M ) * H0 * H1**n )**2 - numpy.exp(x) ) * d
+            W = numpy.exp(x)
+            dW = numpy.sum( ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n ) * w ) * dn - W
+            dWdx = numpy.sum( ( n * rho * n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2 * w ) * dn - W
+            f = dW**2
+            dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
-        x = numpy.log( 1.0 / ( 1.0 + n * H0 * H1**n ) )
+        x = numpy.log( numpy.sum( ( n * rho ) / ( 1.0 + n * H0 * H1**n ) * w ) * dn )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
 
         return numpy.exp(solver.x)
 
-    def get_log_n_partition( self, n=None, rho=None, rho_M=None, H0=None, H1=None, gtol=1e-6 ):
+    def get_log_n_melt( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
-        if rho_M is None:
-            rho_M = self.rho_M
+        if rho_melt is None:
+            rho_melt = self.rho_melt
         if H0 is None:
             H0 = self.H0
         if H1 is None:
@@ -129,13 +150,14 @@ class BatchReactor():
         w[0] = w[-1] = 0.5
 
         def fun(x):
-            W_M = numpy.einsum('i,i,i,i->', w, numpy.exp(x), rho, numpy.exp(2.0*r)) * dr
-            d = 1.0 / ( 1.0 + n * ( 1.0/W_M - 1.0/rho_M ) * H0 * H1**n ) - numpy.exp(x)
-            f = numpy.inner(d, d)
-            dfdx = 2.0 * ( ( n * ( w * numpy.exp(x) * rho * numpy.exp(2.0*r) * dr / W_M**2 ) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W_M - 1.0/rho_M ) * H0 * H1**n )**2 - numpy.exp(x) ) * d
+            W = numpy.exp(x)
+            dW = numpy.sum( ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n ) * n * w ) * dr - W
+            dWdx = numpy.sum( ( n * rho * n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2 * w * n ) * dr - W
+            f = dW**2
+            dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
-        x = numpy.log( 1.0 / ( 1.0 + n * H0 * H1**n ) )
+        x = numpy.log( numpy.sum( ( n * rho ) / ( 1.0 + n * H0 * H1**n ) * n * w ) * dr )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
 
         return numpy.exp(solver.x)
