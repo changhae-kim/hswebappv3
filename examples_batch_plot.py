@@ -3,8 +3,10 @@ import numpy
 from matplotlib import cm, pyplot
 pyplot.rcParams.update({'font.size': 14})
 
-from reactor import BatchReactor
-from examples_batch import t1, y1, n1, a1, t2, y2, n2, a2, t3, y3, n3, a3, t4, y4, n4, a4
+from examples_batch import t1, y1, n1, a1
+from examples_batch import t2, y2, n2, a2
+from examples_batch import t3, y3, n3, a3
+from examples_batch import t4, y4, n4, a4
 from examples_batch import t5, y5, n5, a5
 from examples_batch import t5b, y5b, n5b, a5b
 from examples_batch import t6, y6, n6, a6

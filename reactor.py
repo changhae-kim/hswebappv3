@@ -7,7 +7,7 @@ from scipy.optimize import minimize
 class BatchReactor():
 
     def __init__( self, nmax=5, mesh=0, grid='discrete',
-            rho=None, alpha1m=None, H0=None, H1=None,
+            rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0 ):
 
@@ -41,7 +41,9 @@ class BatchReactor():
                 rho = numpy.array(concs) / ( numpy.einsum('i,i,i,i->', n, concs, n, w) * dr )
         self.rho = rho
 
-        self.rho_melt = ( dens * volume ) / ( mass )
+        if rho_melt is None:
+            rho_melt = ( dens * volume ) / ( mass )
+        self.rho_melt = rho_melt
 
         if alpha1m is None:
             if H0 is None:
@@ -168,20 +170,7 @@ class BatchReactor():
 
         return W
 
-    def get_rate( self, n=None, rho=None, rho_melt=None, alpha1m=None, H0=None, H1=None, gtol=1e-6 ):
-
-        if n is None:
-            n = self.n
-        if rho is None:
-            rho = self.rho
-        if rho_melt is None:
-            rho_melt = self.rho_melt
-        if alpha1m is None:
-            alpha1m = self.alpha1m
-        if H0 is None:
-            H0 = self.H0
-        if H1 is None:
-            H1 = self.H1
+    def get_rate( self, n=None, rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
 
         if alpha1m is None:
             alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
@@ -280,23 +269,23 @@ class BatchReactor():
 
         return rate
 
-    def solve( self, t, n=None, rho=None, rho_melt=None, alpha1m=None, H0=None, H1=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
+    def solve( self, t, n=None, rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
-        if rho_melt is None:
-            rho_melt = self.rho_melt
         if alpha1m is None:
             alpha1m = self.alpha1m
+        if rho_melt is None:
+            rho_melt = self.rho_melt
         if H0 is None:
             H0 = self.H0
         if H1 is None:
             H1 = self.H1
 
         def fun( t, y ):
-            return self.get_rate(n, y, rho_melt, alpha1m, H0, H1, gtol)
+            return self.get_rate(n, y, alpha1m, rho_melt, H0, H1, gtol)
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
@@ -306,20 +295,12 @@ class BatchReactor():
 class CSTReactor(BatchReactor):
 
     def __init__( self, nmax=5, mesh=0, grid='discrete',
-            rho=None, alpha=None, alpha1m=None, H0=None, H1=None, fin=None, fout=None,
+            rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0], influx=[0.0, 0.0, 0.0, 0.0, 0.0], outflux=[0.0, 0.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0 ):
 
-        super().__init__(nmax, mesh, grid, rho, alpha1m, H0, H1, concs, temp, volume, mass, monomer, dens)
+        super().__init__(nmax, mesh, grid, rho, alpha1m, rho_melt, H0, H1, concs, temp, volume, mass, monomer, dens)
 
-        self.get_batch_rate = self.get_rate
-        self.get_rate = self.get_flux_rate
-
-        if alpha is None:
-            n = self.n
-            H0 = self.H0
-            H1 = self.H1
-            alpha = 1.0 / ( 1.0 + 1.0 / ( n * H0 * H1**n ) )
         self.alpha = alpha
 
         if fin is None:
@@ -343,7 +324,56 @@ class CSTReactor(BatchReactor):
 
         return
 
-    def get_flux_rate( self, n=None, rho=None, alpha=None, alpha1m=None, fin=None, fout=None ):
-        rate = self.get_batch_rate(n, rho, alpha1m) + fin - fout[0] * alpha * rho - fout[1] * alpha1m * rho
+    def get_part( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if rho_melt is None:
+            rho_melt = self.rho_melt
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+
+        W = self.get_melt( n, rho, rho_melt, H0, H1, gtol=1e-6 )
+
+        A = n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n
+        alpha = 1.0 / ( 1.0 + 1.0 / A )
+        alpha1m = 1.0 / ( 1.0 + A )
+
+        print(W)
+        print(alpha1m)
+
+        return alpha1m
+
+    def get_rate( self, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, gtol=1e-6 ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if rho_melt is None:
+            rho_melt = self.rho_melt
+        if alpha is None:
+            alpha = self.alpha
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+
+        if alpha is None:
+            if alpha1m is None:
+                alpha, alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
+            else:
+                alpha, _ = self.get_part(n, rho, rho_melt, H0, H1, gtol)
+        elif alpha1m is None:
+            _, alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
+
+        rate = self.get_rhs(n, y, alpha1m) + fin - fout[0] * alpha * rho - fout[1] * alpha1m * rho
+
         return rate
 '''
