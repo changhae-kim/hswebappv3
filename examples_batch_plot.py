@@ -10,8 +10,8 @@ from examples_batch import t5b, y5b, n5b, a5b
 from examples_batch import t6, y6, n6, a6
 from examples_batch import t6b, y6b, n6b, a6b
 
-prune = 20
-nwin = 100
+prune = 2
+nwin = 110
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()
 ax2 = ax1.twinx()
@@ -28,8 +28,8 @@ ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_partition_discrete.png')
 
-prune = 20
-nwin = 100
+prune = 2
+nwin = 110
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()
 ax2 = ax1.twinx()
@@ -46,8 +46,8 @@ ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_nopartition_discrete.png')
 
-prune = 10
-nwin = 105.0
+prune = 5
+nwin = 110.0
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()
 ax2 = ax1.twinx()
@@ -64,8 +64,8 @@ ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_partition_continuum.png')
 
-prune = 20
-nwin = 105.0
+prune = 2
+nwin = 110.0
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()
 ax2 = ax1.twinx()
@@ -82,7 +82,7 @@ ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_nopartition_continuum.png')
 
-prune = 10
+prune = 2
 nwin = 10.0**2.10
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()
@@ -102,7 +102,7 @@ ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_partition_log_n.png')
 
-prune = 10
+prune = 2
 nwin = 10.0**2.10
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()
@@ -122,7 +122,7 @@ ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_partition_log_n_compare.png')
 
-prune = 10
+prune = 2
 nwin = 10.0**2.10
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()
@@ -142,7 +142,7 @@ ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_nopartition_log_n.png')
 
-prune = 10
+prune = 2
 nwin = 10.0**2.10
 fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
 ax1 = fig.subplots()

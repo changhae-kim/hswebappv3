@@ -14,15 +14,15 @@ class BatchReactor():
         if grid == 'discrete':
             self.n = numpy.arange(1, nmax+1, 1)
             self.get_melt = self.get_discrete_melt
-            self.get_rate = self.get_discrete_rate
+            self.get_rhs = self.get_discrete_rhs
         elif grid == 'continuum':
             self.n = numpy.linspace(1.0, nmax, mesh)
             self.get_melt = self.get_continuum_melt
-            self.get_rate = self.get_continuum_rate
+            self.get_rhs = self.get_continuum_rhs
         elif grid == 'log_n':
             self.n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
             self.get_melt = self.get_log_n_melt
-            self.get_rate = self.get_log_n_rate
+            self.get_rhs = self.get_log_n_rhs
 
         if rho is None:
             n = self.n
@@ -44,15 +44,18 @@ class BatchReactor():
         self.rho_melt = ( dens * volume ) / ( mass )
 
         if alpha1m is None:
-            n = self.n
             if H0 is None:
                 H0 = ( monomer * volume ) / ( mass * 0.082057366080960 * temp ) * numpy.exp( 8.124149532 + 472.8315525 / temp )
             if H1 is None:
                 H1 = numpy.exp( 0.327292343 - 536.5152612 / temp )
-            alpha1m = 1.0 / ( 1.0 + n * H0 * H1**n )
         self.H0 = H0
         self.H1 = H1
         self.alpha1m = alpha1m
+
+        if alpha1m is None:
+            n = self.n
+            alpha1m = 1.0 / ( 1.0 + n * H0 * H1**n )
+        self.alpha1m0 = alpha1m
 
         return
 
@@ -98,8 +101,9 @@ class BatchReactor():
 
         x = numpy.log( numpy.sum( ( n * rho ) / ( 1.0 + n * H0 * H1**n ) ) )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
+        W = numpy.exp(solver.x)
 
-        return numpy.exp(solver.x)
+        return W
 
     def get_continuum_melt( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
 
@@ -128,8 +132,9 @@ class BatchReactor():
 
         x = numpy.log( numpy.sum( ( n * rho ) / ( 1.0 + n * H0 * H1**n ) * w ) * dn )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
+        W = numpy.exp(solver.x)
 
-        return numpy.exp(solver.x)
+        return W
 
     def get_log_n_melt( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
 
@@ -159,10 +164,33 @@ class BatchReactor():
 
         x = numpy.log( numpy.sum( ( n * rho ) / ( 1.0 + n * H0 * H1**n ) * n * w ) * dr )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
+        W = numpy.exp(solver.x)
 
-        return numpy.exp(solver.x)
+        return W
 
-    def get_discrete_rate( self, n=None, rho=None, alpha1m=None ):
+    def get_rate( self, n=None, rho=None, rho_melt=None, alpha1m=None, H0=None, H1=None, gtol=1e-6 ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if rho_melt is None:
+            rho_melt = self.rho_melt
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+
+        if alpha1m is None:
+            alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
+
+        rate = self.get_rhs(n, rho, alpha1m)
+
+        return rate
+
+    def get_discrete_rhs( self, n=None, rho=None, alpha1m=None ):
 
         if n is None:
             n = self.n
@@ -182,7 +210,7 @@ class BatchReactor():
 
         return rate
 
-    def get_continuum_rate( self, n=None, rho=None, alpha1m=None ):
+    def get_continuum_rhs( self, n=None, rho=None, alpha1m=None ):
 
         if n is None:
             n = self.n
@@ -216,7 +244,7 @@ class BatchReactor():
 
         return rate
 
-    def get_log_n_rate( self, n=None, rho=None, alpha1m=None ):
+    def get_log_n_rhs( self, n=None, rho=None, alpha1m=None ):
 
         if n is None:
             n = self.n
@@ -252,23 +280,29 @@ class BatchReactor():
 
         return rate
 
-    def solve( self, t, n=None, rho=None, alpha1m=None, rtol=1e-3, atol=1e-6 ):
+    def solve( self, t, n=None, rho=None, rho_melt=None, alpha1m=None, H0=None, H1=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
+        if rho_melt is None:
+            rho_melt = self.rho_melt
         if alpha1m is None:
             alpha1m = self.alpha1m
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
 
         def fun( t, y ):
-            return self.get_rate(n, y, alpha1m)
+            return self.get_rate(n, y, rho_melt, alpha1m, H0, H1, gtol)
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
         return solver.t, solver.y
 
-
+'''
 class CSTReactor(BatchReactor):
 
     def __init__( self, nmax=5, mesh=0, grid='discrete',
@@ -312,4 +346,4 @@ class CSTReactor(BatchReactor):
     def get_flux_rate( self, n=None, rho=None, alpha=None, alpha1m=None, fin=None, fout=None ):
         rate = self.get_batch_rate(n, rho, alpha1m) + fin - fout[0] * alpha * rho - fout[1] * alpha1m * rho
         return rate
-
+'''
