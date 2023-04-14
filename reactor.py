@@ -9,7 +9,7 @@ class BatchReactor():
     def __init__( self, nmax=5, mesh=0, grid='discrete',
             rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0],
-            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0 ):
+            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
 
         if grid == 'discrete':
             self.n = numpy.arange(1, nmax+1, 1)
@@ -30,15 +30,13 @@ class BatchReactor():
                 rho = numpy.array(concs) / numpy.inner(n, concs)
             elif grid == 'continuum':
                 dn = n[1] - n[0]
-                w = numpy.ones_like(n)
-                w[0] = w[-1] = 0.5
-                rho = numpy.array(concs) / ( numpy.einsum('i,i,i->', w, n, concs) * dn )
+                g = n * concs
+                rho = numpy.array(concs) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn )
             elif grid == 'log_n':
                 r = numpy.log(n)
                 dr = r[1] - r[0]
-                w = numpy.ones_like(n)
-                w[0] = w[-1] = 0.5
-                rho = numpy.array(concs) / ( numpy.einsum('i,i,i->', w, n**2, concs) * dr )
+                g = n**2 * concs
+                rho = numpy.array(concs) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dr )
         self.rho = rho
 
         if rho_melt is None:
@@ -58,6 +56,8 @@ class BatchReactor():
             n = self.n
             alpha1m = 1.0 / ( 1.0 + n * H0 * H1**n )
         self.alpha1m0 = alpha1m
+
+        self.rand = rand
 
         return
 
@@ -121,18 +121,19 @@ class BatchReactor():
             H1 = self.H1
 
         dn = n[1] - n[0]
-        w = numpy.ones_like(n)
-        w[0] = w[-1] = 0.5
 
         def fun(x):
             W = numpy.exp(x)
-            dW = numpy.einsum( 'i,i,i,i->', w, n, rho, 1.0 / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n ) ) * dn - W
-            dWdx = numpy.einsum( 'i,i,i,i->', w, n, rho, ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2 ) * dn - W
+            g = ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
+            dW = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn - W
+            g = ( n * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2
+            dWdx = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
-        x = numpy.log( numpy.einsum( 'i,i,i,i->', w, n, rho, 1.0 / ( 1.0 + n * H0 * H1**n ) ) * dn )
+        g = ( n * rho ) / ( 1.0 + n * H0 * H1**n )
+        x = numpy.log( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
         W = numpy.exp(solver.x)
 
@@ -153,18 +154,19 @@ class BatchReactor():
 
         r = numpy.log(n)
         dr = r[1] - r[0]
-        w = numpy.ones_like(n)
-        w[0] = w[-1] = 0.5
 
         def fun(x):
             W = numpy.exp(x)
-            dW = numpy.einsum( 'i,i,i,i->', w, n**2, rho, 1.0 / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n ) ) * dr - W
-            dWdx = numpy.einsum( 'i,i,i,i->', w, n**2, rho, ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2 ) * dr - W
+            g = ( n**2 * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
+            dW = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dr - W
+            g = ( n**2 * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2
+            dWdx = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dr - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
-        x = numpy.log( numpy.einsum( 'i,i,i,i->', w, n**2, rho, 1.0 / ( 1.0 + n * H0 * H1**n ) ) * dr )
+        g = ( n**2 * rho ) / ( 1.0 + n * H0 * H1**n )
+        x = numpy.log( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dr )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
         W = numpy.exp(solver.x)
 
@@ -181,7 +183,7 @@ class BatchReactor():
 
         return func
 
-    def get_discrete_rate( self, n=None, rho=None, alpha1m=None ):
+    def get_discrete_rate( self, n=None, rho=None, alpha1m=None, rand=None ):
 
         if n is None:
             n = self.n
@@ -189,19 +191,32 @@ class BatchReactor():
             rho = self.rho
         if alpha1m is None:
             alpha1m = self.alpha1m
+        if rand is None:
+            rand = self.rand
 
         y = alpha1m * rho
 
-        dy = numpy.empty_like(y)
-        dy[1:-1] = y[2:] - y[1:-1]
-        dy[0   ] = y[1 ] - y[0   ]
-        dy[  -1] =       - y[  -1]
+        dy = numpy.zeros_like(y)
+        if rand != 1.0:
+            dy[1:-1] = y[2:] - y[1:-1]
+            dy[0   ] = y[1 ] - y[0   ]
+            dy[  -1] =       - y[  -1]
 
-        rate = dy
+        sy = numpy.zeros_like(y)
+        if rand != 0.0:
+            sy[-2::-1] = numpy.cumsum(y[:0:-1])
+            sy[-1    ] = 0.0
+
+        y2 = numpy.zeros_like(y)
+        if rand != 0.0:
+            y2[         :len(y)//2] = y[1::2]
+            y2[len(y)//2:         ] = 0.0
+
+        rate = ( 1.0 - rand ) * ( dy ) + ( rand ) * ( 2.0 * sy - y2 - ( n - 1.0 ) * y )
 
         return rate
 
-    def get_continuum_rate( self, n=None, rho=None, alpha1m=None ):
+    def get_continuum_rate( self, n=None, rho=None, alpha1m=None, rand=None ):
 
         if n is None:
             n = self.n
@@ -209,33 +224,43 @@ class BatchReactor():
             rho = self.rho
         if alpha1m is None:
             alpha1m = self.alpha1m
+        if rand is None:
+            rand = self.rand
 
         y = alpha1m * rho
         dn = n[1] - n[0]
 
-        dydn = numpy.empty_like(y)
-        dydn[1:-1] = ( y[2:  ] - y[ :-2] ) / ( 2.0 * dn )
-        #dydn[0   ] = ( y[1   ] - y[0   ] ) / ( dn )
-        #dydn[  -1] = ( y[  -1] - y[  -2] ) / ( dn )
-        dydn[0   ] = dydn[1   ]
-        dydn[  -1] = dydn[  -2]
-        #dydn[ 0] = 2.0 * dydn[ 1] - dydn[ 2]
-        #dydn[-1] = 2.0 * dydn[-2] - dydn[-3]
+        dydn = numpy.zeros_like(y)
+        if rand != 1.0:
+            dydn[1:-1] = ( y[2:  ] - y[ :-2] ) / ( 2.0 * dn )
+            #dydn[0   ] = ( y[1   ] - y[0   ] ) / ( dn )
+            #dydn[  -1] = ( y[  -1] - y[  -2] ) / ( dn )
+            dydn[0   ] = dydn[1   ]
+            dydn[  -1] = dydn[  -2]
+            #dydn[ 0] = 2.0 * dydn[ 1] - dydn[ 2]
+            #dydn[-1] = 2.0 * dydn[-2] - dydn[-3]
 
-        d2ydn2 = numpy.empty_like(y)
-        d2ydn2[1:-1] = ( y[2:  ] - 2.0 * y[1:-1] + y[ :-2] ) / ( dn**2.0 )
-        #d2ydn2[0   ] = 0.0
-        #d2ydn2[  -1] = 0.0
-        d2ydn2[0   ] = d2ydn2[1   ]
-        d2ydn2[  -1] = d2ydn2[  -2]
-        #d2ydn2[ 0] = 2.0 * d2ydn2[ 1] - d2ydn2[ 2]
-        #d2ydn2[-1] = 2.0 * d2ydn2[-2] - d2ydn2[-3]
+        d2ydn2 = numpy.zeros_like(y)
+        if rand != 1.0:
+            d2ydn2[1:-1] = ( y[2:  ] - 2.0 * y[1:-1] + y[ :-2] ) / ( dn**2.0 )
+            #d2ydn2[0   ] = 0.0
+            #d2ydn2[  -1] = 0.0
+            d2ydn2[0   ] = d2ydn2[1   ]
+            d2ydn2[  -1] = d2ydn2[  -2]
+            #d2ydn2[ 0] = 2.0 * d2ydn2[ 1] - d2ydn2[ 2]
+            #d2ydn2[-1] = 2.0 * d2ydn2[-2] - d2ydn2[-3]
 
-        rate = dydn + 0.5 * d2ydn2
+        iy = numpy.zeros_like(y)
+        if rand != 0.0:
+            g = y
+            iy[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dn
+            iy[-1    ] = 0.0
+
+        rate = ( 1.0 - rand ) * ( dydn + 0.5 * d2ydn2 ) + ( rand ) * ( 2.0 * iy - n * y )
 
         return rate
 
-    def get_log_n_rate( self, n=None, rho=None, alpha1m=None ):
+    def get_log_n_rate( self, n=None, rho=None, alpha1m=None, rand=None ):
 
         if n is None:
             n = self.n
@@ -243,31 +268,41 @@ class BatchReactor():
             rho = self.rho
         if alpha1m is None:
             alpha1m = self.alpha1m
+        if rand is None:
+            rand = self.rand
 
         y = alpha1m * rho
 
         r = numpy.log(n)
         dr = r[1] - r[0]
 
-        dydr = numpy.empty_like(y)
-        dydr[1:-1] = ( y[2:  ] - y[ :-2] ) / ( 2.0 * dr )
-        dydr[0   ] = ( y[1   ] - y[0   ] ) / ( dr )
-        dydr[  -1] = ( y[  -1] - y[  -2] ) / ( dr )
-        #dydr[0   ] = dydr[1   ]
-        #dydr[  -1] = dydr[  -2]
-        #dydr[ 0] = 2.0 * dydr[ 1] - dydr[ 2]
-        #dydr[-1] = 2.0 * dydr[-2] - dydr[-3]
+        dydr = numpy.zeros_like(y)
+        if rand != 1.0:
+            dydr[1:-1] = ( y[2:  ] - y[ :-2] ) / ( 2.0 * dr )
+            dydr[0   ] = ( y[1   ] - y[0   ] ) / ( dr )
+            dydr[  -1] = ( y[  -1] - y[  -2] ) / ( dr )
+            #dydr[0   ] = dydr[1   ]
+            #dydr[  -1] = dydr[  -2]
+            #dydr[ 0] = 2.0 * dydr[ 1] - dydr[ 2]
+            #dydr[-1] = 2.0 * dydr[-2] - dydr[-3]
 
-        d2ydr2 = numpy.empty_like(y)
-        d2ydr2[1:-1] = ( y[2:  ] - 2.0 * y[1:-1] + y[ :-2] ) / ( dr**2.0 )
-        d2ydr2[0   ] = 0.0
-        d2ydr2[  -1] = 0.0
-        #d2ydr2[0   ] = d2ydr2[1   ]
-        #d2ydr2[  -1] = d2ydr2[  -2]
-        #d2ydr2[ 0] = 2.0 * d2ydr2[ 1] - d2ydr2[ 2]
-        #d2ydr2[-1] = 2.0 * d2ydr2[-2] - d2ydr2[-3]
+        d2ydr2 = numpy.zeros_like(y)
+        if rand != 1.0:
+            d2ydr2[1:-1] = ( y[2:  ] - 2.0 * y[1:-1] + y[ :-2] ) / ( dr**2.0 )
+            d2ydr2[0   ] = 0.0
+            d2ydr2[  -1] = 0.0
+            #d2ydr2[0   ] = d2ydr2[1   ]
+            #d2ydr2[  -1] = d2ydr2[  -2]
+            #d2ydr2[ 0] = 2.0 * d2ydr2[ 1] - d2ydr2[ 2]
+            #d2ydr2[-1] = 2.0 * d2ydr2[-2] - d2ydr2[-3]
 
-        rate = ( 1.0/n - 0.5/n**2 ) * dydr + (0.5/n**2) * d2ydr2
+        iy = numpy.zeros_like(y)
+        if rand != 0.0:
+            g = n * y
+            iy[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dr
+            iy[-1    ] = 0.0
+
+        rate = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/n**2 ) * dydr + (0.5/n**2) * d2ydr2 ) + ( rand ) * ( 2.0 * iy - n * y )
 
         return rate
 
@@ -301,9 +336,9 @@ class CSTReactor(BatchReactor):
     def __init__( self, nmax=5, mesh=0, grid='discrete',
             rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0], influx=[0.0, 0.0, 0.0, 0.0, 0.0], outflux=[0.0, 0.0],
-            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0 ):
+            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
 
-        super().__init__(nmax, mesh, grid, rho, alpha1m, rho_melt, H0, H1, concs, temp, volume, mass, monomer, dens)
+        super().__init__(nmax, mesh, grid, rho, alpha1m, rho_melt, H0, H1, concs, temp, volume, mass, monomer, dens, rand)
 
         self.alpha = alpha
 
@@ -313,15 +348,13 @@ class CSTReactor(BatchReactor):
                 fin = numpy.array(influx) / numpy.inner(n, concs)
             elif grid == 'continuum':
                 dn = n[1] - n[0]
-                w = numpy.ones_like(n)
-                w[0] = w[-1] = 0.5
-                fin = numpy.array(influx) / ( numpy.einsum('i,i,i->', w, n, concs) * dn )
+                g = n * concs
+                fin = numpy.array(influx) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn )
             elif grid == 'log_n':
                 r = numpy.log(n)
                 dr = r[1] - r[0]
-                w = numpy.ones_like(n)
-                w[0] = w[-1] = 0.5
-                fin = numpy.array(influx) / ( numpy.einsum('i,i,i->', w, n**2, concs) * dr )
+                g = n**2 * concs
+                fin = numpy.array(influx) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dr )
         self.fin = fin
 
         self.fout = numpy.array(outflux)
@@ -442,9 +475,9 @@ class CSTReactor(BatchReactor):
 
         dt = t[1:] - t[:-1]
 
-        g = numpy.empty_like(y)
-        gin = numpy.empty_like(y)
-        gout = numpy.empty_like(y)
+        g = numpy.zeros_like(y)
+        gin = numpy.zeros_like(y)
+        gout = numpy.zeros_like(y)
 
         for i, _ in enumerate(t):
 
@@ -465,17 +498,17 @@ class CSTReactor(BatchReactor):
             gin[:, i] = fin
             gout[:, i] = fout[0] * alp * y[:, i] + fout[1] * a1m * y[:, i]
 
-        dG = 0.5 * (g[:, 1:] + g[:, :-1]) * dt
-        dGin = 0.5 * (gin[:, 1:] + gin[:, :-1]) * dt
-        dGout = 0.5 * (gout[:, 1:] + gout[:, :-1]) * dt
-
         G = numpy.zeros_like(y)
         Gin = numpy.zeros_like(y)
         Gout = numpy.zeros_like(y)
 
-        G[:, 1:] = numpy.cumsum(dG, axis=1)
-        Gin[:, 1:] = numpy.cumsum(dGin, axis=1)
-        Gout[:, 1:] = numpy.cumsum(dGout, axis=1)
+        G[:, 1:] = 0.5 * numpy.cumsum(g[:, 1:] + g[:, :-1], axis=1) * dt
+        Gin[:, 1:] = 0.5 * numpy.cumsum(gin[:, 1:] + gin[:, :-1], axis=1) * dt
+        Gout[:, 1:] = 0.5 * numpy.cumsum(gout[:, 1:] + gout[:, :-1], axis=1) * dt
+
+        G[:, 0] = 0.0
+        Gin[:, 0] = 0.0
+        Gout[:, 0] = 0.0
 
         return G, Gin, Gout
 
