@@ -32,13 +32,13 @@ class BatchReactor():
                 dn = n[1] - n[0]
                 w = numpy.ones_like(n)
                 w[0] = w[-1] = 0.5
-                rho = numpy.array(concs) / ( numpy.einsum('i,i,i->', n, concs, w) * dn )
+                rho = numpy.array(concs) / ( numpy.einsum('i,i,i->', w, n, concs) * dn )
             elif grid == 'log_n':
                 r = numpy.log(n)
                 dr = r[1] - r[0]
                 w = numpy.ones_like(n)
                 w[0] = w[-1] = 0.5
-                rho = numpy.array(concs) / ( numpy.einsum('i,i,i,i->', n, concs, n, w) * dr )
+                rho = numpy.array(concs) / ( numpy.einsum('i,i,i->', w, n**2, concs) * dr )
         self.rho = rho
 
         if rho_melt is None:
@@ -126,13 +126,13 @@ class BatchReactor():
 
         def fun(x):
             W = numpy.exp(x)
-            dW = numpy.sum( ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n ) * w ) * dn - W
-            dWdx = numpy.sum( ( n * rho * n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2 * w ) * dn - W
+            dW = numpy.einsum( 'i,i,i,i->', w, n, rho, 1.0 / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n ) ) * dn - W
+            dWdx = numpy.einsum( 'i,i,i,i->', w, n, rho, ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2 ) * dn - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
-        x = numpy.log( numpy.sum( ( n * rho ) / ( 1.0 + n * H0 * H1**n ) * w ) * dn )
+        x = numpy.log( numpy.einsum( 'i,i,i,i->', w, n, rho, 1.0 / ( 1.0 + n * H0 * H1**n ) ) * dn )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
         W = numpy.exp(solver.x)
 
@@ -158,13 +158,13 @@ class BatchReactor():
 
         def fun(x):
             W = numpy.exp(x)
-            dW = numpy.sum( ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n ) * n * w ) * dr - W
-            dWdx = numpy.sum( ( n * rho * n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2 * w * n ) * dr - W
+            dW = numpy.einsum( 'i,i,i,i->', w, n**2, rho, 1.0 / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n ) ) * dr - W
+            dWdx = numpy.einsum( 'i,i,i,i->', w, n**2, rho, ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2 ) * dr - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
-        x = numpy.log( numpy.sum( ( n * rho ) / ( 1.0 + n * H0 * H1**n ) * n * w ) * dr )
+        x = numpy.log( numpy.einsum( 'i,i,i,i->', w, n**2, rho, 1.0 / ( 1.0 + n * H0 * H1**n ) ) * dr )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
         W = numpy.exp(solver.x)
 
@@ -246,28 +246,28 @@ class BatchReactor():
 
         y = alpha1m * rho
 
-        x = numpy.log(n)
-        dx = x[1] - x[0]
+        r = numpy.log(n)
+        dr = r[1] - r[0]
 
-        dydx = numpy.empty_like(y)
-        dydx[1:-1] = ( y[2:  ] - y[ :-2] ) / ( 2.0 * dx )
-        dydx[0   ] = ( y[1   ] - y[0   ] ) / ( dx )
-        dydx[  -1] = ( y[  -1] - y[  -2] ) / ( dx )
-        #dydx[0   ] = dydx[1   ]
-        #dydx[  -1] = dydx[  -2]
-        #dydx[ 0] = 2.0 * dydx[ 1] - dydx[ 2]
-        #dydx[-1] = 2.0 * dydx[-2] - dydx[-3]
+        dydr = numpy.empty_like(y)
+        dydr[1:-1] = ( y[2:  ] - y[ :-2] ) / ( 2.0 * dr )
+        dydr[0   ] = ( y[1   ] - y[0   ] ) / ( dr )
+        dydr[  -1] = ( y[  -1] - y[  -2] ) / ( dr )
+        #dydr[0   ] = dydr[1   ]
+        #dydr[  -1] = dydr[  -2]
+        #dydr[ 0] = 2.0 * dydr[ 1] - dydr[ 2]
+        #dydr[-1] = 2.0 * dydr[-2] - dydr[-3]
 
-        d2ydx2 = numpy.empty_like(y)
-        d2ydx2[1:-1] = ( y[2:  ] - 2.0 * y[1:-1] + y[ :-2] ) / ( dx**2.0 )
-        d2ydx2[0   ] = 0.0
-        d2ydx2[  -1] = 0.0
-        #d2ydx2[0   ] = d2ydx2[1   ]
-        #d2ydx2[  -1] = d2ydx2[  -2]
-        #d2ydx2[ 0] = 2.0 * d2ydx2[ 1] - d2ydx2[ 2]
-        #d2ydx2[-1] = 2.0 * d2ydx2[-2] - d2ydx2[-3]
+        d2ydr2 = numpy.empty_like(y)
+        d2ydr2[1:-1] = ( y[2:  ] - 2.0 * y[1:-1] + y[ :-2] ) / ( dr**2.0 )
+        d2ydr2[0   ] = 0.0
+        d2ydr2[  -1] = 0.0
+        #d2ydr2[0   ] = d2ydr2[1   ]
+        #d2ydr2[  -1] = d2ydr2[  -2]
+        #d2ydr2[ 0] = 2.0 * d2ydr2[ 1] - d2ydr2[ 2]
+        #d2ydr2[-1] = 2.0 * d2ydr2[-2] - d2ydr2[-3]
 
-        rate = ( numpy.exp(-x) - 0.5 * numpy.exp(-2.0*x) ) * dydx + 0.5 * numpy.exp(-2.0*x) * d2ydx2
+        rate = ( 1.0/n - 0.5/n**2 ) * dydr + (0.5/n**2) * d2ydr2
 
         return rate
 
@@ -319,7 +319,7 @@ class CSTReactor(BatchReactor):
                 dr = r[1] - r[0]
                 w = numpy.ones_like(n)
                 w[0] = w[-1] = 0.5
-                fin = numpy.array(influx) / ( numpy.einsum('i,i,i->', w, concs, numpy.exp(2.0*r)) * dr )
+                fin = numpy.array(influx) / ( numpy.einsum('i,i,i->', w, n**2, concs) * dr )
         self.fin = fin
 
         self.fout = numpy.array(outflux)
