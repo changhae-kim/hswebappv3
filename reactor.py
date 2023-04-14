@@ -291,6 +291,8 @@ class BatchReactor():
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
+        self.solver = solver
+
         return solver.t, solver.y
 
 
@@ -408,5 +410,72 @@ class CSTReactor(BatchReactor):
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
+        self.solver = solver
+
         return solver.t, solver.y
+
+    def cointegrate( self, t=None, y=None, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, gtol=1e-6 ):
+
+        if t is None:
+            t = self.solver.t
+        if y is None:
+            y = self.solver.y
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if alpha is None:
+            alpha = self.alpha
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if rho_melt is None:
+            rho_melt = self.rho_melt
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+        if fin is None:
+            fin = self.fin
+        if fout is None:
+            fout = self.fout
+
+        dt = t[1:] - t[:-1]
+
+        g = numpy.empty_like(y)
+        gin = numpy.empty_like(y)
+        gout = numpy.empty_like(y)
+
+        for i, _ in enumerate(t):
+
+            alp = alpha
+            a1m = alpha1m
+
+            if alp is None:
+                if a1m is None:
+                    alp, a1m = self.get_part(n, y[:, i], rho_melt, H0, H1, gtol)
+                else:
+                    alp, _ = self.get_part(n, y[:, i], rho_melt, H0, H1, gtol)
+            elif a1m is None:
+                _, a1m = self.get_part(n, y[:, i], rho_melt, H0, H1, gtol)
+
+            rate = self.get_rate(n, y[:, i], a1m)
+
+            g[:, i] = rate
+            gin[:, i] = fin
+            gout[:, i] = fout[0] * alp * y[:, i] + fout[1] * a1m * y[:, i]
+
+        dG = 0.5 * (g[:, 1:] + g[:, :-1]) * dt
+        dGin = 0.5 * (gin[:, 1:] + gin[:, :-1]) * dt
+        dGout = 0.5 * (gout[:, 1:] + gout[:, :-1]) * dt
+
+        G = numpy.zeros_like(y)
+        Gin = numpy.zeros_like(y)
+        Gout = numpy.zeros_like(y)
+
+        G[:, 1:] = numpy.cumsum(dG, axis=1)
+        Gin[:, 1:] = numpy.cumsum(dGin, axis=1)
+        Gout[:, 1:] = numpy.cumsum(dGout, axis=1)
+
+        return G, Gin, Gout
 

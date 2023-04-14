@@ -21,6 +21,8 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     n1 = numpy.copy(reactor.n)
     a1 = numpy.copy(reactor.alpha1m0)
 
+    G1, Gin1, Gout1 = reactor.cointegrate()
+
     prune = 2
     nwin = 110
     fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
@@ -37,7 +39,25 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('examples_cstr_partition_discrete_io{:.0e}.png'.format(flux))
+    pyplot.savefig('examples_cstr_partition_discrete_io_{:.0e}.png'.format(flux))
+
+    prune = 2
+    nwin = 110
+    fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
+    ax1 = fig.subplots()
+    ax2 = ax1.twinx()
+    cmap = cm.viridis(t1/t1.max())
+    for i, _ in enumerate(t1):
+        if i % prune == 0:
+            ax1.plot(n1[:nwin], Gout1[:nwin, i], color=cmap[i])
+    ax1.set_xlabel('Chain Length')
+    ax1.set_ylabel('Chain Concentration')
+    ax1.set_xlim(0, nwin)
+    ax2.plot(n1, a1, 'k--')
+    ylim = ax2.get_ylim()
+    ax2.set_ylabel('Liquid-Phase Partition')
+    pyplot.tight_layout()
+    pyplot.savefig('examples_cstr_partition_discrete_io_o_{:.0e}.png'.format(flux))
 
 
 for flux in [0.001, 0.01, 0.1, 1.0]:
@@ -51,26 +71,45 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     tmax = 100.0
 
     reactor = CSTReactor(nmax=nmax, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
-    t1, y1 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-    n1 = numpy.copy(reactor.n)
-    a1 = numpy.copy(reactor.alpha1m0)
+    t2, y2 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
+    n2 = numpy.copy(reactor.n)
+    a2 = numpy.copy(reactor.alpha1m0)
+
+    G2, Gin2, Gout2 = reactor.cointegrate()
 
     prune = 2
     nwin = 110
     fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
     ax1 = fig.subplots()
     ax2 = ax1.twinx()
-    cmap = cm.viridis(t1/t1.max())
-    for i, _ in enumerate(t1):
+    cmap = cm.viridis(t2/t2.max())
+    for i, _ in enumerate(t2):
         if i % prune == 0:
-            ax1.plot(n1[:nwin], y1[:nwin, i], color=cmap[i])
+            ax1.plot(n2[:nwin], y2[:nwin, i], color=cmap[i])
     ax1.set_xlabel('Chain Length')
     ax1.set_ylabel('Chain Concentration')
     ax1.set_xlim(0, nwin)
-    ax2.plot(n1, a1, 'k--')
+    ax2.plot(n2, a2, 'k--')
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('examples_cstr_partition_discrete_o{:.0e}.png'.format(flux))
+    pyplot.savefig('examples_cstr_partition_discrete_o_{:.0e}.png'.format(flux))
 
+    prune = 2
+    nwin = 110
+    fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
+    ax1 = fig.subplots()
+    ax2 = ax1.twinx()
+    cmap = cm.viridis(t2/t2.max())
+    for i, _ in enumerate(t2):
+        if i % prune == 0:
+            ax1.plot(n2[:nwin], Gout2[:nwin, i], color=cmap[i])
+    ax1.set_xlabel('Chain Length')
+    ax1.set_ylabel('Chain Concentration')
+    ax1.set_xlim(0, nwin)
+    ax2.plot(n2, a2, 'k--')
+    ylim = ax2.get_ylim()
+    ax2.set_ylabel('Liquid-Phase Partition')
+    pyplot.tight_layout()
+    pyplot.savefig('examples_cstr_partition_discrete_o_o_{:.0e}.png'.format(flux))
 
