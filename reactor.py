@@ -14,15 +14,15 @@ class BatchReactor():
         if grid == 'discrete':
             self.n = numpy.arange(1, nmax+1, 1)
             self.get_melt = self.get_discrete_melt
-            self.get_rhs = self.get_discrete_rhs
+            self.get_rate = self.get_discrete_rate
         elif grid == 'continuum':
             self.n = numpy.linspace(1.0, nmax, mesh)
             self.get_melt = self.get_continuum_melt
-            self.get_rhs = self.get_continuum_rhs
+            self.get_rate = self.get_continuum_rate
         elif grid == 'log_n':
             self.n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
             self.get_melt = self.get_log_n_melt
-            self.get_rhs = self.get_log_n_rhs
+            self.get_rate = self.get_log_n_rate
 
         if rho is None:
             n = self.n
@@ -74,7 +74,7 @@ class BatchReactor():
         if H1 is None:
             H1 = self.H1
 
-        W = self.get_melt( n, rho, rho_melt, H0, H1, gtol=1e-6 )
+        W = self.get_melt(n, rho, rho_melt, H0, H1, gtol)
 
         alpha1m = 1.0 / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
 
@@ -170,16 +170,18 @@ class BatchReactor():
 
         return W
 
-    def get_rate( self, n=None, rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
+    def get_func( self, n=None, rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
 
         if alpha1m is None:
             alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
 
-        rate = self.get_rhs(n, rho, alpha1m)
+        rate = self.get_rate(n, rho, alpha1m)
 
-        return rate
+        func = rate
 
-    def get_discrete_rhs( self, n=None, rho=None, alpha1m=None ):
+        return func
+
+    def get_discrete_rate( self, n=None, rho=None, alpha1m=None ):
 
         if n is None:
             n = self.n
@@ -199,7 +201,7 @@ class BatchReactor():
 
         return rate
 
-    def get_continuum_rhs( self, n=None, rho=None, alpha1m=None ):
+    def get_continuum_rate( self, n=None, rho=None, alpha1m=None ):
 
         if n is None:
             n = self.n
@@ -233,7 +235,7 @@ class BatchReactor():
 
         return rate
 
-    def get_log_n_rhs( self, n=None, rho=None, alpha1m=None ):
+    def get_log_n_rate( self, n=None, rho=None, alpha1m=None ):
 
         if n is None:
             n = self.n
@@ -285,13 +287,13 @@ class BatchReactor():
             H1 = self.H1
 
         def fun( t, y ):
-            return self.get_rate(n, y, alpha1m, rho_melt, H0, H1, gtol)
+            return self.get_func(n, y, alpha1m, rho_melt, H0, H1, gtol)
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
         return solver.t, solver.y
 
-'''
+
 class CSTReactor(BatchReactor):
 
     def __init__( self, nmax=5, mesh=0, grid='discrete',
@@ -337,33 +339,34 @@ class CSTReactor(BatchReactor):
         if H1 is None:
             H1 = self.H1
 
-        W = self.get_melt( n, rho, rho_melt, H0, H1, gtol=1e-6 )
+        W = self.get_melt(n, rho, rho_melt, H0, H1, gtol)
 
         A = n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n
         alpha = 1.0 / ( 1.0 + 1.0 / A )
         alpha1m = 1.0 / ( 1.0 + A )
 
-        print(W)
-        print(alpha1m)
+        return alpha, alpha1m
 
-        return alpha1m
-
-    def get_rate( self, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, gtol=1e-6 ):
+    def get_func( self, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
-        if rho_melt is None:
-            rho_melt = self.rho_melt
         if alpha is None:
             alpha = self.alpha
         if alpha1m is None:
             alpha1m = self.alpha1m
+        if rho_melt is None:
+            rho_melt = self.rho_melt
         if H0 is None:
             H0 = self.H0
         if H1 is None:
             H1 = self.H1
+        if fin is None:
+            fin = self.fin
+        if fout is None:
+            fout = self.fout
 
         if alpha is None:
             if alpha1m is None:
@@ -373,7 +376,37 @@ class CSTReactor(BatchReactor):
         elif alpha1m is None:
             _, alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
 
-        rate = self.get_rhs(n, y, alpha1m) + fin - fout[0] * alpha * rho - fout[1] * alpha1m * rho
+        rate = self.get_rate(n, rho, alpha1m)
 
-        return rate
-'''
+        func = rate + fin - fout[0] * alpha * rho - fout[1] * alpha1m * rho
+
+        return func
+
+    def solve( self, t, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if alpha is None:
+            alpha = self.alpha
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if rho_melt is None:
+            rho_melt = self.rho_melt
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+        if fin is None:
+            fin = self.fin
+        if fout is None:
+            fout = self.fout
+
+        def fun( t, y ):
+            return self.get_func(n, y, alpha, alpha1m, rho_melt, H0, H1, fin, fout, gtol)
+
+        solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
+
+        return solver.t, solver.y
+
