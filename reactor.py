@@ -172,12 +172,27 @@ class BatchReactor():
 
         return W
 
-    def get_func( self, n=None, rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
+    def get_func( self, n=None, rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None, rand=None, gtol=1e-6 ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if rho_melt is None:
+            rho_melt = self.rho_melt
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+        if rand is None:
+            rand = self.rand
 
         if alpha1m is None:
             alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
 
-        rate = self.get_rate(n, rho, alpha1m)
+        rate = self.get_rate(n, rho, alpha1m, rand)
 
         func = rate
 
@@ -306,7 +321,7 @@ class BatchReactor():
 
         return rate
 
-    def solve( self, t, n=None, rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
+    def solve( self, t, n=None, rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -320,9 +335,11 @@ class BatchReactor():
             H0 = self.H0
         if H1 is None:
             H1 = self.H1
+        if rand is None:
+            rand = self.rand
 
         def fun( t, y ):
-            return self.get_func(n, y, alpha1m, rho_melt, H0, H1, gtol)
+            return self.get_func(n, y, alpha1m, rho_melt, H0, H1, rand, gtol)
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
@@ -365,8 +382,6 @@ class CSTReactor(BatchReactor):
 
         if n is None:
             n = self.n
-        if rho is None:
-            rho = self.rho
         if rho_melt is None:
             rho_melt = self.rho_melt
         if H0 is None:
@@ -382,7 +397,7 @@ class CSTReactor(BatchReactor):
 
         return alpha, alpha1m
 
-    def get_func( self, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, gtol=1e-6 ):
+    def get_func( self, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -402,6 +417,8 @@ class CSTReactor(BatchReactor):
             fin = self.fin
         if fout is None:
             fout = self.fout
+        if rand is None:
+            rand = self.rand
 
         if alpha is None:
             if alpha1m is None:
@@ -411,13 +428,13 @@ class CSTReactor(BatchReactor):
         elif alpha1m is None:
             _, alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
 
-        rate = self.get_rate(n, rho, alpha1m)
+        rate = self.get_rate(n, rho, alpha1m, rand)
 
         func = rate + fin - fout[0] * alpha * rho - fout[1] * alpha1m * rho
 
         return func
 
-    def solve( self, t, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
+    def solve( self, t, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -437,9 +454,11 @@ class CSTReactor(BatchReactor):
             fin = self.fin
         if fout is None:
             fout = self.fout
+        if rand is None:
+            rand = self.rand
 
         def fun( t, y ):
-            return self.get_func(n, y, alpha, alpha1m, rho_melt, H0, H1, fin, fout, gtol)
+            return self.get_func(n, y, alpha, alpha1m, rho_melt, H0, H1, fin, fout, rand, gtol)
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
@@ -447,7 +466,7 @@ class CSTReactor(BatchReactor):
 
         return solver.t, solver.y
 
-    def cointegrate( self, t=None, y=None, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, gtol=1e-6 ):
+    def cointegrate( self, t=None, y=None, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
 
         if t is None:
             t = self.solver.t
@@ -472,6 +491,8 @@ class CSTReactor(BatchReactor):
             fin = self.fin
         if fout is None:
             fout = self.fout
+        if rand is None:
+            rand = self.rand
 
         dt = t[1:] - t[:-1]
 
