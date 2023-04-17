@@ -15,7 +15,7 @@ print('We enter the temperature in K, the headspace volume in L, the melt mass i
 print('Then, the code computes the nondimensional Henry\'s constants and the phase partition coefficients.')
 print('The concentrations can be entered in arbitrary units.')
 print('Then, the code normalizes them to the total number of monomer units.')
-print('See lines 20-29 of \'examples_batch.py\' script.')
+print('See lines 20-29 of \'examples_batch_chainend.py\' script.')
 
 nmax = 110
 grid = 'discrete'
@@ -54,7 +54,7 @@ print('The discrete equations can be invoked by passing grid=\'discrete\' to the
 print('This example also demonstrates the use of nondimensional input.')
 print('We provide the normalized concentrations and the phase partition coefficients.')
 print('Then, the code no longer needs the temperature, volume, melt mass, and monomer mass.')
-print('See lines 59-69 of \'examples_batch.py\' script.')
+print('See lines 59-69 of \'examples_batch_chainend.py\' script.')
 
 nmax = 110
 grid = 'discrete'
@@ -95,7 +95,7 @@ print('This example also demonstrates the use of partial nondimensional input.')
 print('We provide the normalized concentrations,')
 print('but we enter the temperature in K, the headspace volume in L, the melt mass in g, and the monomer mass in g/mol.')
 print('Then, the code computes the nondimensional Henry\'s constants and the phase partition coefficients.')
-print('See lines 100-114 of \'examples_batch.py\' script.')
+print('See lines 100-114 of \'examples_batch_chainend.py\' script.')
 
 nmax = 110.0
 mesh = 500
@@ -140,7 +140,7 @@ print('This example also demonstrates the use of partial nondimensional input.')
 print('We provide the phase partition coefficients,')
 print('but we enter the concentrations in arbitrary units.')
 print('Then, the code normalizes them to the total number of monomer units.')
-print('See lines 145-155 of \'examples_batch.py\' script.')
+print('See lines 145-155 of \'examples_batch_chainend.py\' script.')
 
 nmax = 110.0
 mesh = 500
@@ -183,7 +183,7 @@ print('Then, the code computes the nondimensional Henry\'s constants and the pha
 print('The concentrations can be entered in arbitrary units.')
 print('Then, the code normalizes them to the total number of monomer units.')
 print('For reference, we also solve the discrete equations.')
-print('See lines 188-210 of \'examples_batch.py\' script.')
+print('See lines 188-210 of \'examples_batch_chainend.py\' script.')
 
 nmax = 10.0**2.10
 mesh = 500
@@ -259,7 +259,7 @@ print('We provide the phase partition coefficients,')
 print('but we enter the concentrations in arbitrary units.')
 print('Then, the code normalizes them to the total number of monomer units.')
 print('For reference, we also solve the discrete equations.')
-print('See lines 264-286 of \'examples_batch.py\' script.')
+print('See lines 264-286 of \'examples_batch_chainend.py\' script.')
 
 nmax = 10.0**2.10
 mesh = 500
