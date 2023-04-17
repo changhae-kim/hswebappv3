@@ -44,7 +44,7 @@ ax2.plot(n1, a1, 'k--')
 ylim = ax2.get_ylim()
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('examples_batch_partition_discrete.png')
+pyplot.savefig('examples_batch_chainend_partition_discrete.png')
 
 
 print()
@@ -84,7 +84,7 @@ ax2.plot(n2, a2, 'k--')
 ax2.set_ylim(ylim)
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('examples_batch_nopartition_discrete.png')
+pyplot.savefig('examples_batch_chainend_nopartition_discrete.png')
 
 
 print()
@@ -129,7 +129,7 @@ ax2.plot(n3, a3, 'k--')
 ylim = ax2.get_ylim()
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('examples_batch_partition_continuum.png')
+pyplot.savefig('examples_batch_chainend_partition_continuum.png')
 
 
 print()
@@ -170,7 +170,7 @@ ax2.plot(n4, a4, 'k--')
 ax2.set_ylim(ylim)
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('examples_batch_nopartition_continuum.png')
+pyplot.savefig('examples_batch_chainend_nopartition_continuum.png')
 
 
 print()
@@ -227,7 +227,7 @@ ax2.set_xscale('log')
 ylim = ax2.get_ylim()
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('examples_batch_partition_log_n.png')
+pyplot.savefig('examples_batch_chainend_partition_log_n.png')
 
 prune = 2
 nwin = 10.0**2.10
@@ -247,7 +247,7 @@ ax2.set_xscale('log')
 ylim = ax2.get_ylim()
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('examples_batch_partition_log_n_compare.png')
+pyplot.savefig('examples_batch_chainend_partition_log_n_compare.png')
 
 
 print()
@@ -303,7 +303,7 @@ ax2.set_xscale('log')
 ax2.set_ylim(ylim)
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('examples_batch_nopartition_log_n.png')
+pyplot.savefig('examples_batch_chainend_nopartition_log_n.png')
 
 prune = 2
 nwin = 10.0**2.10
@@ -323,7 +323,7 @@ ax2.set_xscale('log')
 ax2.set_ylim(ylim)
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('examples_batch_nopartition_log_n_compare.png')
+pyplot.savefig('examples_batch_chainend_nopartition_log_n_compare.png')
 
 
 print()
