@@ -8,7 +8,7 @@ from reactor import BatchReactor
 
 print()
 print('Examples of Batch Reactor with Random Scission')
-print('These examples are the same as the examples in \'examples_batch_chainend.py\',')
+print('These examples are the same as the examples in \'examples_batch.py\',')
 print('except that they use random scission instead of chain-end scission.')
 print('You can tune the ratio of chain-end scission to random scission by passing different values of rand to the BatchReactor class.')
 print('Here, we use rand=1.0 which corresponds to 100\% random scission.')
