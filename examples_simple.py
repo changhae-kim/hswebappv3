@@ -15,7 +15,7 @@ print('For an example with liquid-phase mass fractions as the starting point,')
 print('imagine a melt where each of the 11 species have a mass fraction of 0.01.')
 print('Indeed, the liquid-phase mass fractions should add to w < 1,')
 print('since a lot of the melt should be long hydrocarbons that do not vaporize.')
-print('See lines 23-32 of \'examples_simple.py\' script.')
+print('See lines 20-29 of \'examples_simple.py\' script.')
 
 T = 473.15
 P = 1.0
@@ -65,6 +65,7 @@ ax2.tick_params(axis='y', labelcolor=color)
 pyplot.title('Gas-Phase Mole Fractions to Liquid-Phase Mass Fractions')
 pyplot.tight_layout()
 pyplot.savefig('examples_simple_y1w1.png')
+pyplot.close()
 
 fig = pyplot.figure(figsize=(9.6, 4.8), dpi=150)
 ax1 = fig.subplots()
@@ -81,6 +82,7 @@ ax2.tick_params(axis='y', labelcolor=color)
 pyplot.title('Liquid-Phase Mass Fractions to Gas-Phase Mole Fractions')
 pyplot.tight_layout()
 pyplot.savefig('examples_simple_y2w2.png')
+pyplot.close()
 
 
 print()
@@ -90,7 +92,7 @@ print('suppose that the mole fractions in the gas phase exhibit a Poisson distri
 print('For an example with liquid-phase mass fractions as the starting point,')
 print('suppose that the mass fractions in the liquid phase exhibit a Gaussian distribution in the molar masses (mu = 30*14.0266, sigma = 10*14.266).')
 print('We normalize so that the mass fractions of the volatiles species in the liquid phase add to 0.11.')
-print('See lines 98-111 of \'examples_simple.py\' script.')
+print('See lines 97-110 of \'examples_simple.py\' script.')
 
 T = 473.15
 P = 1.0
@@ -144,6 +146,7 @@ ax2.tick_params(axis='y', labelcolor=color)
 pyplot.title('Gas-Phase Mole Fractions to Liquid-Phase Mass Fractions')
 pyplot.tight_layout()
 pyplot.savefig('examples_simple_y3w3.png')
+pyplot.close()
 
 fig = pyplot.figure(figsize=(9.6, 4.8), dpi=150)
 ax1 = fig.subplots()
@@ -160,4 +163,5 @@ ax2.tick_params(axis='y', labelcolor=color)
 pyplot.title('Liquid-Phase Mass Fractions to Gas-Phase Mole Fractions')
 pyplot.tight_layout()
 pyplot.savefig('examples_simple_y4w4.png')
+pyplot.close()
 
