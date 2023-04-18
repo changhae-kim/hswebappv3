@@ -23,7 +23,7 @@ print('We enter the temperature in K, the headspace volume in L, the melt mass i
 print('Then, the code computes the nondimensional Henry\'s constants and the phase partition coefficients.')
 print('The concentrations can be entered in arbitrary units.')
 print('Then, the code normalizes them to the total number of monomer units.')
-print('See lines 28-37 of \'examples_batch_random.py\' script.')
+print('See lines 28-38 of \'examples_batch_random.py\' script.')
 
 nmax = 110
 grid = 'discrete'
@@ -32,9 +32,10 @@ concs = numpy.exp(-0.5*((n-100.0)/(2.0))**2)
 tmax = 0.1
 
 reactor = BatchReactor(nmax=nmax, grid=grid, concs=concs, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=1.0)
-t1, y1 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-n1 = numpy.copy(reactor.n)
-a1 = numpy.copy(reactor.alpha1m0)
+n1 = reactor.n
+a1 = reactor.alpha1m0
+#t1, y1 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
+t1, y1 = reactor.solve(tmax, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
 prune = 1
 nwin = 110
@@ -53,6 +54,7 @@ ylim = ax2.get_ylim()
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_random_partition_discrete.png')
+pyplot.close()
 
 
 print()
@@ -62,7 +64,7 @@ print('The discrete equations can be invoked by passing grid=\'discrete\' to the
 print('This example also demonstrates the use of nondimensional input.')
 print('We provide the normalized concentrations and the phase partition coefficients.')
 print('Then, the code no longer needs the temperature, volume, melt mass, and monomer mass.')
-print('See lines 67-77 of \'examples_batch_random.py\' script.')
+print('See lines 69-79 of \'examples_batch_random.py\' script.')
 
 nmax = 110
 grid = 'discrete'
@@ -72,9 +74,9 @@ rho = concs / numpy.inner(n, concs)
 tmax = 0.1
 
 reactor = BatchReactor(nmax=nmax, grid=grid, rho=rho, alpha1m=numpy.ones(nmax), rand=1.0)
+n2 = reactor.n
+a2 = reactor.alpha1m0
 t2, y2 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-n2 = numpy.copy(reactor.n)
-a2 = numpy.copy(reactor.alpha1m0)
 
 prune = 1
 nwin = 110
@@ -93,6 +95,7 @@ ax2.set_ylim(ylim)
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_random_nopartition_discrete.png')
+pyplot.close()
 
 
 print()
@@ -103,7 +106,7 @@ print('This example also demonstrates the use of partial nondimensional input.')
 print('We provide the normalized concentrations,')
 print('but we enter the temperature in K, the headspace volume in L, the melt mass in g, and the monomer mass in g/mol.')
 print('Then, the code computes the nondimensional Henry\'s constants and the phase partition coefficients.')
-print('See lines 108-122 of \'examples_batch_random.py\' script.')
+print('See lines 111-126 of \'examples_batch_random.py\' script.')
 
 nmax = 110.0
 mesh = 500
@@ -117,9 +120,10 @@ rho = ( concs ) / ( numpy.einsum('i,i,i->', w, n, concs) * dn )
 tmax = 0.1
 
 reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, rho=rho, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=1.0)
-t3, y3 = reactor.solve(tmax, gtol=1e-9, rtol=1e-9, atol=1e-9)
-n3 = numpy.copy(reactor.n)
-a3 = numpy.copy(reactor.alpha1m0)
+n3 = reactor.n
+a3 = reactor.alpha1m0
+#t3, y3 = reactor.solve(tmax, gtol=1e-9, rtol=1e-9, atol=1e-9)
+t3, y3 = reactor.solve(tmax, alpha1m=reactor.alpha1m0, gtol=1e-9, rtol=1e-9, atol=1e-9)
 
 prune = 2
 nwin = 110.0
@@ -138,6 +142,7 @@ ylim = ax2.get_ylim()
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_random_partition_continuum.png')
+pyplot.close()
 
 
 print()
@@ -148,7 +153,7 @@ print('This example also demonstrates the use of partial nondimensional input.')
 print('We provide the phase partition coefficients,')
 print('but we enter the concentrations in arbitrary units.')
 print('Then, the code normalizes them to the total number of monomer units.')
-print('See lines 153-163 of \'examples_batch_random.py\' script.')
+print('See lines 158-168 of \'examples_batch_random.py\' script.')
 
 nmax = 110.0
 mesh = 500
@@ -158,9 +163,9 @@ concs = numpy.exp(-0.5*((n-100.0)/(2.0))**2)
 tmax = 0.1
 
 reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, alpha1m=numpy.ones(mesh), rand=1.0)
+n4 = reactor.n
+a4 = reactor.alpha1m0
 t4, y4 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-n4 = numpy.copy(reactor.n)
-a4 = numpy.copy(reactor.alpha1m0)
 
 prune = 1
 nwin = 110.0
@@ -179,6 +184,7 @@ ax2.set_ylim(ylim)
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_random_nopartition_continuum.png')
+pyplot.close()
 
 
 print()
@@ -191,7 +197,7 @@ print('Then, the code computes the nondimensional Henry\'s constants and the pha
 print('The concentrations can be entered in arbitrary units.')
 print('Then, the code normalizes them to the total number of monomer units.')
 print('For reference, we also solve the discrete equations.')
-print('See lines 196-218 of \'examples_batch_random.py\' script.')
+print('See lines 202-226 of \'examples_batch_random.py\' script.')
 
 nmax = 10.0**2.10
 mesh = 500
@@ -201,9 +207,10 @@ concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))*
 tmax = 0.1
 
 reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=1.0)
-t5, y5 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-n5 = numpy.copy(reactor.n)
-a5 = numpy.copy(reactor.alpha1m0)
+n5 = reactor.n
+a5 = reactor.alpha1m0
+#t5, y5 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
+t5, y5 = reactor.solve(tmax, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
 nmax = int(10.0**2.10)+1
 mesh = 0
@@ -213,9 +220,10 @@ concs = (1.0/n) * numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.lo
 tmax = 0.1
 
 reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=1.0)
-t6, y6 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-n6 = numpy.copy(reactor.n)
-a6 = numpy.copy(reactor.alpha1m0)
+n6 = reactor.n
+a6 = reactor.alpha1m0
+#t6, y6 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
+t6, y6 = reactor.solve(tmax, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
 prune = 1
 nwin = 10.0**2.10
@@ -236,6 +244,7 @@ ylim = ax2.get_ylim()
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_random_partition_log_n.png')
+pyplot.close()
 
 prune = 1
 nwin = 10.0**2.10
@@ -256,6 +265,7 @@ ylim = ax2.get_ylim()
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_random_partition_log_n_compare.png')
+pyplot.close()
 
 
 print()
@@ -267,7 +277,7 @@ print('We provide the phase partition coefficients,')
 print('but we enter the concentrations in arbitrary units.')
 print('Then, the code normalizes them to the total number of monomer units.')
 print('For reference, we also solve the discrete equations.')
-print('See lines 272-294 of \'examples_batch_random.py\' script.')
+print('See lines 282-304 of \'examples_batch_random.py\' script.')
 
 nmax = 10.0**2.10
 mesh = 500
@@ -277,9 +287,9 @@ concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))*
 tmax = 0.1
 
 reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, alpha1m=numpy.ones(mesh), rand=1.0)
+n7 = reactor.n
+a7 = reactor.alpha1m0
 t7, y7 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-n7 = numpy.copy(reactor.n)
-a7 = numpy.copy(reactor.alpha1m0)
 
 nmax = int(10.0**2.10)+1
 mesh = 0
@@ -289,9 +299,9 @@ concs = (1.0/n) * numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.lo
 tmax = 0.1
 
 reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, alpha1m=numpy.ones(nmax), rand=1.0)
+n8 = reactor.n
+a8 = reactor.alpha1m0
 t8, y8 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-n8 = numpy.copy(reactor.n)
-a8 = numpy.copy(reactor.alpha1m0)
 
 prune = 1
 nwin = 10.0**2.10
@@ -312,6 +322,7 @@ ax2.set_ylim(ylim)
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_random_nopartition_log_n.png')
+pyplot.close()
 
 prune = 1
 nwin = 10.0**2.10
@@ -332,6 +343,7 @@ ax2.set_ylim(ylim)
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
 pyplot.savefig('examples_batch_random_nopartition_log_n_compare.png')
+pyplot.close()
 
 
 print()
