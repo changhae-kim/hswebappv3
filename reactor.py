@@ -359,6 +359,13 @@ class CSTReactor(BatchReactor):
 
         self.alpha = alpha
 
+        if alpha is None:
+            n = self.n
+            H0 = self.H0
+            H1 = self.H1
+            alpha = 1.0 / ( 1.0 + 1.0 / ( n * H0 * H1**n ) )
+        self.alpha0 = alpha
+
         if fin is None:
             n = self.n
             if grid == 'discrete':
