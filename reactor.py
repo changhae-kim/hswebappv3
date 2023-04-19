@@ -270,6 +270,8 @@ class BatchReactor():
             g = y
             iy[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dn
             iy[-1    ] = 0.0
+            #iy[-1    ] = iy[-2]
+            #iy[-1    ] = 2.0 * iy[-2] - iy[-3]
 
         rate = ( 1.0 - rand ) * ( dydn + 0.5 * d2ydn2 ) + ( rand ) * ( 2.0 * iy - n * y )
 
@@ -316,6 +318,8 @@ class BatchReactor():
             g = n * y
             iy[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dr
             iy[-1    ] = 0.0
+            #iy[-1    ] = iy[-2]
+            #iy[-1    ] = 2.0 * iy[-2] - iy[-3]
 
         rate = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/n**2 ) * dydr + (0.5/n**2) * d2ydr2 ) + ( rand ) * ( 2.0 * iy - n * y )
 
