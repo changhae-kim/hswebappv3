@@ -222,12 +222,7 @@ class BatchReactor():
             sy[-2::-1] = numpy.cumsum(y[:0:-1])
             sy[-1    ] = 0.0
 
-        y2 = numpy.zeros_like(y)
-        if rand != 0.0:
-            y2[         :len(y)//2] = y[1::2]
-            y2[len(y)//2:         ] = 0.0
-
-        rate = ( 1.0 - rand ) * ( dy ) + ( rand ) * ( 2.0 * sy - y2 - ( n - 1.0 ) * y )
+        rate = ( 1.0 - rand ) * ( dy ) + ( rand ) * ( 2.0 * sy - ( n - 1.0 ) * y )
 
         return rate
 
