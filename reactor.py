@@ -209,20 +209,20 @@ class BatchReactor():
         if rand is None:
             rand = self.rand
 
-        y = alpha1m * rho
+        f = alpha1m * rho
 
-        dy = numpy.zeros_like(y)
+        df = numpy.zeros_like(f)
         if rand != 1.0:
-            dy[1:-1] = y[2:] - y[1:-1]
-            dy[0   ] = y[1 ] - y[0   ]
-            dy[  -1] =       - y[  -1]
+            df[1:-1] = f[2:] - f[1:-1]
+            df[0   ] = f[1 ] - f[0   ]
+            df[  -1] =       - f[  -1]
 
-        sy = numpy.zeros_like(y)
+        sf = numpy.zeros_like(f)
         if rand != 0.0:
-            sy[-2::-1] = numpy.cumsum(y[:0:-1])
-            sy[-1    ] = 0.0
+            sf[-2::-1] = numpy.cumsum(f[:0:-1])
+            sf[-1    ] = 0.0
 
-        rate = ( 1.0 - rand ) * ( dy ) + ( rand ) * ( 2.0 * sy - ( n - 1.0 ) * y )
+        rate = ( 1.0 - rand ) * ( df ) + ( rand ) * ( 2.0 * sf - ( n - 1.0 ) * f )
 
         return rate
 
@@ -237,38 +237,38 @@ class BatchReactor():
         if rand is None:
             rand = self.rand
 
-        y = alpha1m * rho
+        f = alpha1m * rho
         dn = n[1] - n[0]
 
-        dydn = numpy.zeros_like(y)
+        dfdn = numpy.zeros_like(f)
         if rand != 1.0:
-            dydn[1:-1] = ( y[2:  ] - y[ :-2] ) / ( 2.0 * dn )
-            #dydn[0   ] = ( y[1   ] - y[0   ] ) / ( dn )
-            #dydn[  -1] = ( y[  -1] - y[  -2] ) / ( dn )
-            dydn[0   ] = dydn[1   ]
-            dydn[  -1] = dydn[  -2]
-            #dydn[ 0] = 2.0 * dydn[ 1] - dydn[ 2]
-            #dydn[-1] = 2.0 * dydn[-2] - dydn[-3]
+            dfdn[1:-1] = ( f[2:  ] - f[ :-2] ) / ( 2.0 * dn )
+            #dfdn[0   ] = ( f[1   ] - f[0   ] ) / ( dn )
+            #dfdn[  -1] = ( f[  -1] - f[  -2] ) / ( dn )
+            dfdn[0   ] = dfdn[1   ]
+            dfdn[  -1] = dfdn[  -2]
+            #dfdn[ 0] = 2.0 * dfdn[ 1] - dfdn[ 2]
+            #dfdn[-1] = 2.0 * dfdn[-2] - dfdn[-3]
 
-        d2ydn2 = numpy.zeros_like(y)
+        d2fdn2 = numpy.zeros_like(f)
         if rand != 1.0:
-            d2ydn2[1:-1] = ( y[2:  ] - 2.0 * y[1:-1] + y[ :-2] ) / ( dn**2.0 )
-            #d2ydn2[0   ] = 0.0
-            #d2ydn2[  -1] = 0.0
-            d2ydn2[0   ] = d2ydn2[1   ]
-            d2ydn2[  -1] = d2ydn2[  -2]
-            #d2ydn2[ 0] = 2.0 * d2ydn2[ 1] - d2ydn2[ 2]
-            #d2ydn2[-1] = 2.0 * d2ydn2[-2] - d2ydn2[-3]
+            d2fdn2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dn**2.0 )
+            #d2fdn2[0   ] = 0.0
+            #d2fdn2[  -1] = 0.0
+            d2fdn2[0   ] = d2fdn2[1   ]
+            d2fdn2[  -1] = d2fdn2[  -2]
+            #d2fdn2[ 0] = 2.0 * d2fdn2[ 1] - d2fdn2[ 2]
+            #d2fdn2[-1] = 2.0 * d2fdn2[-2] - d2fdn2[-3]
 
-        iy = numpy.zeros_like(y)
+        sf = numpy.zeros_like(f)
         if rand != 0.0:
-            g = y
-            iy[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dn
-            iy[-1    ] = 0.0
-            #iy[-1    ] = iy[-2]
-            #iy[-1    ] = 2.0 * iy[-2] - iy[-3]
+            g = f
+            sf[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dn
+            sf[-1    ] = 0.0
+            #sf[-1    ] = sf[-2]
+            #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
 
-        rate = ( 1.0 - rand ) * ( dydn + 0.5 * d2ydn2 ) + ( rand ) * ( 2.0 * iy - n * y )
+        rate = ( 1.0 - rand ) * ( dfdn + 0.5 * d2fdn2 ) + ( rand ) * ( 2.0 * sf - n * f )
 
         return rate
 
@@ -283,40 +283,40 @@ class BatchReactor():
         if rand is None:
             rand = self.rand
 
-        y = alpha1m * rho
+        f = alpha1m * rho
 
         r = numpy.log(n)
         dr = r[1] - r[0]
 
-        dydr = numpy.zeros_like(y)
+        dfdr = numpy.zeros_like(f)
         if rand != 1.0:
-            dydr[1:-1] = ( y[2:  ] - y[ :-2] ) / ( 2.0 * dr )
-            dydr[0   ] = ( y[1   ] - y[0   ] ) / ( dr )
-            dydr[  -1] = ( y[  -1] - y[  -2] ) / ( dr )
-            #dydr[0   ] = dydr[1   ]
-            #dydr[  -1] = dydr[  -2]
-            #dydr[ 0] = 2.0 * dydr[ 1] - dydr[ 2]
-            #dydr[-1] = 2.0 * dydr[-2] - dydr[-3]
+            dfdr[1:-1] = ( f[2:  ] - f[ :-2] ) / ( 2.0 * dr )
+            dfdr[0   ] = ( f[1   ] - f[0   ] ) / ( dr )
+            dfdr[  -1] = ( f[  -1] - f[  -2] ) / ( dr )
+            #dfdr[0   ] = dfdr[1   ]
+            #dfdr[  -1] = dfdr[  -2]
+            #dfdr[ 0] = 2.0 * dfdr[ 1] - dfdr[ 2]
+            #dfdr[-1] = 2.0 * dfdr[-2] - dfdr[-3]
 
-        d2ydr2 = numpy.zeros_like(y)
+        d2fdr2 = numpy.zeros_like(f)
         if rand != 1.0:
-            d2ydr2[1:-1] = ( y[2:  ] - 2.0 * y[1:-1] + y[ :-2] ) / ( dr**2.0 )
-            d2ydr2[0   ] = 0.0
-            d2ydr2[  -1] = 0.0
-            #d2ydr2[0   ] = d2ydr2[1   ]
-            #d2ydr2[  -1] = d2ydr2[  -2]
-            #d2ydr2[ 0] = 2.0 * d2ydr2[ 1] - d2ydr2[ 2]
-            #d2ydr2[-1] = 2.0 * d2ydr2[-2] - d2ydr2[-3]
+            d2fdr2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dr**2.0 )
+            d2fdr2[0   ] = 0.0
+            d2fdr2[  -1] = 0.0
+            #d2fdr2[0   ] = d2fdr2[1   ]
+            #d2fdr2[  -1] = d2fdr2[  -2]
+            #d2fdr2[ 0] = 2.0 * d2fdr2[ 1] - d2fdr2[ 2]
+            #d2fdr2[-1] = 2.0 * d2fdr2[-2] - d2fdr2[-3]
 
-        iy = numpy.zeros_like(y)
+        sf = numpy.zeros_like(f)
         if rand != 0.0:
-            g = n * y
-            iy[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dr
-            iy[-1    ] = 0.0
-            #iy[-1    ] = iy[-2]
-            #iy[-1    ] = 2.0 * iy[-2] - iy[-3]
+            g = n * f
+            sf[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dr
+            sf[-1    ] = 0.0
+            #sf[-1    ] = sf[-2]
+            #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
 
-        rate = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/n**2 ) * dydr + (0.5/n**2) * d2ydr2 ) + ( rand ) * ( 2.0 * iy - n * y )
+        rate = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/n**2 ) * dfdr + (0.5/n**2) * d2fdr2 ) + ( rand ) * ( 2.0 * sf - n * f )
 
         return rate
 
