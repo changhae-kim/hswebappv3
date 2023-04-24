@@ -59,6 +59,8 @@ class BatchReactor():
 
         self.rand = rand
 
+        self.solver = None
+
         return
 
     def get_part( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
@@ -345,6 +347,48 @@ class BatchReactor():
         self.solver = solver
 
         return solver.t, solver.y
+
+    def preprocess( self, x, y, yscale, mass=10.0, monomer=14.027 ):
+
+        if yscale == 'dwdn':
+            n = x
+            rho = y.T / n
+        elif yscale == 'dwdlogn':
+            n = numpy.exp(x)
+            rho = y.T / n**2
+        elif yscale == 'dWdM':
+            n = x / monomer
+            rho = y.T / n * monomer / mass
+        elif yscale == 'dWdlogM':
+            n = numpy.exp(x) / monomer
+            rho = y.T / n**2 / mass
+
+        return n, rho.T
+
+    def postprocess( self, yscale, n=None, rho=None, mass=10.0, monomer=14.027 ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            if self.solver is None:
+                rho = self.rho
+            else:
+                rho = self.solver.y
+
+        if yscale == 'dwdn':
+            x = n
+            y = n * rho.T
+        elif yscale == 'dwdlogn':
+            x = numpy.log(n)
+            y = n**2 * rho.T
+        elif yscale == 'dWdM':
+            x = monomer * n
+            y = mass / monomer * n * rho.T
+        elif yscale == 'dWdlogM':
+            x = numpy.log( monomer * n )
+            y = mass * n**2 * rho.T
+
+        return x, y.T
 
 
 class CSTReactor(BatchReactor):
