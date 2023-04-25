@@ -1,8 +1,10 @@
 import numpy
+import sys
 
 from matplotlib import cm, pyplot
 pyplot.rcParams.update({'font.size': 14})
 
+sys.path.append('..')
 from reactor import CSTReactor
 
 
