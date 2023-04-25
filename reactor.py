@@ -354,13 +354,13 @@ class BatchReactor():
             n = x
             rho = y.T / n
         elif yscale == 'dwdlogn':
-            n = numpy.exp(x)
+            n = x
             rho = y.T / n**2
         elif yscale == 'dWdM':
             n = x / monomer
             rho = y.T / n * monomer / mass
         elif yscale == 'dWdlogM':
-            n = numpy.exp(x) / monomer
+            n = x / monomer
             rho = y.T / n**2 / mass
 
         return n, rho.T
@@ -379,13 +379,13 @@ class BatchReactor():
             x = n
             y = n * rho.T
         elif yscale == 'dwdlogn':
-            x = numpy.log(n)
+            x = n
             y = n**2 * rho.T
         elif yscale == 'dWdM':
             x = monomer * n
             y = mass / monomer * n * rho.T
         elif yscale == 'dWdlogM':
-            x = numpy.log( monomer * n )
+            x = monomer * n
             y = mass * n**2 * rho.T
 
         return x, y.T
