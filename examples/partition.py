@@ -9,7 +9,7 @@ print()
 print('Phase Partition Coefficients')
 print('We compute the gas-phase and liquid-phase partition coefficients inside a reactor of a given volume.')
 print('For now, we assume that the reactor contains a small amount of reagents.')
-print('See lines 14-22 of \'examples_partition.py\' script.')
+print('See lines 14-22 of \'partition.py\' script.')
 
 T = 473.15
 P = 1.0

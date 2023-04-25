@@ -69,7 +69,7 @@ ax2.set_xlabel('Random Scission Time', color=color)
 ax2.tick_params(axis='x', labelcolor=color)
 ax1.set_ylabel('C$_{' + '{:.0f}'.format(nc) + '}$ Chain Concentration')
 pyplot.tight_layout()
-pyplot.savefig('examples_scission_continuum_c{:.0f}.png'.format(nc))
+pyplot.savefig('scission_continuum_c{:.0f}.png'.format(nc))
 pyplot.close()
 
 
@@ -117,6 +117,6 @@ ax2.set_xlabel('Random Scission Time', color=color)
 ax2.tick_params(axis='x', labelcolor=color)
 ax1.set_ylabel('C$_{' + '{:.0f}'.format(nc) + '}$ Chain Concentration')
 pyplot.tight_layout()
-pyplot.savefig('examples_scission_log_n_c{:.0f}.png'.format(nc))
+pyplot.savefig('scission_log_n_c{:.0f}.png'.format(nc))
 pyplot.close()
 

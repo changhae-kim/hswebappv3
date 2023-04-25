@@ -42,7 +42,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('examples_cstr_partition_discrete_io_{:.0e}.png'.format(flux))
+    pyplot.savefig('cstr_partition_discrete_io_{:.0e}.png'.format(flux))
     pyplot.close()
 
     prune = 2
@@ -61,7 +61,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('examples_cstr_partition_discrete_io_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('cstr_partition_discrete_io_o_{:.0e}.png'.format(flux))
     pyplot.close()
 
 
@@ -99,7 +99,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('examples_cstr_partition_discrete_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('cstr_partition_discrete_o_{:.0e}.png'.format(flux))
     pyplot.close()
 
     prune = 2
@@ -118,7 +118,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('examples_cstr_partition_discrete_o_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('cstr_partition_discrete_o_o_{:.0e}.png'.format(flux))
     pyplot.close()
 
 
@@ -157,7 +157,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('examples_cstr_partition_continuum_io_{:.0e}.png'.format(flux))
+    pyplot.savefig('cstr_partition_continuum_io_{:.0e}.png'.format(flux))
     pyplot.close()
 
     prune = 2
@@ -176,7 +176,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('examples_cstr_partition_continuum_io_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('cstr_partition_continuum_io_o_{:.0e}.png'.format(flux))
     pyplot.close()
 
 
@@ -215,7 +215,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('examples_cstr_partition_continuum_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('cstr_partition_continuum_o_{:.0e}.png'.format(flux))
     pyplot.close()
 
     prune = 2
@@ -234,6 +234,6 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('examples_cstr_partition_continuum_o_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('cstr_partition_continuum_o_o_{:.0e}.png'.format(flux))
     pyplot.close()
 
