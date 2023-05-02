@@ -78,9 +78,11 @@ class BatchReactor():
 
         W = self.get_melt(n, rho, rho_melt, H0, H1, gtol)
 
-        alpha1m = 1.0 / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
+        A = n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n
+        alpha = 1.0 / ( 1.0 + 1.0 / A )
+        alpha1m = 1.0 / ( 1.0 + A )
 
-        return alpha1m
+        return alpha, alpha1m
 
     def get_discrete_melt( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
 
@@ -192,7 +194,7 @@ class BatchReactor():
             rand = self.rand
 
         if alpha1m is None:
-            alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
+            _, alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
 
         rate = self.get_rate(n, rho, alpha1m, rand)
 
@@ -380,13 +382,13 @@ class BatchReactor():
             y = n * rho.T
         elif yscale == 'dwdlogn':
             x = n
-            y = n**2 * rho.T
+            y = n**2 * rho.T * numpy.log(10.0)
         elif yscale == 'dWdM':
             x = monomer * n
             y = mass / monomer * n * rho.T
         elif yscale == 'dWdlogM':
             x = monomer * n
-            y = mass * n**2 * rho.T
+            y = mass * n**2 * rho.T * numpy.log(10.0)
 
         return x, y.T
 
@@ -427,25 +429,6 @@ class CSTReactor(BatchReactor):
         self.fout = numpy.array(outflux)
 
         return
-
-    def get_part( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
-
-        if n is None:
-            n = self.n
-        if rho_melt is None:
-            rho_melt = self.rho_melt
-        if H0 is None:
-            H0 = self.H0
-        if H1 is None:
-            H1 = self.H1
-
-        W = self.get_melt(n, rho, rho_melt, H0, H1, gtol)
-
-        A = n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n
-        alpha = 1.0 / ( 1.0 + 1.0 / A )
-        alpha1m = 1.0 / ( 1.0 + A )
-
-        return alpha, alpha1m
 
     def get_func( self, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
 
