@@ -79,7 +79,7 @@ class BatchReactor():
         W = self.get_melt(n, rho, rho_melt, H0, H1, gtol)
 
         A = n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n
-        alpha = 1.0 / ( 1.0 + 1.0 / A )
+        alpha = A / ( 1.0 + A )
         alpha1m = 1.0 / ( 1.0 + A )
 
         return alpha, alpha1m
