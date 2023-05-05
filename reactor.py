@@ -358,6 +358,12 @@ class BatchReactor():
         elif yscale == 'dwdlogn':
             n = x
             rho = y.T / n**2
+        elif yscale == 'dWdn':
+            x = n
+            y = mass * n * rho.T
+        elif yscale == 'dWdlogn':
+            x = n
+            y = mass * n**2 * rho.T
         elif yscale == 'dWdM':
             n = x / monomer
             rho = y.T / n * monomer / mass
