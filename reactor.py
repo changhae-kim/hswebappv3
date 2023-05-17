@@ -6,21 +6,21 @@ from scipy.optimize import minimize
 
 class BatchReactor():
 
-    def __init__( self, nmax=5, mesh=0, grid='discrete',
+    def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
             rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
 
         if grid == 'discrete':
-            self.n = numpy.arange(1, nmax+1, 1)
+            self.n = numpy.arange(nmin, nmax+1, 1)
             self.get_melt = self.get_discrete_melt
             self.get_rate = self.get_discrete_rate
         elif grid == 'continuum':
-            self.n = numpy.linspace(1.0, nmax, mesh)
+            self.n = numpy.linspace(nmin, nmax, mesh)
             self.get_melt = self.get_continuum_melt
             self.get_rate = self.get_continuum_rate
         elif grid == 'log_n':
-            self.n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
+            self.n = numpy.logspace(numpy.log10(nmin), numpy.log10(nmax), mesh)
             self.get_melt = self.get_log_n_melt
             self.get_rate = self.get_log_n_rate
 
@@ -407,12 +407,12 @@ class BatchReactor():
 
 class CSTReactor(BatchReactor):
 
-    def __init__( self, nmax=5, mesh=0, grid='discrete',
+    def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
             rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0], influx=[0.0, 0.0, 0.0, 0.0, 0.0], outflux=[0.0, 0.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
 
-        super().__init__(nmax, mesh, grid, rho, alpha1m, rho_melt, H0, H1, concs, temp, volume, mass, monomer, dens, rand)
+        super().__init__(nmin, nmax, mesh, grid, rho, alpha1m, rho_melt, H0, H1, concs, temp, volume, mass, monomer, dens, rand)
 
         self.alpha = alpha
 
