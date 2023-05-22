@@ -33,10 +33,10 @@ class BatchReactor():
                 g = n * concs
                 rho = numpy.array(concs) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn )
             elif grid == 'log_n':
-                r = numpy.log(n)
-                dr = r[1] - r[0]
+                logn = numpy.log(n)
+                dlogn = logn[1] - logn[0]
                 g = n**2 * concs
-                rho = numpy.array(concs) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dr )
+                rho = numpy.array(concs) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dlogn )
         self.rho = rho
 
         if rho_melt is None:
@@ -156,21 +156,21 @@ class BatchReactor():
         if H1 is None:
             H1 = self.H1
 
-        r = numpy.log(n)
-        dr = r[1] - r[0]
+        logn = numpy.log(n)
+        dlogn = logn[1] - logn[0]
 
         def fun(x):
             W = numpy.exp(x)
             g = ( n**2 * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
-            dW = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dr - W
+            dW = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dlogn - W
             g = ( n**2 * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2
-            dWdx = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dr - W
+            dWdx = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dlogn - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
         g = ( n**2 * rho ) / ( 1.0 + n * H0 * H1**n )
-        x = numpy.log( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dr )
+        x = numpy.log( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dlogn )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
         W = numpy.exp(solver.x)
 
@@ -289,14 +289,14 @@ class BatchReactor():
 
         f = alpha1m * rho
 
-        r = numpy.log(n)
-        dr = r[1] - r[0]
+        logn = numpy.log(n)
+        dlogn = logn[1] - logn[0]
 
         dfdr = numpy.zeros_like(f)
         if rand != 1.0:
-            dfdr[1:-1] = ( f[2:  ] - f[ :-2] ) / ( 2.0 * dr )
-            dfdr[0   ] = ( f[1   ] - f[0   ] ) / ( dr )
-            dfdr[  -1] = ( f[  -1] - f[  -2] ) / ( dr )
+            dfdr[1:-1] = ( f[2:  ] - f[ :-2] ) / ( 2.0 * dlogn )
+            dfdr[0   ] = ( f[1   ] - f[0   ] ) / ( dlogn )
+            dfdr[  -1] = ( f[  -1] - f[  -2] ) / ( dlogn )
             #dfdr[0   ] = dfdr[1   ]
             #dfdr[  -1] = dfdr[  -2]
             #dfdr[ 0] = 2.0 * dfdr[ 1] - dfdr[ 2]
@@ -304,7 +304,7 @@ class BatchReactor():
 
         d2fdr2 = numpy.zeros_like(f)
         if rand != 1.0:
-            d2fdr2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dr**2.0 )
+            d2fdr2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dlogn**2.0 )
             d2fdr2[0   ] = 0.0
             d2fdr2[  -1] = 0.0
             #d2fdr2[0   ] = d2fdr2[1   ]
@@ -315,7 +315,7 @@ class BatchReactor():
         sf = numpy.zeros_like(f)
         if rand != 0.0:
             g = n * f
-            sf[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dr
+            sf[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dlogn
             sf[-1    ] = 0.0
             #sf[-1    ] = sf[-2]
             #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
@@ -432,10 +432,10 @@ class CSTReactor(BatchReactor):
                 g = n * concs
                 fin = numpy.array(influx) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn )
             elif grid == 'log_n':
-                r = numpy.log(n)
-                dr = r[1] - r[0]
+                logn = numpy.log(n)
+                dlogn = logn[1] - logn[0]
                 g = n**2 * concs
-                fin = numpy.array(influx) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dr )
+                fin = numpy.array(influx) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dlogn )
         self.fin = fin
 
         self.fout = numpy.array(outflux)
