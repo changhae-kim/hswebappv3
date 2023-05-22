@@ -572,9 +572,5 @@ class CSTReactor(BatchReactor):
         Gin[:, 1:] = 0.5 * numpy.cumsum(gin[:, 1:] + gin[:, :-1], axis=1) * dt
         Gout[:, 1:] = 0.5 * numpy.cumsum(gout[:, 1:] + gout[:, :-1], axis=1) * dt
 
-        G[:, 0] = 0.0
-        Gin[:, 0] = 0.0
-        Gout[:, 0] = 0.0
-
         return G, Gin, Gout
 
