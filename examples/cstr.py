@@ -24,7 +24,8 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     #t1, y1 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
     t1, y1 = reactor.solve(tmax, alpha=reactor.alpha0, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
-    G1, Gin1, Gout1 = reactor.cointegrate()
+    #G1, Gin1, Gout1 = reactor.cointegrate()
+    G1, Gin1, Gout1 = reactor.cointegrate(alpha=reactor.alpha0, alpha1m=reactor.alpha1m0)
 
     prune = 2
     nwin = 110
@@ -81,7 +82,8 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     #t2, y2 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
     t2, y2 = reactor.solve(tmax, alpha=reactor.alpha0, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
-    G2, Gin2, Gout2 = reactor.cointegrate()
+    #G2, Gin2, Gout2 = reactor.cointegrate()
+    G2, Gin2, Gout2 = reactor.cointegrate(alpha=reactor.alpha0, alpha1m=reactor.alpha1m0)
 
     prune = 2
     nwin = 110
@@ -139,7 +141,8 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     #t3, y3 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
     t3, y3 = reactor.solve(tmax, alpha=reactor.alpha0, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
-    G3, Gin3, Gout3 = reactor.cointegrate()
+    #G3, Gin3, Gout3 = reactor.cointegrate()
+    G3, Gin3, Gout3 = reactor.cointegrate(alpha=reactor.alpha0, alpha1m=reactor.alpha1m0)
 
     prune = 2
     nwin = 110
@@ -197,7 +200,8 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     #t4, y4 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
     t4, y4 = reactor.solve(tmax, alpha=reactor.alpha0, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
-    G4, Gin4, Gout4 = reactor.cointegrate()
+    #G4, Gin4, Gout4 = reactor.cointegrate()
+    G4, Gin4, Gout4 = reactor.cointegrate(alpha=reactor.alpha0, alpha1m=reactor.alpha1m0)
 
     prune = 2
     nwin = 110

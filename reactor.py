@@ -511,17 +511,14 @@ class CSTReactor(BatchReactor):
 
         return solver.t, solver.y
 
-    def cointegrate( self, t=None, y=None, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
+    def cointegrate( self, t=None, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
 
         if t is None:
             t = self.solver.t
-        if y is None:
-            y = self.solver.y
-
         if n is None:
             n = self.n
         if rho is None:
-            rho = self.rho
+            rho = self.solver.y
         if alpha is None:
             alpha = self.alpha
         if alpha1m is None:
@@ -541,9 +538,9 @@ class CSTReactor(BatchReactor):
 
         dt = t[1:] - t[:-1]
 
-        g = numpy.zeros_like(y)
-        gin = numpy.zeros_like(y)
-        gout = numpy.zeros_like(y)
+        g = numpy.zeros_like(rho)
+        gin = numpy.zeros_like(rho)
+        gout = numpy.zeros_like(rho)
 
         for i, _ in enumerate(t):
 
@@ -552,25 +549,25 @@ class CSTReactor(BatchReactor):
 
             if alp is None:
                 if a1m is None:
-                    alp, a1m = self.get_part(n, y[:, i], rho_melt, H0, H1, gtol)
+                    alp, a1m = self.get_part(n, rho[:, i], rho_melt, H0, H1, gtol)
                 else:
-                    alp, _ = self.get_part(n, y[:, i], rho_melt, H0, H1, gtol)
+                    alp, _ = self.get_part(n, rho[:, i], rho_melt, H0, H1, gtol)
             elif a1m is None:
-                _, a1m = self.get_part(n, y[:, i], rho_melt, H0, H1, gtol)
+                _, a1m = self.get_part(n, rho[:, i], rho_melt, H0, H1, gtol)
 
-            rate = self.get_rate(n, y[:, i], a1m)
+            rate = self.get_rate(n, rho[:, i], a1m)
 
             g[:, i] = rate
             gin[:, i] = fin
-            gout[:, i] = fout[0] * alp * y[:, i] + fout[1] * a1m * y[:, i]
+            gout[:, i] = fout[0] * alp * rho[:, i] + fout[1] * a1m * rho[:, i]
 
-        G = numpy.zeros_like(y)
-        Gin = numpy.zeros_like(y)
-        Gout = numpy.zeros_like(y)
+        G = numpy.zeros_like(rho)
+        Gin = numpy.zeros_like(rho)
+        Gout = numpy.zeros_like(rho)
 
-        G[:, 1:] = 0.5 * numpy.cumsum(g[:, 1:] + g[:, :-1], axis=1) * dt
-        Gin[:, 1:] = 0.5 * numpy.cumsum(gin[:, 1:] + gin[:, :-1], axis=1) * dt
-        Gout[:, 1:] = 0.5 * numpy.cumsum(gout[:, 1:] + gout[:, :-1], axis=1) * dt
+        G[:, 1:] = 0.5 * numpy.cumsum( ( g[:, 1:] + g[:, :-1] ) * dt, axis=1)
+        Gin[:, 1:] = 0.5 * numpy.cumsum( ( gin[:, 1:] + gin[:, :-1] ) * dt, axis=1)
+        Gout[:, 1:] = 0.5 * numpy.cumsum( ( gout[:, 1:] + gout[:, :-1] ) * dt, axis=1)
 
         return G, Gin, Gout
 
