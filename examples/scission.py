@@ -7,7 +7,7 @@ pyplot.rcParams.update({'font.size': 14})
 sys.path.append('..')
 from reactor import BatchReactor
 
-'''
+
 nc = 10.0
 t1max = 140.0
 t2max = 4.0
@@ -15,7 +15,7 @@ t2max = 4.0
 nc = 25.0
 t1max = 100.0
 t2max = 0.35
-
+'''
 
 nmax = 110.0
 mesh = 500
@@ -30,9 +30,8 @@ tmax = t1max
 
 reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, rho=rho, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
 n1 = reactor.n
-a1 = reactor.alpha1m0
-#t1, y1 = reactor.solve(tmax, gtol=1e-9, rtol=1e-9, atol=1e-9)
-t1, y1 = reactor.solve(tmax, alpha1m=reactor.alpha1m0, gtol=1e-9, rtol=1e-9, atol=1e-9)
+a1 = reactor.alpha1m
+t1, y1 = reactor.solve(tmax, gtol=1e-9, rtol=1e-9, atol=1e-9)
 
 nmax = 110.0
 mesh = 500
@@ -47,9 +46,8 @@ tmax = t2max
 
 reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, rho=rho, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=1.0)
 n2 = reactor.n
-a2 = reactor.alpha1m0
-#t2, y2 = reactor.solve(tmax, gtol=1e-9, rtol=1e-9, atol=1e-9)
-t2, y2 = reactor.solve(tmax, alpha1m=reactor.alpha1m0, gtol=1e-12, rtol=1e-12, atol=1e-12)
+a2 = reactor.alpha1m
+t2, y2 = reactor.solve(tmax, gtol=1e-9, rtol=1e-9, atol=1e-9)
 
 ia = numpy.argmax( ( n1 < nc ) * n1 )
 ib = ia + 1
@@ -82,9 +80,8 @@ tmax = t1max
 
 reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
 n3 = reactor.n
-a3 = reactor.alpha1m0
-#t3, y3 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-t3, y3 = reactor.solve(tmax, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
+a3 = reactor.alpha1m
+t3, y3 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
 nmax = 10.0**2.10
 mesh = 500
@@ -95,9 +92,8 @@ tmax = t2max
 
 reactor = BatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=1.0)
 n4 = reactor.n
-a4 = reactor.alpha1m0
-#t4, y4 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-t4, y4 = reactor.solve(tmax, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
+a4 = reactor.alpha1m
+t4, y4 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
 ia = numpy.argmax( ( n3 < nc ) * n3 )
 ib = ia + 1
