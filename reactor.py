@@ -6,7 +6,7 @@ from scipy.optimize import minimize
 
 class BatchReactor():
 
-    def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
+    def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete', partition='static',
             rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
@@ -56,6 +56,9 @@ class BatchReactor():
             n = self.n
             alpha1m = 1.0 / ( 1.0 + n * H0 * H1**n )
         self.alpha1m0 = alpha1m
+
+        if partition == 'static':
+            self.alpha1m = alpha1m
 
         self.rand = rand
 
@@ -407,12 +410,12 @@ class BatchReactor():
 
 class CSTReactor(BatchReactor):
 
-    def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
+    def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete', partition='static',
             rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0], influx=[0.0, 0.0, 0.0, 0.0, 0.0], outflux=[0.0, 0.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
 
-        super().__init__(nmin, nmax, mesh, grid, rho, alpha1m, rho_melt, H0, H1, concs, temp, volume, mass, monomer, dens, rand)
+        super().__init__(nmin, nmax, mesh, grid, partition, rho, alpha1m, rho_melt, H0, H1, concs, temp, volume, mass, monomer, dens, rand)
 
         self.alpha = alpha
 
@@ -422,6 +425,9 @@ class CSTReactor(BatchReactor):
             H1 = self.H1
             alpha = ( n * H0 * H1**n ) / ( 1.0 + n * H0 * H1**n )
         self.alpha0 = alpha
+
+        if partition == 'static':
+            self.alpha = alpha
 
         if fin is None:
             n = self.n

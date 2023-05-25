@@ -12,20 +12,19 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
 
     nmax = 110
     grid = 'discrete'
+    partition = 'static'
     n = numpy.arange(1, nmax+1, 1)
     concs = numpy.exp(-0.5*((n-100.0)/(2.0))**2)
     influx = flux * concs
     outflux = [flux, 0.0]
     tmax = 100.0
 
-    reactor = CSTReactor(nmax=nmax, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
+    reactor = CSTReactor(nmax=nmax, grid=grid, partition=partition, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
     n1 = reactor.n
     a1 = reactor.alpha1m0
-    #t1, y1 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-    t1, y1 = reactor.solve(tmax, alpha=reactor.alpha0, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
+    t1, y1 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
-    #G1, Gin1, Gout1 = reactor.cointegrate()
-    G1, Gin1, Gout1 = reactor.cointegrate(alpha=reactor.alpha0, alpha1m=reactor.alpha1m0)
+    G1, Gin1, Gout1 = reactor.cointegrate()
 
     prune = 2
     nwin = 110
@@ -70,20 +69,19 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
 
     nmax = 110
     grid = 'discrete'
+    partition = 'static'
     n = numpy.arange(1, nmax+1, 1)
     concs = numpy.exp(-0.5*((n-100.0)/(2.0))**2)
     influx = numpy.zeros_like(concs)
     outflux = [flux, 0.0]
     tmax = 100.0
 
-    reactor = CSTReactor(nmax=nmax, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
+    reactor = CSTReactor(nmax=nmax, grid=grid, partition=partition, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
     n2 = reactor.n
     a2 = reactor.alpha1m0
-    #t2, y2 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-    t2, y2 = reactor.solve(tmax, alpha=reactor.alpha0, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
+    t2, y2 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
-    #G2, Gin2, Gout2 = reactor.cointegrate()
-    G2, Gin2, Gout2 = reactor.cointegrate(alpha=reactor.alpha0, alpha1m=reactor.alpha1m0)
+    G2, Gin2, Gout2 = reactor.cointegrate()
 
     prune = 2
     nwin = 110
@@ -129,20 +127,19 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     nmax = 110.0
     mesh = 500
     grid = 'continuum'
+    partition = 'static'
     n = numpy.linspace(1.0, nmax, mesh)
     concs = numpy.exp(-0.5*((n-100.0)/(2.0))**2)
     influx = flux * concs
     outflux = [flux, 0.0]
     tmax = 100.0
 
-    reactor = CSTReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
+    reactor = CSTReactor(nmax=nmax, mesh=mesh, grid=grid, partition=partition, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
     n3 = reactor.n
     a3 = reactor.alpha1m0
-    #t3, y3 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-    t3, y3 = reactor.solve(tmax, alpha=reactor.alpha0, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
+    t3, y3 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
-    #G3, Gin3, Gout3 = reactor.cointegrate()
-    G3, Gin3, Gout3 = reactor.cointegrate(alpha=reactor.alpha0, alpha1m=reactor.alpha1m0)
+    G3, Gin3, Gout3 = reactor.cointegrate()
 
     prune = 2
     nwin = 110
@@ -188,20 +185,19 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     nmax = 110.0
     mesh = 500
     grid = 'continuum'
+    partition = 'static'
     n = numpy.linspace(1.0, nmax, mesh)
     concs = numpy.exp(-0.5*((n-100.0)/(2.0))**2)
     influx = numpy.zeros_like(concs)
     outflux = [flux, 0.0]
     tmax = 100.0
 
-    reactor = CSTReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
+    reactor = CSTReactor(nmax=nmax, mesh=mesh, grid=grid, partition=partition, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
     n4 = reactor.n
     a4 = reactor.alpha1m0
-    #t4, y4 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
-    t4, y4 = reactor.solve(tmax, alpha=reactor.alpha0, alpha1m=reactor.alpha1m0, gtol=1e-6, rtol=1e-6, atol=1e-6)
+    t4, y4 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
-    #G4, Gin4, Gout4 = reactor.cointegrate()
-    G4, Gin4, Gout4 = reactor.cointegrate(alpha=reactor.alpha0, alpha1m=reactor.alpha1m0)
+    G4, Gin4, Gout4 = reactor.cointegrate()
 
     prune = 2
     nwin = 110
