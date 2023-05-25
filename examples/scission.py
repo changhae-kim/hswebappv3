@@ -73,7 +73,7 @@ pyplot.close()
 
 nmax = 10.0**2.10
 mesh = 500
-grid = 'log_n'
+grid = 'logn'
 n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
 concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2)
 tmax = t1max
@@ -85,7 +85,7 @@ t3, y3 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
 
 nmax = 10.0**2.10
 mesh = 500
-grid = 'log_n'
+grid = 'logn'
 n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
 concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2)
 tmax = t2max
@@ -113,6 +113,6 @@ ax2.set_xlabel('Random Scission Time', color=color)
 ax2.tick_params(axis='x', labelcolor=color)
 ax1.set_ylabel('C$_{' + '{:.0f}'.format(nc) + '}$ Chain Concentration')
 pyplot.tight_layout()
-pyplot.savefig('scission_log_n_c{:.0f}.png'.format(nc))
+pyplot.savefig('scission_logn_c{:.0f}.png'.format(nc))
 pyplot.close()
 

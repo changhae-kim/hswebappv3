@@ -182,7 +182,7 @@ pyplot.close()
 print()
 print('Case 5: Log Scale Equation with Phase Partition / Dimensional Input')
 print('This example solves the population balance equations in a logarithmic scale with nonzero phase partition coefficients.')
-print('The logarithmic equations can be invoked by passing grid=\'log_n\' to the BatchReactor class.')
+print('The logarithmic equations can be invoked by passing grid=\'logn\' to the BatchReactor class.')
 print('This example also demonstrates the use of dimensional input.')
 print('We enter the temperature in K, the headspace volume in L, the melt mass in g, and the monomer mass in g/mol.')
 print('Then, the code computes the nondimensional Henry\'s constants and the phase partition coefficients.')
@@ -193,7 +193,7 @@ print('See lines 194-2216 of \'batch.py\' script.')
 
 nmax = 10.0**2.10
 mesh = 500
-grid = 'log_n'
+grid = 'logn'
 n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
 concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2)
 tmax = 100.0
@@ -233,7 +233,7 @@ ax2.set_xscale('log')
 ylim = ax2.get_ylim()
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('batch_partition_log_n.png')
+pyplot.savefig('batch_partition_logn.png')
 pyplot.close()
 
 prune = 2
@@ -254,14 +254,14 @@ ax2.set_xscale('log')
 ylim = ax2.get_ylim()
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('batch_partition_log_n_compare.png')
+pyplot.savefig('batch_partition_logn_compare.png')
 pyplot.close()
 
 
 print()
 print('Case 6: Log Scale Equation with No Phase Partition / Mixed Dimensional & Nondimensional Input')
 print('This example solves the population balance equations in a logarithmic scale with trivial phase partition coefficients.')
-print('The logarithmic equations can be invoked by passing grid=\'log_n\' to the BatchReactor class.')
+print('The logarithmic equations can be invoked by passing grid=\'logn\' to the BatchReactor class.')
 print('This example also demonstrates the use of partial nondimensional input.')
 print('We provide the phase partition coefficients,')
 print('but we enter the concentrations in arbitrary units.')
@@ -271,7 +271,7 @@ print('See lines 272-294 of \'batch.py\' script.')
 
 nmax = 10.0**2.10
 mesh = 500
-grid = 'log_n'
+grid = 'logn'
 n = numpy.logspace(0.0, numpy.log10(nmax), mesh)
 concs = numpy.exp(-0.5*((numpy.log(n)-numpy.log(100.0))/(0.01*numpy.log(10.0)))**2)
 tmax = 100.0
@@ -311,7 +311,7 @@ ax2.set_xscale('log')
 ax2.set_ylim(ylim)
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('batch_nopartition_log_n.png')
+pyplot.savefig('batch_nopartition_logn.png')
 pyplot.close()
 
 prune = 2
@@ -332,7 +332,7 @@ ax2.set_xscale('log')
 ax2.set_ylim(ylim)
 ax2.set_ylabel('Liquid-Phase Partition')
 pyplot.tight_layout()
-pyplot.savefig('batch_nopartition_log_n_compare.png')
+pyplot.savefig('batch_nopartition_logn_compare.png')
 pyplot.close()
 
 

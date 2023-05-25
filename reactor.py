@@ -19,10 +19,10 @@ class BatchReactor():
             self.n = numpy.linspace(nmin, nmax, mesh)
             self.get_melt = self.get_continuum_melt
             self.get_rate = self.get_continuum_rate
-        elif grid == 'log_n':
+        elif grid == 'logn':
             self.n = numpy.logspace(numpy.log10(nmin), numpy.log10(nmax), mesh)
-            self.get_melt = self.get_log_n_melt
-            self.get_rate = self.get_log_n_rate
+            self.get_melt = self.get_logn_melt
+            self.get_rate = self.get_logn_rate
 
         if rho is None:
             n = self.n
@@ -32,7 +32,7 @@ class BatchReactor():
                 dn = n[1] - n[0]
                 g = n * concs
                 rho = numpy.array(concs) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn )
-            elif grid == 'log_n':
+            elif grid == 'logn':
                 logn = numpy.log(n)
                 dlogn = logn[1] - logn[0]
                 g = n**2 * concs
@@ -144,7 +144,7 @@ class BatchReactor():
 
         return W
 
-    def get_log_n_melt( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
+    def get_logn_melt( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -277,7 +277,7 @@ class BatchReactor():
 
         return rate
 
-    def get_log_n_rate( self, n=None, rho=None, alpha1m=None, rand=None ):
+    def get_logn_rate( self, n=None, rho=None, alpha1m=None, rand=None ):
 
         if n is None:
             n = self.n
@@ -423,7 +423,7 @@ class CSTReactor(BatchReactor):
                 dn = n[1] - n[0]
                 g = n * concs
                 fin = numpy.array(influx) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn )
-            elif grid == 'log_n':
+            elif grid == 'logn':
                 logn = numpy.log(n)
                 dlogn = logn[1] - logn[0]
                 g = n**2 * concs
