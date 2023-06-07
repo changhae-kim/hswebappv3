@@ -35,3 +35,31 @@ def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=5, xscale='log
     pyplot.savefig(filename)
     pyplot.close()
 
+    return
+
+
+def plot_two_curves( t, y1, y2, y1label, y2label, filename, y1scale='log', y2scale='linear' ):
+
+    fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
+    ax1 = fig.subplots()
+    ax2 = ax1.twinx()
+
+    color = 'tab:blue'
+    ax1.plot(t, y1, color=color)
+    ax1.set_xlabel('Time')
+    ax1.set_ylabel(y1label, color=color)
+    ax1.set_yscale(y1scale)
+    ax1.tick_params(axis='y', which='both', labelcolor=color)
+
+    color = 'tab:orange'
+    ax2.plot(t, y2, color=color)
+    ax2.set_ylabel(y2label, color=color)
+    ax2.set_yscale(y2scale)
+    ax2.tick_params(axis='y', which='both', labelcolor=color)
+
+    fig.tight_layout()
+    fig.savefig(filename)
+    pyplot.close()
+
+    return
+

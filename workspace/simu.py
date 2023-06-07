@@ -1,7 +1,6 @@
 import numpy
 import sys
 
-sys.path.append('..')
 from reactor import BatchReactor
 from utils import plot_populations
 

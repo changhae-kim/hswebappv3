@@ -50,6 +50,52 @@ def convert_rho_to_y( yscale, n, rho, mass=10.0, monomer=14.027 ):
 
     return x, y.T
 
+def get_dispersity( xscale, t, n, rho, monomer=14.027 ):
+
+    if xscale in ['n', 'M']:
+
+        dx = n[1:] - n[:-1]
+
+        g0 = n**0 * rho.T
+        g1 = n**1 * rho.T
+        g2 = n**2 * rho.T
+
+    elif xscale in ['logn', 'logM']:
+
+        logn = numpy.log(n)
+        dx = logn[1:] - logn[:-1]
+
+        g0 = n**1 * rho.T
+        g1 = n**2 * rho.T
+        g2 = n**3 * rho.T
+
+    if t is None:
+
+        G0 = 0.5 * numpy.einsum( 'i->', ( g0[1:] + g0[:-1] ) * dx )
+        G1 = 0.5 * numpy.einsum( 'i->', ( g1[1:] + g1[:-1] ) * dx )
+        G2 = 0.5 * numpy.einsum( 'i->', ( g2[1:] + g2[:-1] ) * dx )
+
+    else:
+
+        G0 = numpy.zeros_like(t)
+        G1 = numpy.zeros_like(t)
+        G2 = numpy.zeros_like(t)
+
+        G0 = 0.5 * numpy.einsum( 'ij->i', ( g0[:, 1:] + g0[:, :-1] ) * dx )
+        G1 = 0.5 * numpy.einsum( 'ij->i', ( g1[:, 1:] + g1[:, :-1] ) * dx )
+        G2 = 0.5 * numpy.einsum( 'ij->i', ( g2[:, 1:] + g2[:, :-1] ) * dx )
+
+    nn = G1/G0
+    nw = G2/G1
+    Dn = nw/nn
+
+    if xscale in ['n', 'logn']:
+        return nn, nw, Dn
+    elif xscale in ['M', 'logM']:
+        Mn = monomer * nn
+        Mw = monomer * nw
+        return Mn, Mw, Dn
+
 
 class BatchReactor():
 
@@ -78,12 +124,12 @@ class BatchReactor():
             elif grid == 'continuum':
                 dn = n[1] - n[0]
                 g = n * concs
-                rho = numpy.array(concs) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn )
+                rho = numpy.array(concs) / ( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1]) * dn )
             elif grid == 'logn':
                 logn = numpy.log(n)
                 dlogn = logn[1] - logn[0]
                 g = n**2 * concs
-                rho = numpy.array(concs) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dlogn )
+                rho = numpy.array(concs) / ( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1]) * dlogn )
         self.rho = rho
 
         if rho_melt is None:
@@ -177,15 +223,15 @@ class BatchReactor():
         def fun(x):
             W = numpy.exp(x)
             g = ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
-            dW = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn - W
+            dW = 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dn - W
             g = ( n * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2
-            dWdx = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn - W
+            dWdx = 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dn - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
         g = ( n * rho ) / ( 1.0 + n * H0 * H1**n )
-        x = numpy.log( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn )
+        x = numpy.log( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1]) * dn )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
         W = numpy.exp(solver.x)
 
@@ -210,15 +256,15 @@ class BatchReactor():
         def fun(x):
             W = numpy.exp(x)
             g = ( n**2 * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
-            dW = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dlogn - W
+            dW = 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dlogn - W
             g = ( n**2 * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2
-            dWdx = 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dlogn - W
+            dWdx = 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dlogn - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
         g = ( n**2 * rho ) / ( 1.0 + n * H0 * H1**n )
-        x = numpy.log( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dlogn )
+        x = numpy.log( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dlogn )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
         W = numpy.exp(solver.x)
 
@@ -398,8 +444,13 @@ class BatchReactor():
 
         return solver.t, solver.y
 
-    def postprocess( self, yscale, n=None, rho=None, mass=10.0, monomer=14.027 ):
+    def postprocess( self, target, t=None, n=None, rho=None, mass=10.0, monomer=14.027 ):
 
+        if t is None:
+            if self.solver is None:
+                t = None
+            else:
+                t = self.solver.t
         if n is None:
             n = self.n
         if rho is None:
@@ -408,9 +459,10 @@ class BatchReactor():
             else:
                 rho = self.solver.y
 
-        convert_rho_to_y(yscale, n, rho, mass, monomer)
-
-        return x, y
+        if target in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']:
+            return convert_rho_to_y(target, n, rho, mass, monomer)
+        elif target in ['n', 'logn', 'M', 'logM']:
+            return get_dispersity(target, t, n, rho, monomer)
 
 
 class CSTReactor(BatchReactor):
@@ -429,12 +481,12 @@ class CSTReactor(BatchReactor):
             elif grid == 'continuum':
                 dn = n[1] - n[0]
                 g = n * concs
-                fin = numpy.array(influx) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dn )
+                fin = numpy.array(influx) / ( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dn )
             elif grid == 'logn':
                 logn = numpy.log(n)
                 dlogn = logn[1] - logn[0]
                 g = n**2 * concs
-                fin = numpy.array(influx) / ( 0.5 * numpy.einsum('i->', g[1:] + g[:-1]) * dlogn )
+                fin = numpy.array(influx) / ( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dlogn )
         self.fin = fin
 
         self.fout = numpy.array(outflux)

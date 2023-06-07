@@ -4,9 +4,8 @@ import os, sys
 
 from matplotlib import pyplot
 
-sys.path.append('..')
 from reactor import CSTReactor
-from utils import plot_populations
+from utils import plot_populations, plot_two_curves
 
 
 volume  = 1.0
@@ -93,43 +92,12 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
 
     # plot_populations(t, n, Gout, alpha1m, 'Chain Length', 'Chain Concentration', 'rho_n_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 29.0])
     # plot_populations(t, n, dwdn_out, alpha1m, 'Chain Length', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 29.0])
+
+    nn, nw, Dn = reactor.postprocess('logn', t=t, rho=Gout)
+
+    # plot_two_curves(t, nn, Dn, r'$\overline{n}$', 'PDI', 'disp_'+basename+'.png', y1scale='linear')
+
     '''
-    logn = numpy.log(n)
-    dlogn = logn[1] - logn[0]
-
-    g0 = n**1 * Gout.T
-    g1 = n**2 * Gout.T
-    g2 = n**3 * Gout.T
-
-    G0 = numpy.zeros_like(t)
-    G1 = numpy.zeros_like(t)
-    G2 = numpy.zeros_like(t)
-
-    G0 = 0.5 * numpy.einsum('ij->i', g0[:, 1:] + g0[:, :-1]) * dlogn
-    G1 = 0.5 * numpy.einsum('ij->i', g1[:, 1:] + g1[:, :-1]) * dlogn
-    G2 = 0.5 * numpy.einsum('ij->i', g2[:, 1:] + g2[:, :-1]) * dlogn
-
-    nn = G1/G0
-    nw = G2/G1
-    ds = nw/nn
-
-    fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
-    ax1 = fig.subplots()
-    ax2 = ax1.twinx()
-    color = 'tab:blue'
-    ax1.plot(t, nn, color=color)
-    # ax1.set_yscale('log')
-    ax1.set_xlabel('Time')
-    ax1.set_ylabel(r'$\overline{n}$', color=color)
-    ax1.tick_params(axis='y', which='both', labelcolor=color)
-    color = 'tab:orange'
-    ax2.plot(t, ds, color=color)
-    ax2.set_ylabel('PDI', color=color)
-    ax2.tick_params(axis='y', which='both', labelcolor=color)
-    fig.tight_layout()
-    fig.savefig('disp_'+basename+'.png')
-    pyplot.close()
-    
     logn = numpy.log(n)
     dlogn = logn[1] - logn[0]
 

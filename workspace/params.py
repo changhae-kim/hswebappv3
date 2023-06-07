@@ -4,9 +4,8 @@ import os, sys
 
 from matplotlib import pyplot
 
-sys.path.append('..')
 from reactor import BatchReactor
-from utils import plot_populations
+from utils import plot_populations, plot_two_curves
 
 '''
 nmax = 100
@@ -75,8 +74,8 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
 
     reactor = BatchReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
     n = reactor.n
-    # alpha1m = reactor.alpha1m
-    alpha1m = numpy.ones_like(reactor.alpha1m)
+    alpha1m = reactor.alpha1m
+    # alpha1m = numpy.ones_like(reactor.alpha1m)
 
     if not os.path.exists('t_'+basename+'.npy') or not os.path.exists('rho_'+basename+'.npy'):
         t, rho = reactor.solve(tmax, alpha1m=alpha1m, gtol=1e-12, rtol=1e-12, atol=1e-12)
@@ -100,40 +99,8 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
 
     # plot_populations(t, n, rho, alpha1m, 'Chain Length', 'Chain Concentration', 'rho_n_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 30.0])
     # plot_populations(t, n, dwdn, alpha1m, 'Chain Length', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 30.0])
-    '''
-    logn = numpy.log(n)
-    dlogn = logn[1] - logn[0]
 
-    g0 = n**1 * rho.T
-    g1 = n**2 * rho.T
-    g2 = n**3 * rho.T
+    nn, nw, Dn = reactor.postprocess('logn', t=t, rho=rho)
 
-    G0 = numpy.zeros_like(t)
-    G1 = numpy.zeros_like(t)
-    G2 = numpy.zeros_like(t)
+    # plot_two_curves(t, nn, Dn, r'$\overline{n}$', 'PDI', 'disp_'+basename+'.png')
 
-    G0 = 0.5 * numpy.einsum('ij->i', g0[:, 1:] + g0[:, :-1]) * dlogn
-    G1 = 0.5 * numpy.einsum('ij->i', g1[:, 1:] + g1[:, :-1]) * dlogn
-    G2 = 0.5 * numpy.einsum('ij->i', g2[:, 1:] + g2[:, :-1]) * dlogn
-
-    nn = G1/G0
-    nw = G2/G1
-    ds = nw/nn
-
-    fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
-    ax1 = fig.subplots()
-    ax2 = ax1.twinx()
-    color = 'tab:blue'
-    ax1.plot(t, nn, color=color)
-    ax1.set_yscale('log')
-    ax1.set_xlabel('Time')
-    ax1.set_ylabel(r'$\overline{n}$', color=color)
-    ax1.tick_params(axis='y', which='both', labelcolor=color)
-    color = 'tab:orange'
-    ax2.plot(t, ds, color=color)
-    ax2.set_ylabel('PDI', color=color)
-    ax2.tick_params(axis='y', which='both', labelcolor=color)
-    fig.tight_layout()
-    fig.savefig('disp_'+basename+'.png')
-    pyplot.close()
-    '''
