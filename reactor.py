@@ -4,6 +4,53 @@ from scipy.integrate import solve_ivp
 from scipy.optimize import minimize
 
 
+def convert_y_to_rho( yscale, x, y, mass=10.0, monomer=14.027 ):
+
+    if yscale == 'dwdn':
+        n = x
+        rho = y.T / n
+    elif yscale == 'dwdlogn':
+        n = x
+        rho = y.T / n**2
+    elif yscale == 'dWdn':
+        n = x
+        rho = y.T / n / mass
+    elif yscale == 'dWdlogn':
+        n = x
+        rho = y.T / n**2 / mass
+    elif yscale == 'dWdM':
+        n = x / monomer
+        rho = y.T / n * monomer / mass
+    elif yscale == 'dWdlogM':
+        n = x / monomer
+        rho = y.T / n**2 / mass
+
+    return n, rho.T
+
+def convert_rho_to_y( yscale, n, rho, mass=10.0, monomer=14.027 ):
+
+    if yscale == 'dwdn':
+        x = n
+        y = n * rho.T
+    elif yscale == 'dwdlogn':
+        x = n
+        y = n**2 * rho.T
+    elif yscale == 'dWdn':
+        x = n
+        y = mass * n * rho.T
+    elif yscale == 'dWdlogn':
+        x = n
+        y = mass * n**2 * rho.T
+    elif yscale == 'dWdM':
+        x = monomer * n
+        y = mass / monomer * n * rho.T
+    elif yscale == 'dWdlogM':
+        x = monomer * n
+        y = mass * n**2 * rho.T
+
+    return x, y.T
+
+
 class BatchReactor():
 
     def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
@@ -351,29 +398,6 @@ class BatchReactor():
 
         return solver.t, solver.y
 
-    def preprocess( self, x, y, yscale, mass=10.0, monomer=14.027 ):
-
-        if yscale == 'dwdn':
-            n = x
-            rho = y.T / n
-        elif yscale == 'dwdlogn':
-            n = x
-            rho = y.T / n**2
-        elif yscale == 'dWdn':
-            n = x
-            rho = y.T / n / mass
-        elif yscale == 'dWdlogn':
-            n = x
-            rho = y.T / n**2 / mass
-        elif yscale == 'dWdM':
-            n = x / monomer
-            rho = y.T / n * monomer / mass
-        elif yscale == 'dWdlogM':
-            n = x / monomer
-            rho = y.T / n**2 / mass
-
-        return n, rho.T
-
     def postprocess( self, yscale, n=None, rho=None, mass=10.0, monomer=14.027 ):
 
         if n is None:
@@ -384,26 +408,9 @@ class BatchReactor():
             else:
                 rho = self.solver.y
 
-        if yscale == 'dwdn':
-            x = n
-            y = n * rho.T
-        elif yscale == 'dwdlogn':
-            x = n
-            y = n**2 * rho.T
-        elif yscale == 'dWdn':
-            x = n
-            y = mass * n * rho.T
-        elif yscale == 'dWdlogn':
-            x = n
-            y = mass * n**2 * rho.T
-        elif yscale == 'dWdM':
-            x = monomer * n
-            y = mass / monomer * n * rho.T
-        elif yscale == 'dWdlogM':
-            x = monomer * n
-            y = mass * n**2 * rho.T
+        convert_rho_to_y(yscale, n, rho, mass, monomer)
 
-        return x, y.T
+        return x, y
 
 
 class CSTReactor(BatchReactor):
