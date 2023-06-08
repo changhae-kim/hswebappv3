@@ -4,121 +4,157 @@ from scipy.integrate import solve_ivp
 from scipy.optimize import minimize
 
 
-def convert_y_to_rho( yscale, x, y, mass=10.0, monomer=14.027 ):
+def convert_y_to_rho( mode, x, y, mass=10.0, monomer=14.027 ):
 
-    if yscale == 'dwdn':
+    assert mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']
+
+    if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn']:
         n = x
+    elif mode in ['dWdM', 'dWdlogM']:
+        n = x / monomer
+
+    if mode == 'dwdn':
         rho = y.T / n
-    elif yscale == 'dwdlogn':
-        n = x
+    elif mode == 'dwdlogn':
         rho = y.T / n**2
-    elif yscale == 'dWdn':
-        n = x
+    elif mode == 'dWdn':
         rho = y.T / n / mass
-    elif yscale == 'dWdlogn':
-        n = x
+    elif mode == 'dWdlogn':
         rho = y.T / n**2 / mass
-    elif yscale == 'dWdM':
-        n = x / monomer
+    elif mode == 'dWdM':
         rho = y.T / n * monomer / mass
-    elif yscale == 'dWdlogM':
-        n = x / monomer
+    elif mode == 'dWdlogM':
         rho = y.T / n**2 / mass
 
     return n, rho.T
 
-def convert_rho_to_y( yscale, n, rho, mass=10.0, monomer=14.027 ):
+def convert_rho_to_y( mode, n, rho, mass=10.0, monomer=14.027 ):
 
-    if yscale == 'dwdn':
+    assert mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']
+
+    if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn']:
         x = n
+    elif mode in ['dWdM', 'dWdlogM']:
+        x = monomer * n
+
+    if mode == 'dwdn':
         y = n * rho.T
-    elif yscale == 'dwdlogn':
-        x = n
+    elif mode == 'dwdlogn':
         y = n**2 * rho.T
-    elif yscale == 'dWdn':
-        x = n
+    elif mode == 'dWdn':
         y = mass * n * rho.T
-    elif yscale == 'dWdlogn':
-        x = n
+    elif mode == 'dWdlogn':
         y = mass * n**2 * rho.T
-    elif yscale == 'dWdM':
-        x = monomer * n
+    elif mode == 'dWdM':
         y = mass / monomer * n * rho.T
-    elif yscale == 'dWdlogM':
-        x = monomer * n
+    elif mode == 'dWdlogM':
         y = mass * n**2 * rho.T
 
     return x, y.T
 
-def get_dispersity( xscale, t, n, rho, monomer=14.027 ):
+def get_dispersity( mode, t, n, rho, monomer=14.027 ):
 
-    if xscale in ['n', 'M']:
+    assert mode in ['D_n', 'D_logn', 'D_M', 'D_logM']
 
+    if mode in ['D_n', 'D_M']:
         dx = n[1:] - n[:-1]
-
         g0 = n**0 * rho.T
         g1 = n**1 * rho.T
         g2 = n**2 * rho.T
 
-    elif xscale in ['logn', 'logM']:
-
+    elif mode in ['D_logn', 'D_logM']:
         logn = numpy.log(n)
         dx = logn[1:] - logn[:-1]
-
         g0 = n**1 * rho.T
         g1 = n**2 * rho.T
         g2 = n**3 * rho.T
 
-    if t is None:
+    G0 = 0.5 * numpy.sum( ( g0.T[1:] + g0.T[:-1] ).T * dx, axis=1 )
+    G1 = 0.5 * numpy.sum( ( g1.T[1:] + g1.T[:-1] ).T * dx, axis=1 )
+    G2 = 0.5 * numpy.sum( ( g2.T[1:] + g2.T[:-1] ).T * dx, axis=1 )
 
-        G0 = 0.5 * numpy.einsum( 'i->', ( g0[1:] + g0[:-1] ) * dx )
-        G1 = 0.5 * numpy.einsum( 'i->', ( g1[1:] + g1[:-1] ) * dx )
-        G2 = 0.5 * numpy.einsum( 'i->', ( g2[1:] + g2[:-1] ) * dx )
+    nn = G1 / G0
+    nw = G2 / G1
+    Dn = nw / nn
 
-    else:
-
-        G0 = 0.5 * numpy.einsum( 'ij->i', ( g0[:, 1:] + g0[:, :-1] ) * dx )
-        G1 = 0.5 * numpy.einsum( 'ij->i', ( g1[:, 1:] + g1[:, :-1] ) * dx )
-        G2 = 0.5 * numpy.einsum( 'ij->i', ( g2[:, 1:] + g2[:, :-1] ) * dx )
-
-    nn = G1/G0
-    nw = G2/G1
-    Dn = nw/nn
-
-    if xscale in ['n', 'logn']:
+    if mode in ['D_n', 'D_logn']:
         return nn, nw, Dn
-    elif xscale in ['M', 'logM']:
+    elif mode in ['D_M', 'D_logM']:
         Mn = monomer * nn
         Mw = monomer * nw
         return Mn, Mw, Dn
 
-def get_pressures( yscale, t, n, rho, alpha, temp=573.15, volume=1.0, mass=10.0, monomer=14.027 ):
+def get_pressures( mode, t, n, rho, alpha, temp=573.15, volume=1.0, mass=10.0, monomer=14.027 ):
+
+    assert mode in ['dpdn', 'dpdlogn', 'dPdn', 'dPdlogn', 'dPdM', 'dPdlogM']
 
     dpdn = alpha.T * rho.T
 
-    if yscale in ['dpdn', 'dPdn', 'dPdM']:
+    if mode in ['dpdn', 'dPdn', 'dPdM']:
         dx = n[1:] - n[:-1]
         dpdx = dpdn
-    elif yscale in ['dpdlogn', 'dPdlogn', 'dPdlogM']:
+    elif mode in ['dpdlogn', 'dPdlogn', 'dPdlogM']:
         logn = numpy.log(n)
         dx = logn[1:] - logn[:-1]
         dpdx = n * dpdn
 
-    if t is None:
-        p = 0.5 * numpy.einsum( 'i->', ( dpdx[1:] + dpdx[:-1] ) * dx )
-    else:
-        p = 0.5 * numpy.einsum( 'ij->i', ( dpdx[:, 1:] + dpdx[:, :-1] ) * dx )
+    p = 0.5 * numpy.sum( ( dpdx.T[1:] + dpdx.T[:-1] ).T * dx, axis=1 )
 
-    if yscale in ['dpdn', 'dpdlogn']:
+    if mode in ['dpdn', 'dpdlogn']:
         return p, dpdx.T
-    elif yscale in ['dPdn', 'dPdlogn', 'dPdM', 'dPdlogM']:
-        nrtv = ( mass / monomer ) * ( 8.31446261815324 * temp / volume )
-        P = nrtv * p
-        if yscale == 'dPdM':
-            dPdx = nrtv * dpdx / monomer
-        else:
-            dPdx = nrtv * dpdx
+    elif mode in ['dPdn', 'dPdlogn', 'dPdM', 'dPdlogM']:
+        NRT_V = ( mass / monomer ) * ( 8.31446261815324 * temp / volume )
+        P = NRT_V * p
+        if mode in ['dPdM']:
+            dPdx = NRT_V * dpdx / monomer
+        elif mode in ['dPdn', 'dPdlogn', 'dPdlogM']:
+            dPdx = NRT_V * dpdx
         return P, dPdx.T
+
+def get_states( mode, t, n, rho, state_cutoffs=[4.5, 16.5], mass=10.0, monomer=14.027 ):
+
+    assert mode in ['rho_n', 'rho_logn', 'concs_n', 'concs_logn', 'w_n', 'w_logn', 'W_n', 'W_logn']
+
+    ngl, nls = state_cutoffs
+    igl = numpy.count_nonzero(n < ngl)
+    ils = numpy.count_nonzero(n < nls)
+
+    if mode in ['rho_n', 'concs_n', 'w_n', 'W_n']:
+        dx = n[1:] - n[:-1]
+        dxgl = ngl - n[igl]
+        dxls = nls - n[ils]
+    elif mode in ['rho_logn', 'concs_logn', 'w_logn', 'W_logn']:
+        logn = numpy.log(n)
+        dx = logn[1:] - logn[:-1]
+        dxgl = numpy.log(ngl) - logn[igl]
+        dxls = numpy.log(nls) - logn[ils]
+
+    if mode in ['rho_n', 'concs_n']:
+        g = rho.T
+    elif mode in ['rho_logn', 'concs_logn']:
+        g = n * rho.T
+    elif mode in ['w_n', 'W_n']:
+        g = n * rho.T
+    elif mode in ['w_logn', 'W_logn']:
+        g = n**2 * rho.T
+
+    Gg  = 0.5 * numpy.sum( ( g.T[    1:igl+1] + g.T[     :igl  ] ).T * dx[     :igl  ], axis=1 )
+    Ggl = 0.5 * numpy.sum( ( g.T[igl+1:igl+2] + g.T[igl  :igl+1] ).T * dx[igl  :igl+1], axis=1 )
+    Gl  = 0.5 * numpy.sum( ( g.T[igl+2:ils+1] + g.T[igl+1:ils  ] ).T * dx[igl+1:ils  ], axis=1 )
+    Gls = 0.5 * numpy.sum( ( g.T[ils+1:ils+2] + g.T[ils  :ils+1] ).T * dx[ils  :ils+1], axis=1 )
+    Gs  = 0.5 * numpy.sum( ( g.T[ils+2:     ] + g.T[ils+1:   -1] ).T * dx[ils+1:     ], axis=1 )
+
+    yg = Gg                                  + Ggl * ( dxgl / dx[igl] )
+    yl = Gl + Ggl * ( 1.0 - dxgl / dx[igl] ) + Gls * ( dxls / dx[ils] )
+    ys = Gs + Ggl * ( 1.0 - dxls / dx[ils] )
+
+    if mode in ['rho_n', 'rho_logn', 'w_n', 'w_logn']:
+        return yg, yl, ys
+    elif mode in ['concs_n', 'concs_logn']:
+        N = mass / monomer
+        return N * yg, N * yl, N * ys
+    elif mode in ['W_n', 'W_logn']:
+        return mass * yg, mass * yl, mass * ys
 
 
 class BatchReactor():
@@ -148,12 +184,12 @@ class BatchReactor():
             elif grid == 'continuum':
                 dn = n[1] - n[0]
                 g = n * concs
-                rho = numpy.array(concs) / ( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1]) * dn )
+                rho = numpy.array(concs) / ( 0.5 * numpy.sum( g[1:] + g[:-1]) * dn )
             elif grid == 'logn':
                 logn = numpy.log(n)
                 dlogn = logn[1] - logn[0]
                 g = n**2 * concs
-                rho = numpy.array(concs) / ( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1]) * dlogn )
+                rho = numpy.array(concs) / ( 0.5 * numpy.sum( g[1:] + g[:-1]) * dlogn )
         self.rho = rho
 
         if rho_melt is None:
@@ -247,15 +283,15 @@ class BatchReactor():
         def fun(x):
             W = numpy.exp(x)
             g = ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
-            dW = 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dn - W
+            dW = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn - W
             g = ( n * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2
-            dWdx = 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dn - W
+            dWdx = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
         g = ( n * rho ) / ( 1.0 + n * H0 * H1**n )
-        x = numpy.log( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1]) * dn )
+        x = numpy.log( 0.5 * numpy.sum( g[1:] + g[:-1]) * dn )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
         W = numpy.exp(solver.x)
 
@@ -280,15 +316,15 @@ class BatchReactor():
         def fun(x):
             W = numpy.exp(x)
             g = ( n**2 * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
-            dW = 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dlogn - W
+            dW = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn - W
             g = ( n**2 * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2
-            dWdx = 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dlogn - W
+            dWdx = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
         g = ( n**2 * rho ) / ( 1.0 + n * H0 * H1**n )
-        x = numpy.log( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dlogn )
+        x = numpy.log( 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn )
         solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
         W = numpy.exp(solver.x)
 
@@ -433,7 +469,7 @@ class BatchReactor():
         sf = numpy.zeros_like(f)
         if rand != 0.0:
             g = n * f
-            sf[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dlogn
+            sf[-2::-1] = 0.5 * numpy.cumsum( g[:0:-1] + g[-2::-1] ) * dlogn
             sf[-1    ] = 0.0
             #sf[-1    ] = sf[-2]
             #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
@@ -468,7 +504,7 @@ class BatchReactor():
 
         return solver.t, solver.y
 
-    def postprocess( self, target, t=None, n=None, rho=None, alpha=None, rho_melt=None, H0=None, H1=None, gtol=1e-6, temp=573.15, volume=1.0, mass=10.0, monomer=14.027 ):
+    def postprocess( self, mode, t=None, n=None, rho=None, alpha=None, rho_melt=None, H0=None, H1=None, state_cutoffs=[4.5, 16.5], temp=573.15, volume=1.0, mass=10.0, monomer=14.027, gtol=1e-6 ):
 
         if t is None:
             if self.solver is None:
@@ -499,12 +535,14 @@ class BatchReactor():
                 for i, _ in enumerate(t):
                     alpha[:, i] = self.get_part(n, rho[:, i], rho_melt, H0, H1, gtol)
 
-        if target in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']:
-            return convert_rho_to_y(target, n, rho, mass, monomer)
-        elif target in ['n', 'logn', 'M', 'logM']:
-            return get_dispersity(target, t, n, rho, monomer)
-        elif target in ['dpdn', 'dpdlogn', 'dPdn', 'dPdlogn', 'dPdM', 'dPdlogM']:
-            return get_pressures(target, t, n, rho, alpha, temp, volume, mass, monomer)
+        if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']:
+            return convert_rho_to_y(mode, n, rho, mass, monomer)
+        elif mode in ['D_n', 'D_logn', 'D_M', 'D_logM']:
+            return get_dispersity(mode, t, n, rho, monomer)
+        elif mode in ['dpdn', 'dpdlogn', 'dPdn', 'dPdlogn', 'dPdM', 'dPdlogM']:
+            return get_pressures(mode, t, n, rho, alpha, temp, volume, mass, monomer)
+        elif mode in ['rho_n', 'rho_logn', 'concs_n', 'concs_logn', 'w_n', 'w_logn', 'W_n', 'W_logn']:
+            return get_states(mode, t, n, rho, state_cutoffs, mass, monomer)
 
 
 class CSTReactor(BatchReactor):
@@ -523,12 +561,12 @@ class CSTReactor(BatchReactor):
             elif grid == 'continuum':
                 dn = n[1] - n[0]
                 g = n * concs
-                fin = numpy.array(influx) / ( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dn )
+                fin = numpy.array(influx) / ( 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn )
             elif grid == 'logn':
                 logn = numpy.log(n)
                 dlogn = logn[1] - logn[0]
                 g = n**2 * concs
-                fin = numpy.array(influx) / ( 0.5 * numpy.einsum( 'i->', g[1:] + g[:-1] ) * dlogn )
+                fin = numpy.array(influx) / ( 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn )
         self.fin = fin
 
         self.fout = numpy.array(outflux)

@@ -3,9 +3,10 @@ import numpy
 import os, sys
 
 from matplotlib import pyplot
+pyplot.rcParams.update({'font.size': 14})
 
 from reactor import CSTReactor
-from utils import plot_populations, plot_two_curves
+from utils import plot_curves, plot_two_axes, plot_populations
 
 
 volume  = 1.0
@@ -93,9 +94,9 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     # plot_populations(t, n, Gout, alpha1m, 'Chain Length', 'Chain Concentration', 'rho_n_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 29.0])
     # plot_populations(t, n, dwdn_out, alpha1m, 'Chain Length', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 29.0])
 
-    nn, nw, Dn = reactor.postprocess('logn', t=t, rho=Gout)
+    nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=Gout)
 
-    # plot_two_curves(t, nn, Dn, r'$\overline{n}$', 'PDI', 'disp_'+basename+'.png', y1scale='linear')
+    # plot_two_axes(t, nn, Dn, r'$\overline{n}$', 'PDI', 'disp_'+basename+'.png', y1scale='linear')
 
     '''
     logn = numpy.log(n)
@@ -117,22 +118,19 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
 
     print('{:40s} {:.3f} {:.3f} {:.3f} {:.3f}'.format( basename, F0/G0, F1/G1, H0/G0, H1/G1 ))
     '''
-    '''
+
     p, dpdn = reactor.postprocess('dpdn', t=t, rho=rho)
     p, dpdlogn = reactor.postprocess('dpdlogn', t=t, rho=rho)
     P, dPdn = reactor.postprocess('dPdn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
     P, dPdlogn = reactor.postprocess('dPdlogn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
 
-    plot_populations(t, n, dpdlogn*numpy.log(10.0), alpha1m, 'Chain Length', r'$d\widetilde{P}/d\log{n}$', 'dpdlogn_'+basename+'.png', prune=prune, xlim=[1.0, nmax])
+    # plot_populations(t, n, dpdlogn*numpy.log(10.0), alpha1m, 'Chain Length', r'$d\widetilde{P}/d\log{n}$', 'dpdlogn_'+basename+'.png', prune=prune, xlim=[1.0, nmax])
+    # plot_populations(t, n, dpdn, alpha1m, 'Chain Length', r'$d\widetilde{P}/d{n}$', 'dpdn_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 29.0])
+    # plot_curves(t, [P], 'Pressure (atm)', 'pressure_'+basename+'.png')
 
-    plot_populations(t, n, dpdn, alpha1m, 'Chain Length', r'$d\widetilde{P}/d{n}$', 'dpdn_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 29.0])
+    rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=reactor.rho[:, numpy.newaxis]+G+Gout)
+    wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=reactor.rho[:, numpy.newaxis]+G+Gout)
 
+    # plot_curves(t, [rho_s, rho_l, rho_g], 'Chain Concentration', 'rho_gls_'+basename+'.png', labels=['Solid (C$_{17'+u'\u2010'+'\infty}$)', 'Liquid (C$_{5'+u'\u2010'+'16}$)', 'Gas (C$_{1'+u'\u2010'+'4}$)'])
+    # plot_curves(t, [ws, wl, wg], 'Mass Fraction', 'w_gls_'+basename+'.png', labels=['Solid (C$_{17'+u'\u2010'+'\infty}$)', 'Liquid (C$_{5'+u'\u2010'+'16}$)', 'Gas (C$_{1'+u'\u2010'+'4}$)'])
 
-    pyplot.figure(figsize=(6.4, 4.8), dpi=150)
-    pyplot.plot(t, P)
-    pyplot.xlabel('Time')
-    pyplot.ylabel('Pressure (atm)')
-    pyplot.tight_layout()
-    pyplot.savefig('pressure_'+basename+'.png')
-    pyplot.close()
-    '''
