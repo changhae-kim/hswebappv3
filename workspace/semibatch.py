@@ -14,8 +14,8 @@ dens    = 920.0
 
 grid = 'logn'
 
-temps  = [573.15] # [ 423.15, 473.15, 523.15, 573.15 ]
-masses = [10.0] # [ 1.0, 10.0, 100.0, 1000.0 ]
+temps  = [ 423.15, 473.15, 523.15, 573.15 ]
+masses = [ 1.0, 10.0, 100.0, 1000.0 ]
 mus    = [3.0]
 sigmas = [0.1]
 
@@ -116,4 +116,23 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     H1 = 0.5 * numpy.sum(g1[-1, n10+1:] + g1[-1, n10:-1]) * dlogn
 
     print('{:40s} {:.3f} {:.3f} {:.3f} {:.3f}'.format( basename, F0/G0, F1/G1, H0/G0, H1/G1 ))
+    '''
+    '''
+    p, dpdn = reactor.postprocess('dpdn', t=t, rho=rho)
+    p, dpdlogn = reactor.postprocess('dpdlogn', t=t, rho=rho)
+    P, dPdn = reactor.postprocess('dPdn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
+    P, dPdlogn = reactor.postprocess('dPdlogn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
+
+    plot_populations(t, n, dpdlogn*numpy.log(10.0), alpha1m, 'Chain Length', r'$d\widetilde{P}/d\log{n}$', 'dpdlogn_'+basename+'.png', prune=prune, xlim=[1.0, nmax])
+
+    plot_populations(t, n, dpdn, alpha1m, 'Chain Length', r'$d\widetilde{P}/d{n}$', 'dpdn_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 29.0])
+
+
+    pyplot.figure(figsize=(6.4, 4.8), dpi=150)
+    pyplot.plot(t, P)
+    pyplot.xlabel('Time')
+    pyplot.ylabel('Pressure (atm)')
+    pyplot.tight_layout()
+    pyplot.savefig('pressure_'+basename+'.png')
+    pyplot.close()
     '''

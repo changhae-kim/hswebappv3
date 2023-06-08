@@ -77,10 +77,6 @@ def get_dispersity( xscale, t, n, rho, monomer=14.027 ):
 
     else:
 
-        G0 = numpy.zeros_like(t)
-        G1 = numpy.zeros_like(t)
-        G2 = numpy.zeros_like(t)
-
         G0 = 0.5 * numpy.einsum( 'ij->i', ( g0[:, 1:] + g0[:, :-1] ) * dx )
         G1 = 0.5 * numpy.einsum( 'ij->i', ( g1[:, 1:] + g1[:, :-1] ) * dx )
         G2 = 0.5 * numpy.einsum( 'ij->i', ( g2[:, 1:] + g2[:, :-1] ) * dx )
@@ -95,6 +91,34 @@ def get_dispersity( xscale, t, n, rho, monomer=14.027 ):
         Mn = monomer * nn
         Mw = monomer * nw
         return Mn, Mw, Dn
+
+def get_pressures( yscale, t, n, rho, alpha, temp=573.15, volume=1.0, mass=10.0, monomer=14.027 ):
+
+    dpdn = alpha.T * rho.T
+
+    if yscale in ['dpdn', 'dPdn', 'dPdM']:
+        dx = n[1:] - n[:-1]
+        dpdx = dpdn
+    elif yscale in ['dpdlogn', 'dPdlogn', 'dPdlogM']:
+        logn = numpy.log(n)
+        dx = logn[1:] - logn[:-1]
+        dpdx = n * dpdn
+
+    if t is None:
+        p = 0.5 * numpy.einsum( 'i->', ( dpdx[1:] + dpdx[:-1] ) * dx )
+    else:
+        p = 0.5 * numpy.einsum( 'ij->i', ( dpdx[:, 1:] + dpdx[:, :-1] ) * dx )
+
+    if yscale in ['dpdn', 'dpdlogn']:
+        return p, dpdx.T
+    elif yscale in ['dPdn', 'dPdlogn', 'dPdM', 'dPdlogM']:
+        nrtv = ( mass / monomer ) * ( 8.31446261815324 * temp / volume )
+        P = nrtv * p
+        if yscale == 'dPdM':
+            dPdx = nrtv * dpdx / monomer
+        else:
+            dPdx = nrtv * dpdx
+        return P, dPdx.T
 
 
 class BatchReactor():
@@ -444,7 +468,7 @@ class BatchReactor():
 
         return solver.t, solver.y
 
-    def postprocess( self, target, t=None, n=None, rho=None, mass=10.0, monomer=14.027 ):
+    def postprocess( self, target, t=None, n=None, rho=None, alpha=None, rho_melt=None, H0=None, H1=None, gtol=1e-6, temp=573.15, volume=1.0, mass=10.0, monomer=14.027 ):
 
         if t is None:
             if self.solver is None:
@@ -458,11 +482,29 @@ class BatchReactor():
                 rho = self.rho
             else:
                 rho = self.solver.y
+        if alpha is None:
+            alpha = self.alpha
+        if rho_melt is None:
+            rho_melt = self.rho_melt
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+
+        if alpha is None:
+            if t is None:
+                alpha, _ = self.get_part(n, rho, rho_melt, H0, H1, gtol)
+            else:
+                alpha = numpy.zeros_like(rho)
+                for i, _ in enumerate(t):
+                    alpha[:, i] = self.get_part(n, rho[:, i], rho_melt, H0, H1, gtol)
 
         if target in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']:
             return convert_rho_to_y(target, n, rho, mass, monomer)
         elif target in ['n', 'logn', 'M', 'logM']:
             return get_dispersity(target, t, n, rho, monomer)
+        elif target in ['dpdn', 'dpdlogn', 'dPdn', 'dPdlogn', 'dPdM', 'dPdlogM']:
+            return get_pressures(target, t, n, rho, alpha, temp, volume, mass, monomer)
 
 
 class CSTReactor(BatchReactor):

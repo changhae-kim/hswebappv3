@@ -97,10 +97,28 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     # plot_populations(t, n, dwdlogn, alpha1m, 'Chain Length', r'$d\widetilde{W}/d\ln{n}$', 'dwdlogn_'+basename+'.png', prune=prune, xlim=[1.0, nmax])
     # plot_populations(t, n, dwdlogn*numpy.log(10.0), alpha1m, 'Chain Length', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', prune=prune, xlim=[1.0, nmax])
 
-    # plot_populations(t, n, rho, alpha1m, 'Chain Length', 'Chain Concentration', 'rho_n_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 30.0])
-    # plot_populations(t, n, dwdn, alpha1m, 'Chain Length', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 30.0])
+    # plot_populations(t, n, rho, alpha1m, 'Chain Length', 'Chain Concentration', 'rho_n_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 29.0])
+    # plot_populations(t, n, dwdn, alpha1m, 'Chain Length', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 29.0])
 
     nn, nw, Dn = reactor.postprocess('logn', t=t, rho=rho)
 
     # plot_two_curves(t, nn, Dn, r'$\overline{n}$', 'PDI', 'disp_'+basename+'.png')
+
+    p, dpdn = reactor.postprocess('dpdn', t=t, rho=rho)
+    p, dpdlogn = reactor.postprocess('dpdlogn', t=t, rho=rho)
+    P, dPdn = reactor.postprocess('dPdn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
+    P, dPdlogn = reactor.postprocess('dPdlogn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
+
+    plot_populations(t, n, dpdlogn*numpy.log(10.0), alpha1m, 'Chain Length', r'$d\widetilde{P}/d\log{n}$', 'dpdlogn_'+basename+'.png', prune=prune, xlim=[1.0, nmax])
+
+    plot_populations(t, n, dpdn, alpha1m, 'Chain Length', r'$d\widetilde{P}/d{n}$', 'dpdn_'+basename+'.png', prune=prune, xscale='linear', xlim=[1.0, 29.0])
+
+
+    pyplot.figure(figsize=(6.4, 4.8), dpi=150)
+    pyplot.plot(t, P)
+    pyplot.xlabel('Time')
+    pyplot.ylabel('Pressure (atm)')
+    pyplot.tight_layout()
+    pyplot.savefig('pressure_'+basename+'.png')
+    pyplot.close()
 
