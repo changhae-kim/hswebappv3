@@ -1,10 +1,11 @@
 from matplotlib import cm, colors, pyplot, ticker
-pyplot.rcParams.update({'font.size': 14})
 
 
-def plot_curves( x, Y, ylabel, filename, xlabel='Time', labels=None ):
+def plot_curves( x, Y, ylabel, filename, xlabel=r'$\tilde{t}$', labels=None, xlim=None ):
 
-    pyplot.figure(figsize=(6.4, 4.8), dpi=150)
+    pyplot.rcParams.update({'font.size': 16})
+
+    pyplot.figure(figsize=(6.4, 4.2), dpi=150)
     if labels == None:
         for y in Y:
             pyplot.plot(x, y)
@@ -14,15 +15,21 @@ def plot_curves( x, Y, ylabel, filename, xlabel='Time', labels=None ):
         pyplot.legend()
     pyplot.xlabel(xlabel)
     pyplot.ylabel(ylabel)
+    if xlim is not None:
+        pyplot.xlim(*xlim)
+    else:
+        pyplot.xlim(x.min(), x.max())
     pyplot.tight_layout()
     pyplot.savefig(filename)
     pyplot.close()
 
     return
 
-def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel='Time', y1scale='log', y2scale='linear' ):
+def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel=r'$\tilde{t}$', y1scale='log', y2scale='linear', xlim=None ):
 
-    fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
+    pyplot.rcParams.update({'font.size': 16})
+
+    fig = pyplot.figure(figsize=(6.4, 4.2), dpi=150)
     ax1 = fig.subplots()
     ax2 = ax1.twinx()
 
@@ -31,6 +38,10 @@ def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel='Time', y1scale
     ax1.set_xlabel(xlabel)
     ax1.set_ylabel(y1label, color=color)
     ax1.set_yscale(y1scale)
+    if xlim is not None:
+        ax1.set_xlim(*xlim)
+    else:
+        ax1.set_xlim(x.min(), x.max())
     ax1.tick_params(axis='y', which='both', labelcolor=color)
 
     color = 'tab:orange'
@@ -45,7 +56,9 @@ def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel='Time', y1scale
 
     return
 
-def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=5, xscale='log', xlim=None, ytick=None ):
+def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=10, tlabel=r'$\tilde{t}$', alabel=r'$1-\alpha$', xscale='log', xlim=None, ytick=None ):
+
+    pyplot.rcParams.update({'font.size': 14})
 
     fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
     ax1 = fig.subplots()
@@ -66,13 +79,13 @@ def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=5, xscale='log
 
     ax2.plot(x, a, 'k--')
 
-    ax2.set_ylabel('Liquid-Phase Partition')
+    ax2.set_ylabel(alabel)
     ax2.set_xscale(xscale)
     if xlim is not None:
         ax2.set_xlim(*xlim)
     ax2.set_ylim(-0.05, 1.05)
 
-    pyplot.colorbar(mappable=cm.ScalarMappable(cmap='viridis', norm=colors.Normalize(vmin=t.min(), vmax=t.max())), location='top', label='Time')
+    pyplot.colorbar(mappable=cm.ScalarMappable(cmap='viridis', norm=colors.Normalize(vmin=t.min(), vmax=t.max())), location='top', label=tlabel)
 
     pyplot.tight_layout()
     pyplot.savefig(filename)
