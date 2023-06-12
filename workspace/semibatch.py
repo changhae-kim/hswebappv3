@@ -97,7 +97,7 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
 
     # rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho3)
     # wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho3)
-    labels = ['Solid (C$_{17'+u'\u2010'+'\infty}$)', 'Liquid (C$_{5'+u'\u2010'+'16}$)', 'Gas (C$_{1'+u'\u2010'+'4}$)']
-    # plot_curves(t, [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels)
-    # plot_curves(t, [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels)
+    # labels = ['Solid (C$_{17'+u'\u2010'+'\infty}$)', 'Liquid (C$_{5'+u'\u2010'+'16}$)', 'Gas (C$_{1'+u'\u2010'+'4}$)']
+    # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right')
+    # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right')
 

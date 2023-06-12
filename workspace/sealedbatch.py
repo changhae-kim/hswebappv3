@@ -20,6 +20,10 @@ masses = [ 3.0, 30.0 ] + [ 1.0, 10.0, 100.0, 1000.0 ]
 mus    = [ 2.0, 3.0, 4.0 ]
 sigmas = [ 0.1, 0.3, 0.5, 0.7 ]
 
+# tt = []
+# PP = []
+# Labels = []
+
 for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
 
     basename = '{temp:g}K_{mass:g}gpL_mu{mu:g}_sigma{sigma:g}'.format(temp=temp, mass=mass, mu=mu, sigma=sigma)
@@ -53,7 +57,7 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     # plot_populations(t, n, dwdn, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0])
 
     # nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=rho)
-    # plot_two_axes(t, nn, Dn, r'$\overline{n}$', '$'+u'\u0110'+'$', 'disp_'+basename+'.png')
+    # plot_two_axes(t, nn, Dn, r'$\overline{n}$', '$'+u'\u0110'+'$', 'disp_'+basename+'.png', xlim=[0.0, 1.0])
 
     # p, dpdn = reactor.postprocess('dpdn', t=t, rho=rho)
     # p, dpdlogn = reactor.postprocess('dpdlogn', t=t, rho=rho)
@@ -61,12 +65,18 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     # P, dPdlogn = reactor.postprocess('dPdlogn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
     # plot_populations(t, n, dpdlogn*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{P}/d\log{n}$', 'dpdlogn_'+basename+'.png', xlim=[1.0, nmax])
     # plot_populations(t, n, dpdn, alpha1m, '$n$', r'$d\widetilde{P}/d{n}$', 'dpdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0])
-    # plot_curves(t, [p], r'$\widetilde{P}$', 'p_'+basename+'.png')
-    # plot_curves(t, [P], 'Vapor Pressure (atm)', 'P_'+basename+'.png')
+    # plot_curves([t], [p], r'$\widetilde{P}$', 'p_'+basename+'.png', xlim=[0.0, 1.0])
+    # plot_curves([t], [P], 'Vapor Pressure (atm)', 'P_'+basename+'.png', xlim=[0.0, 1.0])
 
     # rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho)
     # wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho)
-    labels = ['Solid (C$_{17'+u'\u2010'+'\infty}$)', 'Liquid (C$_{5'+u'\u2010'+'16}$)', 'Gas (C$_{1'+u'\u2010'+'4}$)']
-    # plot_curves(t, [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels)
-    # plot_curves(t, [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels)
+    # labels = ['Solid (C$_{17'+u'\u2010'+'\infty}$)', 'Liquid (C$_{5'+u'\u2010'+'16}$)', 'Gas (C$_{1'+u'\u2010'+'4}$)']
+    # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0])
+    # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0])
+
+    # tt.append(t)
+    # PP.append(P)
+    # Labels.append('$W_M / V_H = '+'{:g}'.format(mass)+'$ g L$^{-1}$')
+
+# plot_curves(tt, PP, 'Vapor Pressure (atm)', 'P_'+basename+'.png', labels=Labels, loc='lower right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.30), 10.0**(+4.30)], size=(6.4, 4.8))
 

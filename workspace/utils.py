@@ -1,36 +1,36 @@
 from matplotlib import cm, colors, pyplot, ticker
 
 
-def plot_curves( x, Y, ylabel, filename, xlabel=r'$\tilde{t}$', labels=None, yscale='linear', xlim=None, font=16 ):
+def plot_curves( X, Y, ylabel, filename, xlabel=r'$\tilde{t}$', labels=None, loc='best', yscale='linear', xlim=None, ylim=None, font=16, size=(6.4, 4.2) ):
 
     pyplot.rcParams.update({'font.size': font})
 
-    pyplot.figure(figsize=(6.4, 4.2), dpi=150)
-    if labels == None:
-        for y in Y:
+    pyplot.figure(figsize=size, dpi=150)
+    if labels is None:
+        for x, y in zip(X, Y):
             pyplot.plot(x, y)
     else:
-        for y, label in zip(Y, labels):
+        for x, y, label in zip(X, Y, labels):
             pyplot.plot(x, y, label=label)
-        pyplot.legend()
+        pyplot.legend(loc=loc)
     pyplot.xlabel(xlabel)
     pyplot.ylabel(ylabel)
     pyplot.yscale(yscale)
     if xlim is not None:
         pyplot.xlim(*xlim)
-    else:
-        pyplot.xlim(x.min(), x.max())
+    if ylim is not None:
+        pyplot.ylim(*ylim)
     pyplot.tight_layout()
     pyplot.savefig(filename)
     pyplot.close()
 
     return
 
-def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel=r'$\tilde{t}$', y1scale='log', y2scale='linear', xlim=None, font=16 ):
+def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel=r'$\tilde{t}$', y1scale='log', y2scale='linear', xlim=None, font=16, size=(6.4, 4.2) ):
 
     pyplot.rcParams.update({'font.size': font})
 
-    fig = pyplot.figure(figsize=(6.4, 4.2), dpi=150)
+    fig = pyplot.figure(figsize=size, dpi=150)
     ax1 = fig.subplots()
     ax2 = ax1.twinx()
 
@@ -41,8 +41,6 @@ def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel=r'$\tilde{t}$',
     ax1.set_yscale(y1scale)
     if xlim is not None:
         ax1.set_xlim(*xlim)
-    else:
-        ax1.set_xlim(x.min(), x.max())
     ax1.tick_params(axis='y', which='both', labelcolor=color)
 
     color = 'tab:orange'
@@ -57,11 +55,11 @@ def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel=r'$\tilde{t}$',
 
     return
 
-def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=10, tlabel=r'$\tilde{t}$', alabel=r'$1-\alpha$', xscale='log', xlim=None, ytick=None, font=14 ):
+def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=10, tlabel=r'$\tilde{t}$', alabel=r'$1-\alpha$', xscale='log', xlim=None, ytick=None, font=14, size=(6.4, 4.8) ):
 
     pyplot.rcParams.update({'font.size': font})
 
-    fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
+    fig = pyplot.figure(figsize=size, dpi=150)
     ax1 = fig.subplots()
     ax2 = ax1.twinx()
 
