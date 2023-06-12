@@ -1,9 +1,9 @@
 from matplotlib import cm, colors, pyplot, ticker
 
 
-def plot_curves( x, Y, ylabel, filename, xlabel=r'$\tilde{t}$', labels=None, xlim=None ):
+def plot_curves( x, Y, ylabel, filename, xlabel=r'$\tilde{t}$', labels=None, yscale='linear', xlim=None, font=16 ):
 
-    pyplot.rcParams.update({'font.size': 16})
+    pyplot.rcParams.update({'font.size': font})
 
     pyplot.figure(figsize=(6.4, 4.2), dpi=150)
     if labels == None:
@@ -15,6 +15,7 @@ def plot_curves( x, Y, ylabel, filename, xlabel=r'$\tilde{t}$', labels=None, xli
         pyplot.legend()
     pyplot.xlabel(xlabel)
     pyplot.ylabel(ylabel)
+    pyplot.yscale(yscale)
     if xlim is not None:
         pyplot.xlim(*xlim)
     else:
@@ -25,9 +26,9 @@ def plot_curves( x, Y, ylabel, filename, xlabel=r'$\tilde{t}$', labels=None, xli
 
     return
 
-def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel=r'$\tilde{t}$', y1scale='log', y2scale='linear', xlim=None ):
+def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel=r'$\tilde{t}$', y1scale='log', y2scale='linear', xlim=None, font=16 ):
 
-    pyplot.rcParams.update({'font.size': 16})
+    pyplot.rcParams.update({'font.size': font})
 
     fig = pyplot.figure(figsize=(6.4, 4.2), dpi=150)
     ax1 = fig.subplots()
@@ -56,9 +57,9 @@ def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel=r'$\tilde{t}$',
 
     return
 
-def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=10, tlabel=r'$\tilde{t}$', alabel=r'$1-\alpha$', xscale='log', xlim=None, ytick=None ):
+def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=10, tlabel=r'$\tilde{t}$', alabel=r'$1-\alpha$', xscale='log', xlim=None, ytick=None, font=14 ):
 
-    pyplot.rcParams.update({'font.size': 14})
+    pyplot.rcParams.update({'font.size': font})
 
     fig = pyplot.figure(figsize=(6.4, 4.8), dpi=150)
     ax1 = fig.subplots()
