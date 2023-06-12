@@ -19,8 +19,11 @@ temps  = [ 423.15, 573.15 ]
 masses = [ 3.0, 30.0 ] + [ 1.0, 10.0, 100.0, 1000.0 ]
 mus    = [ 3.0 ]
 sigmas = [ 0.1 ]
-
 fluxes = [ 1.0, 10.0, 100.0 ]
+
+# tt = []
+# PP = []
+# Labels = []
 
 for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas, fluxes):
 
@@ -100,4 +103,10 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     # labels = ['Solid (C$_{17'+u'\u2010'+'\infty}$)', 'Liquid (C$_{5'+u'\u2010'+'16}$)', 'Gas (C$_{1'+u'\u2010'+'4}$)']
     # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right')
     # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right')
+
+    # tt.append(t)
+    # PP.append(P)
+    # Labels.append(r'$\tilde{f}_\mathrm{out} = '+'{:g}'.format(flux)+'$')
+
+# plot_curves(tt, PP, 'Vapor Pressure (atm)', 'P_'+basename+'.png', labels=Labels, loc='lower left', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.30), 10.0**(+4.30)], size=(6.4, 4.8))
 
