@@ -160,7 +160,7 @@ def get_states( mode, t, n, rho, state_cutoffs=[4.5, 16.5], mass=10.0, monomer=1
 class BatchReactor():
 
     def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
-            rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None,
+            rho=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
 
@@ -192,9 +192,9 @@ class BatchReactor():
                 rho = numpy.array(concs) / ( 0.5 * numpy.sum( g[1:] + g[:-1]) * dlogn )
         self.rho = rho
 
-        if rho_melt is None:
-            rho_melt = ( dens * volume ) / ( mass )
-        self.rho_melt = rho_melt
+        if rho_M is None:
+            rho_M = ( dens * volume ) / ( mass )
+        self.rho_M = rho_M
 
         if alpha is None or alpha1m is None:
             n = self.n
@@ -217,35 +217,35 @@ class BatchReactor():
 
         return
 
-    def get_part( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
+    def get_part( self, n=None, rho=None, rho_M=None, H0=None, H1=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
-        if rho_melt is None:
-            rho_melt = self.rho_melt
+        if rho_M is None:
+            rho_M = self.rho_M
         if H0 is None:
             H0 = self.H0
         if H1 is None:
             H1 = self.H1
 
-        W = self.get_melt(n, rho, rho_melt, H0, H1, gtol)
+        W = self.get_melt(n, rho, rho_M, H0, H1, gtol)
 
-        A = n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n
+        A = n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n
         alpha = A / ( 1.0 + A )
         alpha1m = 1.0 / ( 1.0 + A )
 
         return alpha, alpha1m
 
-    def get_discrete_melt( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
+    def get_discrete_melt( self, n=None, rho=None, rho_M=None, H0=None, H1=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
-        if rho_melt is None:
-            rho_melt = self.rho_melt
+        if rho_M is None:
+            rho_M = self.rho_M
         if H0 is None:
             H0 = self.H0
         if H1 is None:
@@ -253,8 +253,8 @@ class BatchReactor():
 
         def fun(x):
             W = numpy.exp(x)
-            dW = numpy.sum( ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n ) ) - W
-            dWdx = numpy.sum( ( n * rho * n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2 ) - W
+            dW = numpy.sum( ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n ) ) - W
+            dWdx = numpy.sum( ( n * rho * n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n )**2 ) - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
@@ -265,14 +265,14 @@ class BatchReactor():
 
         return W
 
-    def get_continuum_melt( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
+    def get_continuum_melt( self, n=None, rho=None, rho_M=None, H0=None, H1=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
-        if rho_melt is None:
-            rho_melt = self.rho_melt
+        if rho_M is None:
+            rho_M = self.rho_M
         if H0 is None:
             H0 = self.H0
         if H1 is None:
@@ -282,9 +282,9 @@ class BatchReactor():
 
         def fun(x):
             W = numpy.exp(x)
-            g = ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
+            g = ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n )
             dW = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn - W
-            g = ( n * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2
+            g = ( n * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n )**2
             dWdx = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
@@ -297,14 +297,14 @@ class BatchReactor():
 
         return W
 
-    def get_logn_melt( self, n=None, rho=None, rho_melt=None, H0=None, H1=None, gtol=1e-6 ):
+    def get_logn_melt( self, n=None, rho=None, rho_M=None, H0=None, H1=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
-        if rho_melt is None:
-            rho_melt = self.rho_melt
+        if rho_M is None:
+            rho_M = self.rho_M
         if H0 is None:
             H0 = self.H0
         if H1 is None:
@@ -315,9 +315,9 @@ class BatchReactor():
 
         def fun(x):
             W = numpy.exp(x)
-            g = ( n**2 * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )
+            g = ( n**2 * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n )
             dW = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn - W
-            g = ( n**2 * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_melt ) * H0 * H1**n )**2
+            g = ( n**2 * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n )**2
             dWdx = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
@@ -330,7 +330,7 @@ class BatchReactor():
 
         return W
 
-    def get_func( self, n=None, rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None, rand=None, gtol=1e-6 ):
+    def get_func( self, n=None, rho=None, alpha1m=None, rho_M=None, H0=None, H1=None, rand=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -338,8 +338,8 @@ class BatchReactor():
             rho = self.rho
         if alpha1m is None:
             alpha1m = self.alpha1m
-        if rho_melt is None:
-            rho_melt = self.rho_melt
+        if rho_M is None:
+            rho_M = self.rho_M
         if H0 is None:
             H0 = self.H0
         if H1 is None:
@@ -348,7 +348,7 @@ class BatchReactor():
             rand = self.rand
 
         if alpha1m is None:
-            _, alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
+            _, alpha1m = self.get_part(n, rho, rho_M, H0, H1, gtol)
 
         rate = self.get_rate(n, rho, alpha1m, rand)
 
@@ -478,7 +478,7 @@ class BatchReactor():
 
         return rate
 
-    def solve( self, t, n=None, rho=None, alpha1m=None, rho_melt=None, H0=None, H1=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
+    def solve( self, t, n=None, rho=None, alpha1m=None, rho_M=None, H0=None, H1=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -486,8 +486,8 @@ class BatchReactor():
             rho = self.rho
         if alpha1m is None:
             alpha1m = self.alpha1m
-        if rho_melt is None:
-            rho_melt = self.rho_melt
+        if rho_M is None:
+            rho_M = self.rho_M
         if H0 is None:
             H0 = self.H0
         if H1 is None:
@@ -496,7 +496,7 @@ class BatchReactor():
             rand = self.rand
 
         def fun( t, y ):
-            return self.get_func(n, y, alpha1m, rho_melt, H0, H1, rand, gtol)
+            return self.get_func(n, y, alpha1m, rho_M, H0, H1, rand, gtol)
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
@@ -504,7 +504,7 @@ class BatchReactor():
 
         return solver.t, solver.y
 
-    def postprocess( self, mode, t=None, n=None, rho=None, alpha=None, rho_melt=None, H0=None, H1=None, state_cutoffs=[4.5, 16.5], temp=573.15, volume=1.0, mass=10.0, monomer=14.027, gtol=1e-6 ):
+    def postprocess( self, mode, t=None, n=None, rho=None, alpha=None, rho_M=None, H0=None, H1=None, state_cutoffs=[4.5, 16.5], temp=573.15, volume=1.0, mass=10.0, monomer=14.027, gtol=1e-6 ):
 
         if t is None:
             if self.solver is None:
@@ -520,8 +520,8 @@ class BatchReactor():
                 rho = self.solver.y
         if alpha is None:
             alpha = self.alpha
-        if rho_melt is None:
-            rho_melt = self.rho_melt
+        if rho_M is None:
+            rho_M = self.rho_M
         if H0 is None:
             H0 = self.H0
         if H1 is None:
@@ -529,11 +529,11 @@ class BatchReactor():
 
         if alpha is None:
             if t is None:
-                alpha, _ = self.get_part(n, rho, rho_melt, H0, H1, gtol)
+                alpha, _ = self.get_part(n, rho, rho_M, H0, H1, gtol)
             else:
                 alpha = numpy.zeros_like(rho)
                 for i, _ in enumerate(t):
-                    alpha[:, i], _ = self.get_part(n, rho[:, i], rho_melt, H0, H1, gtol)
+                    alpha[:, i], _ = self.get_part(n, rho[:, i], rho_M, H0, H1, gtol)
 
         if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']:
             return convert_rho_to_y(mode, n, rho, mass, monomer)
@@ -548,11 +548,11 @@ class BatchReactor():
 class CSTReactor(BatchReactor):
 
     def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
-            rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None,
+            rho=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0], influx=[0.0, 0.0, 0.0, 0.0, 0.0], outflux=[0.0, 0.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
 
-        super().__init__(nmin, nmax, mesh, grid, rho, alpha, alpha1m, rho_melt, H0, H1, concs, temp, volume, mass, monomer, dens, rand)
+        super().__init__(nmin, nmax, mesh, grid, rho, alpha, alpha1m, rho_M, H0, H1, concs, temp, volume, mass, monomer, dens, rand)
 
         if fin is None:
             n = self.n
@@ -573,7 +573,7 @@ class CSTReactor(BatchReactor):
 
         return
 
-    def get_func( self, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
+    def get_func( self, n=None, rho=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -583,8 +583,8 @@ class CSTReactor(BatchReactor):
             alpha = self.alpha
         if alpha1m is None:
             alpha1m = self.alpha1m
-        if rho_melt is None:
-            rho_melt = self.rho_melt
+        if rho_M is None:
+            rho_M = self.rho_M
         if H0 is None:
             H0 = self.H0
         if H1 is None:
@@ -597,7 +597,7 @@ class CSTReactor(BatchReactor):
             rand = self.rand
 
         if alpha is None or alpha1m is None:
-            alpha, alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
+            alpha, alpha1m = self.get_part(n, rho, rho_M, H0, H1, gtol)
 
         rate = self.get_rate(n, rho, alpha1m, rand)
 
@@ -605,7 +605,7 @@ class CSTReactor(BatchReactor):
 
         return func
 
-    def solve( self, t, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
+    def solve( self, t, n=None, rho=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -615,8 +615,8 @@ class CSTReactor(BatchReactor):
             alpha = self.alpha
         if alpha1m is None:
             alpha1m = self.alpha1m
-        if rho_melt is None:
-            rho_melt = self.rho_melt
+        if rho_M is None:
+            rho_M = self.rho_M
         if H0 is None:
             H0 = self.H0
         if H1 is None:
@@ -629,7 +629,7 @@ class CSTReactor(BatchReactor):
             rand = self.rand
 
         def fun( t, y ):
-            return self.get_func(n, y, alpha, alpha1m, rho_melt, H0, H1, fin, fout, rand, gtol)
+            return self.get_func(n, y, alpha, alpha1m, rho_M, H0, H1, fin, fout, rand, gtol)
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
@@ -637,7 +637,7 @@ class CSTReactor(BatchReactor):
 
         return solver.t, solver.y
 
-    def cointegrate( self, t=None, n=None, rho=None, alpha=None, alpha1m=None, rho_melt=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
+    def cointegrate( self, t=None, n=None, rho=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
 
         if t is None:
             t = self.solver.t
@@ -649,8 +649,8 @@ class CSTReactor(BatchReactor):
             alpha = self.alpha
         if alpha1m is None:
             alpha1m = self.alpha1m
-        if rho_melt is None:
-            rho_melt = self.rho_melt
+        if rho_M is None:
+            rho_M = self.rho_M
         if H0 is None:
             H0 = self.H0
         if H1 is None:
@@ -675,11 +675,11 @@ class CSTReactor(BatchReactor):
 
             if alp is None:
                 if a1m is None:
-                    alp, a1m = self.get_part(n, rho[:, i], rho_melt, H0, H1, gtol)
+                    alp, a1m = self.get_part(n, rho[:, i], rho_M, H0, H1, gtol)
                 else:
-                    alp, _ = self.get_part(n, rho[:, i], rho_melt, H0, H1, gtol)
+                    alp, _ = self.get_part(n, rho[:, i], rho_M, H0, H1, gtol)
             elif a1m is None:
-                _, a1m = self.get_part(n, rho[:, i], rho_melt, H0, H1, gtol)
+                _, a1m = self.get_part(n, rho[:, i], rho_M, H0, H1, gtol)
 
             rate = self.get_rate(n, rho[:, i], a1m)
 
