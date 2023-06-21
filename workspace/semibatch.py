@@ -15,11 +15,12 @@ dens    = 920.0
 
 grid = 'logn'
 
-temps  = [ 423.15, 573.15 ]
-masses = [ 3.0, 30.0 ] + [ 1.0, 10.0, 100.0, 1000.0 ]
+temps  = [ 573.15 ] # [ 423.15, 573.15 ]
+masses = [ 100.0 ] # # [ 3.0, 30.0 ] + [ 1.0, 10.0, 100.0, 1000.0 ]
+masses = [ (mass)/(1.0+mass/dens) for mass in masses ]
 mus    = [ 3.0 ]
 sigmas = [ 0.1 ]
-fluxes = [ 1.0, 10.0, 100.0 ]
+fluxes = [ 1.0, 10.0 ] # [ 30.0 ] + [ 1.0, 10.0, 100.0 ]
 
 # tt = []
 # PP = []
@@ -43,14 +44,21 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     n = reactor.n
     alpha = reactor.alpha
     alpha1m = reactor.alpha1m
+    reactor.alpha = None
+    reactor.alpha1m = None
 
     if not os.path.exists('t_'+basename+'.npy') or not os.path.exists('rho_'+basename+'.npy'):
-        t, rho = reactor.solve(tmax, alpha=alpha, alpha1m=alpha1m, gtol=1e-12, rtol=1e-12, atol=1e-12)
+        t, rho = reactor.solve(tmax, gtol=1e-12, rtol=1e-12, atol=1e-12)
         numpy.save('t_'+basename+'.npy', t)
         numpy.save('rho_'+basename+'.npy', rho)
     else:
         t = numpy.load('t_'+basename+'.npy')
         rho = numpy.load('rho_'+basename+'.npy')
+
+    G, Gin, Gout = reactor.cointegrate(t=t, rho=rho)
+    rho1 = ( reactor.rho + ( G + Gin - Gout ).T ).T
+    rho2 = Gout
+    rho3 = ( reactor.rho + ( G + Gin ).T ).T
 
     # n, dwdn = reactor.postprocess('dwdn', rho=rho)
     # n, dwdlogn = reactor.postprocess('dwdlogn', rho=rho)
@@ -69,20 +77,15 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     # plot_curves(t, [p], r'$\widetilde{P}$', 'p_'+basename+'.png')
     # plot_curves(t, [P], 'Vapor Pressure (atm)', 'P_'+basename+'.png')
 
-    G, Gin, Gout = reactor.cointegrate(t=t, rho=rho, alpha=alpha, alpha1m=alpha1m)
-    rho1 = ( reactor.rho + ( G + Gin - Gout ).T ).T
-    rho2 = Gout
-    rho3 = ( reactor.rho + ( G + Gin ).T ).T
-
-    # n, dwdn1 = reactor.postprocess('dwdn', rho=rho2)
-    # n, dwdlogn1 = reactor.postprocess('dwdlogn', rho=rho2)
+    # n, dwdn1 = reactor.postprocess('dwdn', t=t, rho=rho1)
+    # n, dwdlogn1 = reactor.postprocess('dwdlogn', t=t, rho=rho1)
     # plot_populations(t, n, rho1, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax])
     # plot_populations(t, n, dwdlogn1*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', xlim=[1.0, nmax])
     # plot_populations(t, n, rho1, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0])
     # plot_populations(t, n, dwdn1, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0])
 
-    # n, dwdn2 = reactor.postprocess('dwdn', rho=rho2)
-    # n, dwdlogn2 = reactor.postprocess('dwdlogn', rho=rho2)
+    # n, dwdn2 = reactor.postprocess('dwdn', t=t, rho=rho2)
+    # n, dwdlogn2 = reactor.postprocess('dwdlogn', t=t, rho=rho2)
     # plot_populations(t, n, rho2, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax])
     # plot_populations(t, n, dwdlogn2*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', xlim=[1.0, nmax])
     # plot_populations(t, n, rho2, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0])
@@ -91,8 +94,8 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     # nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=Gout)
     # plot_two_axes(t, nn, Dn, r'$\overline{n}$', '$'+u'\u0110'+'$', 'disp_'+basename+'.png')
 
-    # n, dwdn3 = reactor.postprocess('dwdn', rho=rho3)
-    # n, dwdlogn3 = reactor.postprocess('dwdlogn', rho=rho3)
+    # n, dwdn3 = reactor.postprocess('dwdn', t=t, rho=rho3)
+    # n, dwdlogn3 = reactor.postprocess('dwdlogn', t=t, rho=rho3)
     # plot_populations(t, n, rho3, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax])
     # plot_populations(t, n, dwdlogn3*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', xlim=[1.0, nmax])
     # plot_populations(t, n, rho3, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0])

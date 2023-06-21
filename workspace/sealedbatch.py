@@ -15,10 +15,11 @@ dens    = 920.0
 
 grid = 'logn'
 
-temps  = [ 423.15, 573.15 ]
-masses = [ 3.0, 30.0 ] + [ 1.0, 10.0, 100.0, 1000.0 ]
-mus    = [ 2.0, 3.0, 4.0 ]
-sigmas = [ 0.1, 0.3, 0.5, 0.7 ]
+temps  = [ 423.15, 573.15 ] # [ 423.15, 573.15 ]
+masses = [ 1.0, 10.0, 100.0 ] # [ 3.0, 30.0 ] + [ 1.0, 10.0, 100.0, 1000.0 ]
+masses = [ (mass)/(1.0+mass/dens) for mass in masses ]
+mus    = [ 3.0 ] # [ 2.0, 3.0, 4.0 ]
+sigmas = [ 0.1 ] # [ 0.1, 0.3, 0.5, 0.7 ]
 
 # tt = []
 # PP = []
@@ -39,9 +40,10 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     n = reactor.n
     alpha1m = reactor.alpha1m
     # alpha1m = numpy.ones_like(reactor.alpha1m)
+    reactor.alpha1m = None
 
     if not os.path.exists('t_'+basename+'.npy') or not os.path.exists('rho_'+basename+'.npy'):
-        t, rho = reactor.solve(tmax, alpha1m=alpha1m, gtol=1e-12, rtol=1e-12, atol=1e-12)
+        t, rho = reactor.solve(tmax, gtol=1e-12, rtol=1e-12, atol=1e-12)
         numpy.save('t_'+basename+'.npy', t)
         numpy.save('rho_'+basename+'.npy', rho)
     else:
@@ -50,6 +52,7 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
 
     # n, dwdn = reactor.postprocess('dwdn', rho=rho)
     # n, dwdlogn = reactor.postprocess('dwdlogn', rho=rho)
+    # print(temp, mass, n[(n > 1.0) & (alpha1m < 0.5)].max(), n[(n > 1.0) & (alpha1m > 0.5)].min(), alpha1m[(n > 1.0) & (alpha1m < 0.5)].max(), alpha1m[(n > 1.0) & (alpha1m > 0.5)].min(), n[numpy.argmax(dwdn[:, -1])], n[numpy.argmax(dwdlogn[:, -1])])
     # plot_populations(t, n, dwdlogn, alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png')
     # plot_populations(t, n, rho, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax])
     # plot_populations(t, n, dwdlogn*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', xlim=[1.0, nmax])
@@ -76,7 +79,8 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
 
     # tt.append(t)
     # PP.append(P)
-    # Labels.append('$W_M / V_H = '+'{:g}'.format(mass)+'$ g L$^{-1}$')
+    # Labels.append('$V_H / W_H =$'+'{:g}'.format(1000.0/mass)+' cm$^3$$\cdot$g$^{-1}$')
+    # Labels.append('$V_0 / W_0 =$'+'{:g}'.format(1000.0/mass)+' cm$^3$$\cdot$g$^{-1}$')
 
 # plot_curves(tt, PP, 'Vapor Pressure (atm)', 'P_'+basename+'.png', labels=Labels, loc='lower right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.30), 10.0**(+4.30)], size=(6.4, 4.8))
 
