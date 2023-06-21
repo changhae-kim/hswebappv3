@@ -138,15 +138,15 @@ def get_states( mode, t, n, rho, state_cutoffs=[4.5, 16.5], mass=10.0, monomer=1
     elif mode in ['w_logn', 'W_logn']:
         g = n**2 * rho.T
 
-    Gg  = 0.5 * numpy.sum( ( g.T[    1:igl+1] + g.T[     :igl  ] ).T * dx[     :igl  ], axis=1 )
+    Ggg = 0.5 * numpy.sum( ( g.T[    1:igl+1] + g.T[     :igl  ] ).T * dx[     :igl  ], axis=1 )
     Ggl = 0.5 * numpy.sum( ( g.T[igl+1:igl+2] + g.T[igl  :igl+1] ).T * dx[igl  :igl+1], axis=1 )
-    Gl  = 0.5 * numpy.sum( ( g.T[igl+2:ils+1] + g.T[igl+1:ils  ] ).T * dx[igl+1:ils  ], axis=1 )
+    Gll = 0.5 * numpy.sum( ( g.T[igl+2:ils+1] + g.T[igl+1:ils  ] ).T * dx[igl+1:ils  ], axis=1 )
     Gls = 0.5 * numpy.sum( ( g.T[ils+1:ils+2] + g.T[ils  :ils+1] ).T * dx[ils  :ils+1], axis=1 )
-    Gs  = 0.5 * numpy.sum( ( g.T[ils+2:     ] + g.T[ils+1:   -1] ).T * dx[ils+1:     ], axis=1 )
+    Gss = 0.5 * numpy.sum( ( g.T[ils+2:     ] + g.T[ils+1:   -1] ).T * dx[ils+1:     ], axis=1 )
 
-    yg = Gg                                  + Ggl * ( dxgl / dx[igl] )
-    yl = Gl + Ggl * ( 1.0 - dxgl / dx[igl] ) + Gls * ( dxls / dx[ils] )
-    ys = Gs + Ggl * ( 1.0 - dxls / dx[ils] )
+    yg = Ggg                                  + Ggl * ( dxgl / dx[igl] )
+    yl = Gll + Ggl * ( 1.0 - dxgl / dx[igl] ) + Gls * ( dxls / dx[ils] )
+    ys = Gss + Ggl * ( 1.0 - dxls / dx[ils] )
 
     if mode in ['rho_n', 'rho_logn', 'w_n', 'w_logn']:
         return yg, yl, ys
