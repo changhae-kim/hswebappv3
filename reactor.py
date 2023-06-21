@@ -533,7 +533,7 @@ class BatchReactor():
             else:
                 alpha = numpy.zeros_like(rho)
                 for i, _ in enumerate(t):
-                    alpha[:, i] = self.get_part(n, rho[:, i], rho_melt, H0, H1, gtol)
+                    alpha[:, i], _ = self.get_part(n, rho[:, i], rho_melt, H0, H1, gtol)
 
         if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']:
             return convert_rho_to_y(mode, n, rho, mass, monomer)
@@ -596,13 +596,8 @@ class CSTReactor(BatchReactor):
         if rand is None:
             rand = self.rand
 
-        if alpha is None:
-            if alpha1m is None:
-                alpha, alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
-            else:
-                alpha, _ = self.get_part(n, rho, rho_melt, H0, H1, gtol)
-        elif alpha1m is None:
-            _, alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
+        if alpha is None or alpha1m is None:
+            alpha, alpha1m = self.get_part(n, rho, rho_melt, H0, H1, gtol)
 
         rate = self.get_rate(n, rho, alpha1m, rand)
 
