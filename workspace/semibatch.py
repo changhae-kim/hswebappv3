@@ -41,8 +41,7 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
 
     reactor = CSTReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
     n = reactor.n
-    alpha = reactor.alpha
-    alpha1m = reactor.alpha1m
+    alpha, alpha1m = reactor.get_part()
     reactor.alpha = None
     reactor.alpha1m = None
 

@@ -37,8 +37,10 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
 
     reactor = BatchReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
     n = reactor.n
-    alpha1m = reactor.alpha1m
+    alpha, alpha1m = reactor.get_part()
+    reactor.alpha = None
     reactor.alpha1m = None
+    # reactor.alpha = alpha = numpy_zeros_like(reactor.alpha)
     # reactor.alpha1m = alpha1m = numpy.ones_like(reactor.alpha1m)
 
     if not os.path.exists('t_'+basename+'.npy') or not os.path.exists('rho_'+basename+'.npy'):
@@ -49,8 +51,8 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
         t = numpy.load('t_'+basename+'.npy')
         rho = numpy.load('rho_'+basename+'.npy')
 
-    # n, dwdn = reactor.postprocess('dwdn', rho=rho)
-    # n, dwdlogn = reactor.postprocess('dwdlogn', rho=rho)
+    # n, dwdn = reactor.postprocess('dwdn', t=t, rho=rho)
+    # n, dwdlogn = reactor.postprocess('dwdlogn', t=t, rho=rho)
     # print(temp, mass, n[(n > 1.0) & (alpha1m < 0.5)].max(), n[(n > 1.0) & (alpha1m > 0.5)].min(), alpha1m[(n > 1.0) & (alpha1m < 0.5)].max(), alpha1m[(n > 1.0) & (alpha1m > 0.5)].min(), n[numpy.argmax(dwdn[:, -1])], n[numpy.argmax(dwdlogn[:, -1])])
     # plot_populations(t, n, dwdlogn, alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png')
     # plot_populations(t, n, rho, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax])
