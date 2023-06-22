@@ -11,19 +11,18 @@ from utils import plot_curves, plot_two_axes, plot_populations
 
 volume  = 1.0
 monomer = 14.027
-dens    = 920.0
+dens    = 940.0
 
 grid = 'logn'
 
 temps  = [ 423.15, 573.15 ] # [ 423.15, 573.15 ]
 masses = [ 1.0, 10.0, 100.0 ] # [ 3.0, 30.0 ] + [ 1.0, 10.0, 100.0, 1000.0 ]
-masses = [ (mass)/(1.0+mass/dens) for mass in masses ]
 mus    = [ 3.0 ] # [ 2.0, 3.0, 4.0 ]
 sigmas = [ 0.1 ] # [ 0.1, 0.3, 0.5, 0.7 ]
 
 # tt = []
 # PP = []
-# Labels = []
+# llabels = []
 
 for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
 
@@ -39,8 +38,8 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     reactor = BatchReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
     n = reactor.n
     alpha1m = reactor.alpha1m
-    # alpha1m = numpy.ones_like(reactor.alpha1m)
     reactor.alpha1m = None
+    # reactor.alpha1m = alpha1m = numpy.ones_like(reactor.alpha1m)
 
     if not os.path.exists('t_'+basename+'.npy') or not os.path.exists('rho_'+basename+'.npy'):
         t, rho = reactor.solve(tmax, gtol=1e-12, rtol=1e-12, atol=1e-12)
@@ -79,8 +78,8 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
 
     # tt.append(t)
     # PP.append(P)
-    # Labels.append('$V_H / W_H =$'+'{:g}'.format(1000.0/mass)+' cm$^3$$\cdot$g$^{-1}$')
-    # Labels.append('$V_0 / W_0 =$'+'{:g}'.format(1000.0/mass)+' cm$^3$$\cdot$g$^{-1}$')
+    # llabels.append('$V_H / W_H =$'+'{:g}'.format(1000.0/mass)+' cm$^3$$\cdot$g$^{-1}$')
+    # llabels.append('$V_0 / W_0 =$'+'{:g}'.format(1000.0/mass)+' cm$^3$$\cdot$g$^{-1}$')
 
-# plot_curves(tt, PP, 'Vapor Pressure (atm)', 'P_'+basename+'.png', labels=Labels, loc='lower right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.30), 10.0**(+4.30)], size=(6.4, 4.8))
+# plot_curves(tt, PP, 'Vapor Pressure (atm)', 'P_'+basename+'.png', labels=llabels, loc='lower right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.20), 10.0**(+4.20)], size=(6.4, 4.8))
 
