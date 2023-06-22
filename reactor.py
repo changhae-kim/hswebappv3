@@ -232,9 +232,9 @@ class BatchReactor():
 
         W = self.get_melt(n, rho, rho_M, H0, H1, gtol)
 
-        A = n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n
-        alpha = A / ( 1.0 + A )
-        alpha1m = 1.0 / ( 1.0 + A )
+        An = n * H0 * H1**n * ( 1.0 - W / rho_M )
+        alpha = An / ( W + An )
+        alpha1m = W / ( W + An )
 
         return alpha, alpha1m
 
@@ -251,17 +251,20 @@ class BatchReactor():
         if H1 is None:
             H1 = self.H1
 
+        An = n * H0 * H1**n
+
         def fun(x):
             W = numpy.exp(x)
-            dW = numpy.sum( ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n ) ) - W
-            dWdx = numpy.sum( ( n * rho * n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n )**2 ) - W
+            dW = numpy.sum( ( n * rho ) * ( W ) / ( W + An * ( 1.0 - W / rho_M ) ) ) - W
+            dWdx = numpy.sum( ( n * rho ) * ( An * W ) / ( W + An * ( 1.0 - W / rho_M ) )**2 ) - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
-        x = numpy.log( numpy.sum( ( n * rho ) / ( 1.0 + n * H0 * H1**n ) ) )
-        solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
-        W = numpy.exp(solver.x)
+        W = numpy.sum( ( n * rho ) / ( 1.0 + An ) )
+        if W > 0.0:
+            solver = minimize(fun, numpy.log(W), method='BFGS', jac=True, options={'gtol': gtol})
+            W = numpy.exp(solver.x)
 
         return W
 
@@ -278,22 +281,24 @@ class BatchReactor():
         if H1 is None:
             H1 = self.H1
 
+        An = n * H0 * H1**n
         dn = n[1] - n[0]
 
         def fun(x):
             W = numpy.exp(x)
-            g = ( n * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n )
+            g = ( n * rho ) * ( W ) / ( W + An * ( 1.0 - W / rho_M ) )
             dW = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn - W
-            g = ( n * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n )**2
+            g = ( n * rho ) * ( An * W ) / ( W + An * ( 1.0 - W / rho_M ) )**2
             dWdx = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
-        g = ( n * rho ) / ( 1.0 + n * H0 * H1**n )
-        x = numpy.log( 0.5 * numpy.sum( g[1:] + g[:-1]) * dn )
-        solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
-        W = numpy.exp(solver.x)
+        g = ( n * rho ) / ( 1.0 + An )
+        W = 0.5 * numpy.sum( g[1:] + g[:-1]) * dn
+        if W > 0.0:
+            solver = minimize(fun, numpy.log(W), method='BFGS', jac=True, options={'gtol': gtol})
+            W = numpy.exp(solver.x)
 
         return W
 
@@ -310,23 +315,25 @@ class BatchReactor():
         if H1 is None:
             H1 = self.H1
 
+        An = n * H0 * H1**n
         logn = numpy.log(n)
         dlogn = logn[1] - logn[0]
 
         def fun(x):
             W = numpy.exp(x)
-            g = ( n**2 * rho ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n )
+            g = ( n**2 * rho ) * ( W ) / ( W + An * ( 1.0 - W / rho_M ) )
             dW = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn - W
-            g = ( n**2 * rho ) * ( n * (1.0/W) * H0 * H1**n ) / ( 1.0 + n * ( 1.0/W - 1.0/rho_M ) * H0 * H1**n )**2
+            g = ( n**2 * rho ) * ( An * W ) / ( W + An * ( 1.0 - W / rho_M ) )**2
             dWdx = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn - W
             f = dW**2
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
-        g = ( n**2 * rho ) / ( 1.0 + n * H0 * H1**n )
-        x = numpy.log( 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn )
-        solver = minimize(fun, x, method='BFGS', jac=True, options={'gtol': gtol})
-        W = numpy.exp(solver.x)
+        g = ( n**2 * rho ) / ( 1.0 + An )
+        W = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn
+        if W > 0.0:
+            solver = minimize(fun, numpy.log(W), method='BFGS', jac=True, options={'gtol': gtol})
+            W = numpy.exp(solver.x)
 
         return W
 
