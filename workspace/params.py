@@ -3,7 +3,6 @@ import numpy
 import os, sys
 
 from reactor import BatchReactor
-from utils import plot_populations, plot_two_curves
 
 nmax = 100
 grid = 'discrete'
@@ -11,9 +10,9 @@ concs = numpy.ones(100)
 
 temps = [ 423.15, 473.15, 523.15, 573.15 ]
 volume = 1.0
-masses = [ 10.0, 100.0, 1000.0 ]
+masses = [ 1.0, 10.0, 100.0 ]
 monomer = 14.027
-dens = 920.0
+dens = 940.0
 
 Mws = [ 22150, 17200, 70400, 420000, 115150, 4000, ]
 Mns = [  8150, 15400, 64300, 158000,  33000, 2800, ]
