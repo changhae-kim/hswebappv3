@@ -148,6 +148,8 @@ def get_states( mode, t, n, rho, state_cutoffs=[4.5, 16.5], mass=10.0, monomer=1
     yl = Gll + Ggl * ( 1.0 - dxgl / dx[igl] ) + Gls * ( dxls / dx[ils] )
     ys = Gss + Ggl * ( 1.0 - dxls / dx[ils] )
 
+    yg, yl, ys = numpy.array([ yg, yl, ys ]) / numpy.sum([ yg, yl, ys ], axis=0)
+
     if mode in ['rho_n', 'rho_logn', 'w_n', 'w_logn']:
         return yg, yl, ys
     elif mode in ['concs_n', 'concs_logn']:
