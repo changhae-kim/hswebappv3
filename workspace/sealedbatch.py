@@ -24,7 +24,7 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
 
     basename = '{temp:g}K_{mass:g}gpL_mu{mu:g}_sigma{sigma:g}'.format(temp=temp, mass=mass, mu=mu, sigma=sigma)
 
-    nmin = 1e-2 # 1e-3
+    nmin = 1e-2
     nmax = 10.0**(mu+4.0*sigma)
     mesh = int(100.0*(numpy.log10(nmax)-numpy.log10(nmin)))
     n = numpy.logspace(numpy.log10(nmin), numpy.log10(nmax), mesh)
@@ -76,10 +76,9 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho)
     wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho)
     labels = ['Solid', 'Liquid', 'Gas']
-    # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=16)
-    # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=16)
+    # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
+    # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
     # print(temp, mass, wg[-1], wl[-1], ws[-1])
-
 
 for temp in temps:
 
@@ -89,7 +88,9 @@ for temp in temps:
 
     for mass, mu, sigma in itertools.product(masses, mus, sigmas):
 
-        nmin = 1e-2 # 1e-3
+        basename = '{temp:g}K_{mass:g}gpL_mu{mu:g}_sigma{sigma:g}'.format(temp=temp, mass=mass, mu=mu, sigma=sigma)
+
+        nmin = 1e-2
         nmax = 10.0**(mu+4.0*sigma)
         mesh = int(100.0*(numpy.log10(nmax)-numpy.log10(nmin)))
         n = numpy.logspace(numpy.log10(nmin), numpy.log10(nmax), mesh)

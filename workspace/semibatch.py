@@ -15,8 +15,8 @@ dens    = 940.0
 
 grid = 'logn'
 
-temps  = [ 423.15, 573.15 ]
-masses = [ 100.0 ]
+temps  = [ 573.15 ]
+masses = [ 100.0, 10.0, 1.0 ]
 mus    = [ 3.0 ]
 sigmas = [ 0.1 ]
 fluxes = [ 1.0, 10.0, 100.0 ]
@@ -104,17 +104,18 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho3)
     wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho3)
     labels = ['Solid', 'Liquid', 'Gas']
-    #plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
-    #plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
+    # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
+    # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
 
-
-for temp in temps:
+for mass in masses:
 
     tt = []
     PP = []
     llabels = []
 
-    for mass, mu, sigma, flux in itertools.product(masses, mus, sigmas, fluxes):
+    for temp, mu, sigma, flux in itertools.product(temps, mus, sigmas, fluxes):
+
+        basename = '{temp:g}K_{mass:g}gpL_mu{mu:g}_sigma{sigma:g}_flux{flux:g}'.format(temp=temp, mass=mass, mu=mu, sigma=sigma, flux=flux)
 
         nmin = 1e-2
         nmax = 10.0**(mu+4.0*sigma)
