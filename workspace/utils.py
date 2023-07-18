@@ -92,3 +92,24 @@ def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=10, tlabel=r'$
 
     return
 
+def plot_colormap( x, y, z, xlabel, ylabel, zlabel, filename, xscale='linear', yscale='linear', zscale='linear', zmin=None, zmax=None, font=16, size=(6.4, 4.8) ):
+
+    pyplot.rcParams.update({'font.size': font})
+
+    pyplot.figure(figsize=size, dpi=150)
+    if zscale == 'log':
+        norm = colors.LogNorm(vmin=zmin, vmax=zmax)
+    else:
+        norm = colors.Normalize(vmin=zmin, vmax=zmax)
+    pyplot.pcolormesh(x, y, z, norm=norm)
+    pyplot.xlabel(xlabel)
+    pyplot.ylabel(ylabel)
+    pyplot.xscale(xscale)
+    pyplot.yscale(yscale)
+    pyplot.colorbar(label=zlabel)
+    pyplot.tight_layout()
+    pyplot.savefig(filename)
+    pyplot.close()
+
+    return
+
