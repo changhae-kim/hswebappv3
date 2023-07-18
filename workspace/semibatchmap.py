@@ -15,7 +15,7 @@ dens    = 940.0
 
 grid = 'logn'
 
-N = 10
+N = 20
 temps  = [ 573.15 ]
 masses = numpy.logspace( 0, 2, N+1 )
 mus    = [ 3.0 ]
@@ -32,7 +32,7 @@ Rho_S = []
 WG = []
 WL = []
 WS = []
-
+'''
 for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas, fluxes):
 
     basename = '{temp:g}K_{mass:g}gpL_mu{mu:g}_sigma{sigma:g}_flux{flux:g}'.format(temp=temp, mass=mass, mu=mu, sigma=sigma, flux=flux)
@@ -82,7 +82,7 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     WG.append(wg[-1])
     WL.append(wl[-1])
     WS.append(ws[-1])
-
+'''
 data = [
         [Mn,    'Mn',    'linear', None, None, r'$\tilde{M}_n$',            ],
         [Mw,    'Mw',    'linear', None, None, r'$\tilde{M}_w$',            ],
