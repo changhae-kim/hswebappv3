@@ -104,5 +104,5 @@ for i, _ in enumerate(data):
         data[i][0] = numpy.load(data[i][1]+'.npy')
 
 for i, _ in enumerate(data):
-    plot_colormap(1000.0/masses, fluxes, data[i][0].T, '$V_0/W_0$ (cm$^3$ g$^{-1}$)', r'$\tilde{f}_\mathrm{out}$', data[i][-1], data[i][1]+'.png', xscale='log', yscale='log', zscale=data[i][2], zmin=data[i][3], zmax=data[i][4])
+    plot_colormap(fluxes, 1000.0/masses, data[i][0], r'$\tilde{f}_\mathrm{out}$', '$V_0/W_0$ (cm$^3$ g$^{-1}$)', data[i][-1], data[i][1]+'.png', xscale='log', yscale='log', zscale=data[i][2], zmin=data[i][3], zmax=data[i][4])
 
