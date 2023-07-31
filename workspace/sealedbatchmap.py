@@ -79,8 +79,8 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     WS.append(ws[-1])
 
 data = [
-        [Mn,    'Mn',    'linear', None, None, r'$\tilde{M}_N$',            ],
-        [Mw,    'Mw',    'linear', None, None, r'$\tilde{M}_W$',            ],
+        [Mn,    'Mn',    'linear', None, None, r'$\widetilde{M}_N$',        ],
+        [Mw,    'Mw',    'linear', None, None, r'$\widetilde{M}_W$',        ],
         [DDn,   'DDn',   'linear', None, None, '$'+u'\u0110'+'$',           ],
         [PP,    'PP',    'log',    None, None, 'Peak Vapor Pressure (atm)', ],
         [Rho_G, 'Rho_G', 'linear', None, None, 'Mole Fraction of Gases',    ],
