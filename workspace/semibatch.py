@@ -100,7 +100,7 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     # print(flux, xa+(xb-xa)/(yb-ya)*(0.5-ya), n[numpy.argmax(dwdn3[:, -1])], n[numpy.argmax(dwdlogn3[:, -1])])
 
     nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=rho3)
-    # plot_two_axes(t, nn, Dn, r'$\overline{n}$', '$'+u'\u0110'+'$', 'disp_'+basename+'.png')
+    # plot_two_axes(t, nn, Dn, r'$\widetilde{M}_N$', '$'+u'\u0110'+'$', 'disp_'+basename+'.png')
     # print(mass, flux, nn[-1], nw[-1], Dn[-1])
 
     rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho3)
