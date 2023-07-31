@@ -5,7 +5,7 @@ import os, sys
 from matplotlib import pyplot
 pyplot.rcParams.update({'font.size': 14})
 
-from reactor import CSTReactor
+from reactor import SemiBatchReactor
 from utils import plot_curves, plot_two_axes, plot_populations
 
 
@@ -35,7 +35,7 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     influx = numpy.zeros_like(concs)
     outflux = [flux, 0.0]
 
-    reactor = CSTReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
+    reactor = SemiBatchReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
     n = reactor.n
     alpha, alpha1m = reactor.get_part()
     reactor.alpha = None
@@ -75,15 +75,15 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     n, dwdlogn1 = reactor.postprocess('dwdlogn', t=t, rho=rho1)
     # plot_populations(t, n, rho1, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax])
     # plot_populations(t, n, dwdlogn1*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', xlim=[1.0, nmax])
-    # plot_populations(t, n, rho1, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0])
-    # plot_populations(t, n, dwdn1, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0])
+    # plot_populations(t, n, rho1, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
+    # plot_populations(t, n, dwdn1, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
 
     n, dwdn2 = reactor.postprocess('dwdn', t=t, rho=rho2)
     n, dwdlogn2 = reactor.postprocess('dwdlogn', t=t, rho=rho2)
     # plot_populations(t, n, rho2, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax])
     # plot_populations(t, n, dwdlogn2*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', xlim=[1.0, nmax])
-    # plot_populations(t, n, rho2, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0])
-    # plot_populations(t, n, dwdn2, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0])
+    # plot_populations(t, n, rho2, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
+    # plot_populations(t, n, dwdn2, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
 
     n, dwdn3 = reactor.postprocess('dwdn', t=t, rho=rho3)
     n, dwdlogn3 = reactor.postprocess('dwdlogn', t=t, rho=rho3)
@@ -99,13 +99,14 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
 
     nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=rho3)
     # plot_two_axes(t, nn, Dn, r'$\overline{n}$', '$'+u'\u0110'+'$', 'disp_'+basename+'.png')
-    # print(flux, nn[-1], nw[-1], Dn[-1])
+    # print(mass, flux, nn[-1], nw[-1], Dn[-1])
 
     rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho3)
     wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho3)
     labels = ['Solid', 'Liquid', 'Gas']
     # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
     # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
+    print(mass, flux, wg[-1], wl[-1], ws[-1])
 
 for mass in masses:
 
@@ -127,7 +128,7 @@ for mass in masses:
         influx = numpy.zeros_like(concs)
         outflux = [flux, 0.0]
 
-        reactor = CSTReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
+        reactor = SemiBatchReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
         n = reactor.n
         alpha, alpha1m = reactor.get_part()
         reactor.alpha = None

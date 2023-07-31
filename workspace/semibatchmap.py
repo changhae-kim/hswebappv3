@@ -5,7 +5,7 @@ import os, sys
 from matplotlib import pyplot
 pyplot.rcParams.update({'font.size': 14})
 
-from reactor import CSTReactor
+from reactor import SemiBatchReactor
 from utils import plot_curves, plot_two_axes, plot_populations, plot_colormap
 
 
@@ -47,7 +47,7 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     influx = numpy.zeros_like(concs)
     outflux = [flux, 0.0]
 
-    reactor = CSTReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
+    reactor = SemiBatchReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
     n = reactor.n
     alpha, alpha1m = reactor.get_part()
     reactor.alpha = None

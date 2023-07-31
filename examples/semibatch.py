@@ -5,7 +5,7 @@ from matplotlib import cm, pyplot
 pyplot.rcParams.update({'font.size': 14})
 
 sys.path.append('..')
-from reactor import CSTReactor
+from reactor import SemiBatchReactor
 
 
 for flux in [0.001, 0.01, 0.1, 1.0]:
@@ -18,7 +18,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     outflux = [flux, 0.0]
     tmax = 100.0
 
-    reactor = CSTReactor(nmax=nmax, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
+    reactor = SemiBatchReactor(nmax=nmax, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
     n1 = reactor.n
     a1 = reactor.alpha1m
     t1, y1 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
@@ -41,7 +41,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('cstr_partition_discrete_io_{:.0e}.png'.format(flux))
+    pyplot.savefig('semibatch_partition_discrete_io_{:.0e}.png'.format(flux))
     pyplot.close()
 
     prune = 2
@@ -60,7 +60,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('cstr_partition_discrete_io_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('semibatch_partition_discrete_io_o_{:.0e}.png'.format(flux))
     pyplot.close()
 
 
@@ -74,7 +74,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     outflux = [flux, 0.0]
     tmax = 100.0
 
-    reactor = CSTReactor(nmax=nmax, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
+    reactor = SemiBatchReactor(nmax=nmax, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
     n2 = reactor.n
     a2 = reactor.alpha1m
     t2, y2 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
@@ -97,7 +97,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('cstr_partition_discrete_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('semibatch_partition_discrete_o_{:.0e}.png'.format(flux))
     pyplot.close()
 
     prune = 2
@@ -116,7 +116,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('cstr_partition_discrete_o_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('semibatch_partition_discrete_o_o_{:.0e}.png'.format(flux))
     pyplot.close()
 
 
@@ -131,7 +131,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     outflux = [flux, 0.0]
     tmax = 100.0
 
-    reactor = CSTReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
+    reactor = SemiBatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
     n3 = reactor.n
     a3 = reactor.alpha1m
     t3, y3 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
@@ -154,7 +154,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('cstr_partition_continuum_io_{:.0e}.png'.format(flux))
+    pyplot.savefig('semibatch_partition_continuum_io_{:.0e}.png'.format(flux))
     pyplot.close()
 
     prune = 2
@@ -173,7 +173,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('cstr_partition_continuum_io_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('semibatch_partition_continuum_io_o_{:.0e}.png'.format(flux))
     pyplot.close()
 
 
@@ -188,7 +188,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     outflux = [flux, 0.0]
     tmax = 100.0
 
-    reactor = CSTReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
+    reactor = SemiBatchReactor(nmax=nmax, mesh=mesh, grid=grid, concs=concs, influx=influx, outflux=outflux, temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0)
     n4 = reactor.n
     a4 = reactor.alpha1m
     t4, y4 = reactor.solve(tmax, gtol=1e-6, rtol=1e-6, atol=1e-6)
@@ -211,7 +211,7 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('cstr_partition_continuum_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('semibatch_partition_continuum_o_{:.0e}.png'.format(flux))
     pyplot.close()
 
     prune = 2
@@ -230,6 +230,6 @@ for flux in [0.001, 0.01, 0.1, 1.0]:
     ylim = ax2.get_ylim()
     ax2.set_ylabel('Liquid-Phase Partition')
     pyplot.tight_layout()
-    pyplot.savefig('cstr_partition_continuum_o_o_{:.0e}.png'.format(flux))
+    pyplot.savefig('semibatch_partition_continuum_o_o_{:.0e}.png'.format(flux))
     pyplot.close()
 

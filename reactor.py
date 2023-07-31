@@ -554,7 +554,7 @@ class BatchReactor():
             return get_states(mode, t, n, rho, state_cutoffs, mass, monomer)
 
 
-class CSTReactor(BatchReactor):
+class SemiBatchReactor(BatchReactor):
 
     def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
             rho=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None,
