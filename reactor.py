@@ -84,11 +84,11 @@ def get_dispersity( mode, t, n, rho, monomer=14.027 ):
         Mw = monomer * nw
         return Mn, Mw, Dn
 
-def get_pressures( mode, t, n, rho, alpha, temp=573.15, volume=1.0, mass=10.0, monomer=14.027 ):
+def get_pressures( mode, t, n, rho, V, alpha, temp=573.15, volume=1.0, mass=10.0, monomer=14.027 ):
 
     assert mode in ['dpdn', 'dpdlogn', 'dPdn', 'dPdlogn', 'dPdM', 'dPdlogM']
 
-    dpdn = alpha.T * rho.T
+    dpdn = alpha.T * ( rho / V ).T
 
     if mode in ['dpdn', 'dPdn', 'dPdM']:
         dx = n[1:] - n[:-1]
@@ -162,7 +162,7 @@ def get_states( mode, t, n, rho, state_cutoffs=[4.5, 16.5], mass=10.0, monomer=1
 class BatchReactor():
 
     def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
-            rho=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None,
+            rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
 
@@ -198,18 +198,24 @@ class BatchReactor():
             rho_M = ( dens * volume ) / ( mass )
         self.rho_M = rho_M
 
-        if alpha is None or alpha1m is None:
+        if W is None or V is None or alpha is None or alpha1m is None:
             n = self.n
             if H0 is None:
                 H0 = ( monomer * volume ) / ( mass * 0.082057366080960 * temp ) * numpy.exp( 8.124149532 + 472.8315525 / temp )
             if H1 is None:
                 H1 = numpy.exp( 0.327292343 - 536.5152612 / temp )
+            if W is None:
+                W = 1.0
+            if V is None:
+                V = 1.0
             if alpha is None:
-                alpha = ( n * H0 * H1**n ) / ( 1.0 + n * H0 * H1**n )
+                alpha = ( n * H0 * H1**n * V / W ) / ( 1.0 + n * H0 * H1**n * V / W )
             if alpha1m is None:
-                alpha1m = 1.0 / ( 1.0 + n * H0 * H1**n )
+                alpha1m = 1.0 / ( 1.0 + n * H0 * H1**n * V / W )
         self.H0 = H0
         self.H1 = H1
+        self.W = W
+        self.V = V
         self.alpha = alpha
         self.alpha1m = alpha1m
 
@@ -219,7 +225,7 @@ class BatchReactor():
 
         return
 
-    def get_part( self, n=None, rho=None, rho_M=None, H0=None, H1=None, gtol=1e-6 ):
+    def get_part( self, n=None, rho=None, rho_M=None, H0=None, H1=None, gtol=1e-6, alpha_only=True ):
 
         if n is None:
             n = self.n
@@ -233,12 +239,16 @@ class BatchReactor():
             H1 = self.H1
 
         W = self.get_melt(n, rho, rho_M, H0, H1, gtol)
+        V = 1.0 - W / rho_M
 
         An = n * H0 * H1**n * ( 1.0 - W / rho_M )
         alpha = An / ( W + An )
         alpha1m = W / ( W + An )
 
-        return alpha, alpha1m
+        if alpha_only:
+            return alpha, alpha1m
+        else:
+            return W, V, alpha, alpha1m
 
     def get_discrete_melt( self, n=None, rho=None, rho_M=None, H0=None, H1=None, gtol=1e-6 ):
 
@@ -513,7 +523,7 @@ class BatchReactor():
 
         return solver.t, solver.y
 
-    def postprocess( self, mode, t=None, n=None, rho=None, alpha=None, rho_M=None, H0=None, H1=None, state_cutoffs=[4.5, 16.5], temp=573.15, volume=1.0, mass=10.0, monomer=14.027, gtol=1e-6 ):
+    def postprocess( self, mode, t=None, n=None, rho=None, V=None, alpha=None, rho_M=None, H0=None, H1=None, state_cutoffs=[4.5, 16.5], temp=573.15, volume=1.0, mass=10.0, monomer=14.027, gtol=1e-6 ):
 
         if t is None:
             if self.solver is None:
@@ -527,6 +537,8 @@ class BatchReactor():
                 rho = self.rho
             else:
                 rho = self.solver.y
+        if V is None:
+            V = self.V
         if alpha is None:
             alpha = self.alpha
         if rho_M is None:
@@ -536,20 +548,21 @@ class BatchReactor():
         if H1 is None:
             H1 = self.H1
 
-        if alpha is None:
+        if V is None or alpha is None:
             if t is None:
-                alpha, _ = self.get_part(n, rho, rho_M, H0, H1, gtol)
+                _, V, alpha, _ = self.get_part(n, rho, rho_M, H0, H1, gtol, alpha_only=False)
             else:
+                V = numpy.zeros_like(t)
                 alpha = numpy.zeros_like(rho)
                 for i, _ in enumerate(t):
-                    alpha[:, i], _ = self.get_part(n, rho[:, i], rho_M, H0, H1, gtol)
+                    _, V[i], alpha[:, i], _ = self.get_part(n, rho[:, i], rho_M, H0, H1, gtol, alpha_only=False)
 
         if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']:
             return convert_rho_to_y(mode, n, rho, mass, monomer)
         elif mode in ['D_n', 'D_logn', 'D_M', 'D_logM']:
             return get_dispersity(mode, t, n, rho, monomer)
         elif mode in ['dpdn', 'dpdlogn', 'dPdn', 'dPdlogn', 'dPdM', 'dPdlogM']:
-            return get_pressures(mode, t, n, rho, alpha, temp, volume, mass, monomer)
+            return get_pressures(mode, t, n, rho, V, alpha, temp, volume, mass, monomer)
         elif mode in ['rho_n', 'rho_logn', 'concs_n', 'concs_logn', 'w_n', 'w_logn', 'W_n', 'W_logn']:
             return get_states(mode, t, n, rho, state_cutoffs, mass, monomer)
 
@@ -557,11 +570,11 @@ class BatchReactor():
 class SemiBatchReactor(BatchReactor):
 
     def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
-            rho=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None,
+            rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0], influx=[0.0, 0.0, 0.0, 0.0, 0.0], outflux=[0.0, 0.0],
             temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
 
-        super().__init__(nmin, nmax, mesh, grid, rho, alpha, alpha1m, rho_M, H0, H1, concs, temp, volume, mass, monomer, dens, rand)
+        super().__init__(nmin, nmax, mesh, grid, rho, W, V, alpha, alpha1m, rho_M, H0, H1, concs, temp, volume, mass, monomer, dens, rand)
 
         if fin is None:
             n = self.n
@@ -582,12 +595,14 @@ class SemiBatchReactor(BatchReactor):
 
         return
 
-    def get_func( self, n=None, rho=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
+    def get_func( self, n=None, rho=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
+        if V is None:
+            V = self.V
         if alpha is None:
             alpha = self.alpha
         if alpha1m is None:
@@ -605,21 +620,23 @@ class SemiBatchReactor(BatchReactor):
         if rand is None:
             rand = self.rand
 
-        if alpha is None or alpha1m is None:
-            alpha, alpha1m = self.get_part(n, rho, rho_M, H0, H1, gtol)
+        if V is None or alpha is None or alpha1m is None:
+            _, V, alpha, alpha1m = self.get_part(n, rho, rho_M, H0, H1, gtol, alpha_only=False)
 
         rate = self.get_rate(n, rho, alpha1m, rand)
 
-        func = rate + fin - fout[0] * alpha * rho - fout[1] * alpha1m * rho
+        func = rate + fin - fout[0] * alpha * rho / V - fout[1] * alpha1m * rho
 
         return func
 
-    def solve( self, t, n=None, rho=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
+    def solve( self, t, n=None, rho=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
         if n is None:
             n = self.n
         if rho is None:
             rho = self.rho
+        if V is None:
+            V = self.V
         if alpha is None:
             alpha = self.alpha
         if alpha1m is None:
@@ -638,7 +655,7 @@ class SemiBatchReactor(BatchReactor):
             rand = self.rand
 
         def fun( t, y ):
-            return self.get_func(n, y, alpha, alpha1m, rho_M, H0, H1, fin, fout, rand, gtol)
+            return self.get_func(n, y, V, alpha, alpha1m, rho_M, H0, H1, fin, fout, rand, gtol)
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
@@ -646,7 +663,7 @@ class SemiBatchReactor(BatchReactor):
 
         return solver.t, solver.y
 
-    def cointegrate( self, t=None, n=None, rho=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
+    def cointegrate( self, t=None, n=None, rho=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
 
         if t is None:
             t = self.solver.t
@@ -654,6 +671,8 @@ class SemiBatchReactor(BatchReactor):
             n = self.n
         if rho is None:
             rho = self.solver.y
+        if V is None:
+            V = self.V
         if alpha is None:
             alpha = self.alpha
         if alpha1m is None:
@@ -679,22 +698,18 @@ class SemiBatchReactor(BatchReactor):
 
         for i, _ in enumerate(t):
 
+            v = V
             alp = alpha
             a1m = alpha1m
 
-            if alp is None:
-                if a1m is None:
-                    alp, a1m = self.get_part(n, rho[:, i], rho_M, H0, H1, gtol)
-                else:
-                    alp, _ = self.get_part(n, rho[:, i], rho_M, H0, H1, gtol)
-            elif a1m is None:
-                _, a1m = self.get_part(n, rho[:, i], rho_M, H0, H1, gtol)
+            if v is None or alp is None or a1m is None:
+                _, v, alp, a1m = self.get_part(n, rho[:, i], rho_M, H0, H1, gtol, alpha_only=False)
 
             rate = self.get_rate(n, rho[:, i], a1m)
 
             g[:, i] = rate
             gin[:, i] = fin
-            gout[:, i] = fout[0] * alp * rho[:, i] + fout[1] * a1m * rho[:, i]
+            gout[:, i] = fout[0] * alp * rho[:, i] / v + fout[1] * a1m * rho[:, i]
 
         G = numpy.zeros_like(rho)
         Gin = numpy.zeros_like(rho)

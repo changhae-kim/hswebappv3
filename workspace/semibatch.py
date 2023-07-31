@@ -38,6 +38,8 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     reactor = SemiBatchReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
     n = reactor.n
     alpha, alpha1m = reactor.get_part()
+    reactor.W = None
+    reactor.V = None
     reactor.alpha = None
     reactor.alpha1m = None
 
@@ -106,7 +108,7 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     labels = ['Solid', 'Liquid', 'Gas']
     # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
     # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
-    print(mass, flux, wg[-1], wl[-1], ws[-1])
+    # print(mass, flux, wg[-1], wl[-1], ws[-1])
 
 for mass in masses:
 
