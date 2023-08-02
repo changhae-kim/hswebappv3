@@ -27,9 +27,9 @@ print('T = {:g} K'.format(T))
 print('P = {:g} atm'.format(P))
 print('W = {:g} g'.format(W))
 print('V = {:g} L'.format(V))
-print('{:>5s} {:>10s} {:>10s} {:>10s} {:>10s}'.format('', 'Hv', 'MW', 'alpha', '1-alpha'))
-print('-' * 49)
+print('{:>10s} {:>10s} {:>10s} {:>10s} {:>10s}'.format('', 'Hv', 'MW', 'alpha', '1-alpha'))
+print('-' * 54)
 for ( name, Hi, Mi, value1, value2 ) in zip( calc.names, calc.Hv, calc.MW, alpha, alpha1m ):
-    print('{:>5s} {:10.1f} {:10.3f} {:10f} {:10f}'.format( name, Hi, Mi, value1, value2 ))
+    print('{:>10s} {:10.1f} {:10.3f} {:10f} {:10f}'.format( name, Hi, Mi, value1, value2 ))
 print()
 
