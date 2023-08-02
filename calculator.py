@@ -20,7 +20,7 @@ compounds = {
     'Toluene' : { 'H0':  32950.3153     , 'Hsol/R': -3461. , 'MW':  92.14  },
 }
 
-compounds = {
+compounds_v2 = {
     'H2'      : { 'MW':   2.016 , 'dHsol/R': +472.8315525 , 'lnH0': 8.124149532 },
     'C1'      : { 'MW':  16.04  , 'dHsol/R': +2.735977354 , 'lnH0': 8.731344842 },
     'C2'      : { 'MW':  30.07  , 'dHsol/R': -600.1989700 , 'lnH0': 8.778734219 },
@@ -42,17 +42,23 @@ compounds = {
 
 class Calculator():
 
-    def __init__( self, temp=573.15, pressure=1.0, volume=1.0, mass=10.0 ):
+    def __init__( self, temp=573.15, pressure=1.0, volume=1.0, mass=10.0, version=2 ):
 
         self.temp     = temp
         self.pressure = pressure
         self.volume   = volume
         self.mass     = mass
 
+        self.version  = version
+
         self.names  = [ key for key in compounds.keys() ]
         self.MW     = numpy.array([ value[ 'MW'      ] for value in compounds.values() ])
-        self.dHsolR = numpy.array([ value[ 'dHsol/R' ] for value in compounds.values() ])
-        self.lnH0   = numpy.array([ value[ 'lnH0'    ] for value in compounds.values() ])
+        if self.version == 1:
+            self.Hsol_R = numpy.array([ value[ 'Hsol/R'  ] for value in compounds.values() ])
+            self.H0     = numpy.array([ value[ 'H0'      ] for value in compounds.values() ])
+        else:
+            self.dHsolR = numpy.array([ value[ 'dHsol/R' ] for value in compounds.values() ])
+            self.lnH0   = numpy.array([ value[ 'lnH0'    ] for value in compounds.values() ])
         self.Hv     = self.get_henrysconst()
 
         self.R = 0.082057366080960 # L atm / mol K
@@ -62,7 +68,10 @@ class Calculator():
     def get_henrysconst( self, temp=None ):
         if temp is None:
             temp = self.temp
-        return numpy.exp( self.lnH0 + self.dHsolR / temp )
+        if self.version == 1:
+            return self.H0 * numpy.exp( self.Hsol_R * ( 1.0/temp - 1.0/573.0 ) )
+        else:
+            return numpy.exp( self.lnH0 + self.dHsolR / temp )
 
     def get_vector(self, diction):
         vector = numpy.zeros_like(self.Hv)
