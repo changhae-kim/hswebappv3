@@ -52,13 +52,14 @@ class Calculator():
         self.version  = version
 
         self.names  = [ key for key in compounds.keys() ]
-        self.MW     = numpy.array([ value[ 'MW'      ] for value in compounds.values() ])
         if self.version == 1:
-            self.Hsol_R = numpy.array([ value[ 'Hsol/R'  ] for value in compounds.values() ])
-            self.H0     = numpy.array([ value[ 'H0'      ] for value in compounds.values() ])
+            self.MW     = numpy.array([ value[ 'MW'     ] for value in compounds.values() ])
+            self.Hsol_R = numpy.array([ value[ 'Hsol/R' ] for value in compounds.values() ])
+            self.H0     = numpy.array([ value[ 'H0'     ] for value in compounds.values() ])
         else:
-            self.dHsolR = numpy.array([ value[ 'dHsol/R' ] for value in compounds.values() ])
-            self.lnH0   = numpy.array([ value[ 'lnH0'    ] for value in compounds.values() ])
+            self.MW     = numpy.array([ value[ 'MW'      ] for value in compounds_v2.values() ])
+            self.dHsolR = numpy.array([ value[ 'dHsol/R' ] for value in compounds_v2.values() ])
+            self.lnH0   = numpy.array([ value[ 'lnH0'    ] for value in compounds_v2.values() ])
         self.Hv     = self.get_henrysconst()
 
         self.R = 0.082057366080960 # L atm / mol K
