@@ -86,16 +86,16 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     WS.append(ws[-1])
 
 data = [
-        [Mn,    'Mn',    'linear', None, None, r'$\widetilde{M}_N$',        ],
-        [Mw,    'Mw',    'linear', None, None, r'$\widetilde{M}_W$',        ],
-        [DDn,   'DDn',   'linear', None, None, '$'+u'\u0110'+'$',           ],
-        [PP,    'PP',    'log',    None, None, 'Peak Vapor Pressure (atm)', ],
-        [Rho_G, 'Rho_G', 'linear', None, None, 'Mole Fraction of Gases',    ],
-        [Rho_L, 'Rho_L', 'linear', None, None, 'Mole Fraction of Liquids',  ],
-        [Rho_S, 'Rho_S', 'linear', None, None, 'Mole Fraction of Solids',   ],
-        [WG,    'WG',    'linear', None, None, 'Mass Fraction of Gases',    ],
-        [WL,    'WL',    'linear', None, None, 'Mass Fraction of Liquids',  ],
-        [WS,    'WS',    'linear', None, None, 'Mass Fraction of Solids',   ],
+        [Mn,    'Mn',    'linear', None, None, r'$\widetilde{M}_N$',                    ],
+        [Mw,    'Mw',    'linear', None, None, r'$\widetilde{M}_W$',                    ],
+        [DDn,   'DDn',   'linear', None, None, '$'+u'\u0110'+'$',                       ],
+        [PP,    'PP',    'log',    None, None, 'Peak Hydrocarbon Pressure (atm)',       ],
+        [Rho_G, 'Rho_G', 'linear', None, None, 'Mole Fraction of C$_{1}$$_{-}$$_{4}$',  ],
+        [Rho_L, 'Rho_L', 'linear', None, None, 'Mole Fraction of C$_{5}$$_{-}$$_{16}$', ],
+        [Rho_S, 'Rho_S', 'linear', None, None, 'Mole Fraction of C$_{17}$$_{+}$',       ],
+        [WG,    'WG',    'linear', None, None, 'Mass Fraction of C$_{1}$$_{-}$$_{4}$',  ],
+        [WL,    'WL',    'linear', None, None, 'Mass Fraction of C$_{5}$$_{-}$$_{16}$', ],
+        [WS,    'WS',    'linear', None, None, 'Mass Fraction of C$_{17}$$_{+}$',       ],
         ]
 
 for i, _ in enumerate(data):
