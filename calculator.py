@@ -41,15 +41,15 @@ compounds_v2 = {
 
 compounds_vse = {
         'H2' : { 'MW':   2.016 , 'dHsol/R': +691.8831937 , 'lnH0': 10.25696988 },
-        'C1' : { 'MW':  16.043 , 'dHsol/R': +233.2020188 , 'lnH0': 9.081528337 },
-        'C2' : { 'MW':  30.070 , 'dHsol/R': -781.5461769 , 'lnH0': 11.69976088 },
-        'C3' : { 'MW':  44.097 , 'dHsol/R': -1572.979601 , 'lnH0': 13.39599370 },
+        'C1' : { 'MW':  16.043 , 'dHsol/R': +336.7220615 , 'lnH0': 7.945863499 },
+        'C2' : { 'MW':  30.070 , 'dHsol/R': -715.1370929 , 'lnH0': 10.97122118 },
+        'C3' : { 'MW':  44.097 , 'dHsol/R': -1524.149393 , 'lnH0': 12.86030274 },
         'C4' : { 'MW':  58.124 , 'dHsol/R': -2681.412383 , 'lnH0': 16.44435926 },
         'C5' : { 'MW':  72.151 , 'dHsol/R': -3363.089950 , 'lnH0': 17.59190507 },
         'C6' : { 'MW':  86.178 , 'dHsol/R': -3921.683432 , 'lnH0': 18.35340079 },
         'C7' : { 'MW': 100.205 , 'dHsol/R': -4463.381658 , 'lnH0': 19.07863755 },
-        'C8' : { 'MW': 114.232 , 'dHsol/R': -5530.146725 , 'lnH0': 21.87715777 },
-        'He' : { 'MW':   4.003 , 'dHsol/R': +1819.192389 , 'lnH0': 8.309017648 },
+        'C8' : { 'MW': 114.232 , 'dHsol/R': -5569.210892 , 'lnH0': 22.30571054 },
+        'He' : { 'MW':   4.003 , 'dHsol/R': +1844.426877 , 'lnH0': 7.360613029 },
         }
 
 
@@ -64,7 +64,7 @@ class Calculator():
 
         self.version  = version
 
-        if self.version == 1:
+        if self.version in [1, 'v1']:
             self.names  = [ key for key in compounds.keys() ]
             self.MW     = numpy.array([ value[ 'MW'     ] for value in compounds.values() ])
             self.Hsol_R = numpy.array([ value[ 'Hsol/R' ] for value in compounds.values() ])
