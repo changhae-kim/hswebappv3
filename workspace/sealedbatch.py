@@ -38,6 +38,8 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     reactor.V = None
     reactor.alpha = None
     reactor.alpha1m = None
+    # reactor.W = W = 1.0
+    # reactor.V = W = 0.0
     # reactor.alpha = alpha = numpy.zeros_like(reactor.alpha)
     # reactor.alpha1m = alpha1m = numpy.ones_like(reactor.alpha1m)
 
@@ -77,7 +79,7 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
 
     rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho)
     wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho)
-    labels = ['Solid', 'Liquid', 'Gas']
+    labels = ['C$_{17}$$_{+}$', 'C$_{5}$$_{-}$$_{16}$', 'C$_{1}$$_{-}$$_{4}$', ]
     # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
     # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
     # print(temp, mass, wg[-1], wl[-1], ws[-1])
@@ -122,5 +124,5 @@ for temp in temps:
         PP.append(P)
         llabels.append('$V_0 / W_0 =$'+'{:g}'.format(1000.0/mass)+' cm$^3$$\cdot$g$^{-1}$')
 
-    # plot_curves(tt, PP, 'Vapor Pressure (atm)', 'P_'+basename+'.png', labels=llabels, loc='lower right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.20), 10.0**(+4.20)], font=18, size=(6.4, 4.8))
+    # plot_curves(tt, PP, 'Hydrocarbon Pressure (atm)', 'P_'+basename+'.png', labels=llabels, loc='lower right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.20), 10.0**(+4.20)], font=18, size=(6.4, 4.8))
 
