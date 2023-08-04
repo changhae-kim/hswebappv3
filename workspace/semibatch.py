@@ -149,7 +149,7 @@ for mass in masses:
 
         tt.append(t)
         PP.append(P)
-        llabels.append(r'$\tilde{f}_\mathrm{out} = '+'{:g}'.format(flux)+'$')
+        llabels.append(r'$\mathrm{Da}^{-1} = '+'{:g}'.format(flux)+'$')
 
     # plot_curves(tt, PP, 'Vapor Pressure (atm)', 'P_'+basename+'.png', labels=llabels, loc='upper right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-2.30), 10.0**(+4.30)], font=18, size=(6.4, 4.8))
 
