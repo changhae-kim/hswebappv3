@@ -99,5 +99,5 @@ for i, _ in enumerate(data):
         data[i][0] = numpy.load(data[i][1]+'.npy')
 
 for i, _ in enumerate(data):
-    plot_colormap(1000.0/masses, temps-273.15, data[i][0], '$V_0/W_0$ (cm$^3$ g$^{-1}$)', 'Temperature ('+u'\u2103'+')', data[i][-1], data[i][1]+'.png', xscale='log', zscale=data[i][2], zmin=data[i][3], zmax=data[i][4])
+    plot_colormap(1000.0/masses, temps-273.15, data[i][0], '$V/W$ (cm$^3$ g$^{-1}$)', 'Temperature ('+u'\u2103'+')', data[i][-1], data[i][1]+'.png', xscale='log', zscale=data[i][2], zmin=data[i][3], zmax=data[i][4])
 
