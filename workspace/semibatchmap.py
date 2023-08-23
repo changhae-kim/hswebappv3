@@ -37,6 +37,10 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
 
     basename = '{temp:g}K_{mass:g}gpL_mu{mu:g}_sigma{sigma:g}_flux{flux:g}'.format(temp=temp, mass=mass, mu=mu, sigma=sigma, flux=flux)
 
+    f = open('semibatchmap.log', 'at')
+    f.write(basename+'\n')
+    f.close()
+
     nmin = 1e-2
     nmax = 10.0**(mu+4.0*sigma)
     mesh = int(100.0*(numpy.log10(nmax)-numpy.log10(nmin)))
@@ -56,6 +60,12 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     reactor.alpha1m = None
 
     if not os.path.exists('t_'+basename+'.npy') or not os.path.exists('rho_'+basename+'.npy'):
+        #print(basename)
+        #tol = 5e-12
+        #t, rho = reactor.solve(tmax, gtol=tol, rtol=tol, atol=tol)
+        #numpy.save('t_'+basename+'.npy', t)
+        #numpy.save('rho_'+basename+'.npy', rho)
+        #exit()
         t, rho = reactor.solve(tmax, gtol=1e-12, rtol=1e-12, atol=1e-12)
         numpy.save('t_'+basename+'.npy', t)
         numpy.save('rho_'+basename+'.npy', rho)
