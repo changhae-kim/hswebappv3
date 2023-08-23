@@ -122,7 +122,7 @@ for temp in temps:
 
         tt.append(t)
         PP.append(P)
-        llabels.append('$V_0 / W_0 =$'+'{:g}'.format(1000.0/mass)+' cm$^3$$\cdot$g$^{-1}$')
+        llabels.append('$V / W =$'+'{:g}'.format(1000.0/mass)+' cm$^3$$\cdot$g$^{-1}$')
 
     # plot_curves(tt, PP, 'Hydrocarbon Pressure (atm)', 'P_'+basename+'.png', labels=llabels, loc='lower right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.20), 10.0**(+4.20)], font=18, size=(6.4, 4.8))
 
