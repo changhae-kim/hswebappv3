@@ -105,6 +105,8 @@ for temp in temps:
         reactor = BatchReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
         n = reactor.n
         alpha, alpha1m = reactor.get_part()
+        reactor.W = None
+        reactor.V = None
         reactor.alpha = None
         reactor.alpha1m = None
         # reactor.alpha = alpha = numpy.zeros_like(reactor.alpha)
