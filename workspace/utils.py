@@ -84,7 +84,7 @@ def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=10, tlabel=r'$
         ax2.set_xlim(*xlim)
     ax2.set_ylim(-0.05, 1.05)
 
-    pyplot.colorbar(mappable=cm.ScalarMappable(cmap='viridis', norm=colors.Normalize(vmin=t.min(), vmax=t.max())), location='top', label=tlabel)
+    pyplot.colorbar(mappable=cm.ScalarMappable(cmap='viridis', norm=colors.Normalize(vmin=t.min(), vmax=t.max())), location='top', label=tlabel) ##
 
     pyplot.tight_layout()
     pyplot.savefig(filename)

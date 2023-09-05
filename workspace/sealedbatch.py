@@ -63,6 +63,7 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     # ya = alpha1m[(n > 1.0) & (alpha1m < 0.5)].max()
     # yb = alpha1m[(n > 1.0) & (alpha1m > 0.5)].min()
     # print(temp, mass, xa+(xb-xa)/(yb-ya)*(0.5-ya), n[numpy.argmax(dwdn[:, -1])], n[numpy.argmax(dwdlogn[:, -1])])
+    ## plot_populations(t, n, dwdlogn*numpy.log(10.0), alpha1m, 'Chain Length', 'Mass Fraction', 'dwdlogn_'+basename+'.png', tlabel='Dimensionless Time', alabel=r'Liquid-Phase Fraction', xlim=[1.0, nmax], font=18)
 
     nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=rho)
     # plot_two_axes(t, nn, Dn, r'$\widetilde{M}_N$', '$'+u'\u0110'+'$', 'disp_'+basename+'.png', xlim=[0.0, 1.0])
