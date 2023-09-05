@@ -103,7 +103,7 @@ class Calculator():
         return vector
 
     def get_diction(self, vector):
-        diction = { name: vector[i] for i, name in enumerate(self.names) if vector[i] > 0.0 }
+        diction = { name: vector[i] for i, name in enumerate(self.names) }
         return diction
 
     def get_gasphase( self, w, temp=None, diction=False, get_pressure=False, set_pressure=False ):
