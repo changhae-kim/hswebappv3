@@ -21,8 +21,11 @@ def plot_curves( X, Y, ylabel, filename, xlabel=r'$\tilde{t}$', labels=None, loc
     if ylim is not None:
         pyplot.ylim(*ylim)
     pyplot.tight_layout()
-    pyplot.savefig(filename)
-    pyplot.close()
+    if filename is None or filename == '':
+        pyplot.show()
+    else:
+        pyplot.savefig(filename)
+        pyplot.close()
 
     return
 
@@ -49,9 +52,12 @@ def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel=r'$\tilde{t}$',
     ax2.set_yscale(y2scale)
     ax2.tick_params(axis='y', which='both', labelcolor=color)
 
-    fig.tight_layout()
-    fig.savefig(filename)
-    pyplot.close()
+    pyplot.tight_layout()
+    if filename is None or filename == '':
+        pyplot.show()
+    else:
+        pyplot.savefig(filename)
+        pyplot.close()
 
     return
 
@@ -87,8 +93,11 @@ def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=10, tlabel=r'$
     pyplot.colorbar(mappable=cm.ScalarMappable(cmap='viridis', norm=colors.Normalize(vmin=t.min(), vmax=t.max())), location='top', label=tlabel) ##
 
     pyplot.tight_layout()
-    pyplot.savefig(filename)
-    pyplot.close()
+    if filename is None or filename == '':
+        pyplot.show()
+    else:
+        pyplot.savefig(filename)
+        pyplot.close()
 
     return
 
@@ -108,8 +117,11 @@ def plot_colormap( x, y, z, xlabel, ylabel, zlabel, filename, xscale='linear', y
     pyplot.yscale(yscale)
     pyplot.colorbar(label=zlabel)
     pyplot.tight_layout()
-    pyplot.savefig(filename)
-    pyplot.close()
+    if filename is None or filename == '':
+        pyplot.show()
+    else:
+        pyplot.savefig(filename)
+        pyplot.close()
 
     return
 
