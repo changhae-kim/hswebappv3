@@ -51,8 +51,8 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
         t = numpy.load('t_'+basename+'.npy')
         rho = numpy.load('rho_'+basename+'.npy')
 
-    n, dwdn = reactor.postprocess('dwdn', t=t, rho=rho)
-    n, dwdlogn = reactor.postprocess('dwdlogn', t=t, rho=rho)
+    # n, dwdn = reactor.postprocess('dwdn', t=t, rho=rho)
+    # n, dwdlogn = reactor.postprocess('dwdlogn', t=t, rho=rho)
     # plot_populations(t, n, dwdlogn, alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png')
     # plot_populations(t, n, rho, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax], font=16)
     # plot_populations(t, n, dwdlogn*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', xlim=[1.0, nmax], font=16)
@@ -65,26 +65,26 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     # print(temp, mass, xa+(xb-xa)/(yb-ya)*(0.5-ya), n[numpy.argmax(dwdn[:, -1])], n[numpy.argmax(dwdlogn[:, -1])])
     ## plot_populations(t, n, dwdlogn*numpy.log(10.0), alpha1m, 'Chain Length', 'Mass Fraction', 'dwdlogn_'+basename+'.png', tlabel='Dimensionless Time', alabel=r'Liquid-Phase Fraction', xlim=[1.0, nmax], font=18)
 
-    nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=rho)
+    # nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=rho)
     # plot_two_axes(t, nn, Dn, r'$\widetilde{M}_N$', '$'+u'\u0110'+'$', 'disp_'+basename+'.png', xlim=[0.0, 1.0])
     # print(temp, mass, nn[-1], nw[-1], Dn[-1])
 
-    p, dpdn = reactor.postprocess('dpdn', t=t, rho=rho)
-    p, dpdlogn = reactor.postprocess('dpdlogn', t=t, rho=rho)
-    P, dPdn = reactor.postprocess('dPdn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
-    P, dPdlogn = reactor.postprocess('dPdlogn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
+    # p, dpdn = reactor.postprocess('dpdn', t=t, rho=rho)
+    # p, dpdlogn = reactor.postprocess('dpdlogn', t=t, rho=rho)
+    # P, dPdn = reactor.postprocess('dPdn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
+    # P, dPdlogn = reactor.postprocess('dPdlogn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
     # plot_populations(t, n, dpdlogn*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{P}/d\log{n}$', 'dpdlogn_'+basename+'.png', xlim=[1.0, nmax])
     # plot_populations(t, n, dpdn, alpha1m, '$n$', r'$d\widetilde{P}/d{n}$', 'dpdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0])
     # plot_curves([t], [p], r'$\widetilde{P}$', 'p_'+basename+'.png', xlim=[0.0, 1.0])
     # plot_curves([t], [P], 'Vapor Pressure (atm)', 'P_'+basename+'.png', xlim=[0.0, 1.0])
 
-    rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho)
-    wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho)
-    labels = ['C$_{17}$$_{+}$', 'C$_{5}$$_{-}$$_{16}$', 'C$_{1}$$_{-}$$_{4}$', ]
+    # rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho, state_cutoffs=[7.5, 25.5])
+    # wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho, state_cutoffs=[7.5, 25.5])
+    # labels = ['C$_{26}$$_{+}$', 'C$_{8}$$_{-}$$_{25}$', 'C$_{1}$$_{-}$$_{7}$', ]
     # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
     # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
     # print(temp, mass, wg[-1], wl[-1], ws[-1])
-
+'''
 for temp in temps:
 
     tt = []
@@ -128,4 +128,4 @@ for temp in temps:
         llabels.append('$V / W =$'+'{:g}'.format(1000.0/mass)+' cm$^3$$\cdot$g$^{-1}$')
 
     # plot_curves(tt, PP, 'Hydrocarbon Pressure (atm)', 'P_'+basename+'.png', labels=llabels, loc='lower right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.20), 10.0**(+4.20)], font=18, size=(6.4, 4.8))
-
+'''

@@ -64,8 +64,8 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=rho)
     P, dPdn = reactor.postprocess('dPdn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
     P, dPdlogn = reactor.postprocess('dPdlogn', t=t, rho=rho, temp=temp, volume=volume, mass=mass, monomer=monomer)
-    rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho)
-    wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho)
+    rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho, state_cutoffs=[7.5, 25.5])
+    wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho, state_cutoffs=[7.5, 25.5])
 
     Mn.append(nn[-1])
     Mw.append(nw[-1])
@@ -83,12 +83,12 @@ data = [
         [Mw,    'Mw',    'linear', None, None, r'$\widetilde{M}_W$',                    ],
         [DDn,   'DDn',   'linear', None, None, '$'+u'\u0110'+'$',                       ],
         [PP,    'PP',    'log',    None, None, 'Peak Hydrocarbon Pressure (atm)',       ],
-        [Rho_G, 'Rho_G', 'linear', None, None, 'Mole Fraction of C$_{1}$$_{-}$$_{4}$',  ],
-        [Rho_L, 'Rho_L', 'linear', None, None, 'Mole Fraction of C$_{5}$$_{-}$$_{16}$', ],
-        [Rho_S, 'Rho_S', 'linear', None, None, 'Mole Fraction of C$_{17}$$_{+}$',       ],
-        [WG,    'WG',    'linear', None, None, 'Mass Fraction of C$_{1}$$_{-}$$_{4}$',  ],
-        [WL,    'WL',    'linear', None, None, 'Mass Fraction of C$_{5}$$_{-}$$_{16}$', ],
-        [WS,    'WS',    'linear', None, None, 'Mass Fraction of C$_{17}$$_{+}$',       ],
+        [Rho_G, 'Rho_G', 'linear', None, None, 'Mole Fraction of C$_{1}$$_{-}$$_{7}$',  ],
+        [Rho_L, 'Rho_L', 'linear', None, None, 'Mole Fraction of C$_{8}$$_{-}$$_{25}$', ],
+        [Rho_S, 'Rho_S', 'linear', None, None, 'Mole Fraction of C$_{26}$$_{+}$',       ],
+        [WG,    'WG',    'linear', None, None, 'Mass Fraction of C$_{1}$$_{-}$$_{7}$',  ],
+        [WL,    'WL',    'linear', None, None, 'Mass Fraction of C$_{8}$$_{-}$$_{25}$', ],
+        [WS,    'WS',    'linear', None, None, 'Mass Fraction of C$_{26}$$_{+}$',       ],
         ]
 
 for i, _ in enumerate(data):
