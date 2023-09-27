@@ -16,7 +16,7 @@ dens    = 940.0
 grid = 'logn'
 
 temps  = [ 573.15 ]
-masses = [ 100.0, 10.0, 1.0 ]
+masses = [ 10.0/0.3 ] # [ 100.0, 10.0, 1.0 ]
 mus    = [ 3.0 ]
 sigmas = [ 0.1 ]
 fluxes = [ 1.0, 10.0, 100.0 ]
@@ -153,5 +153,5 @@ for mass in masses:
         PP.append(P)
         llabels.append(r'$\mathrm{Da}^{-1} = '+'{:g}'.format(flux)+'$')
 
-    # plot_curves(tt, PP, 'Hydrocarbon Pressure (atm)', 'P_'+basename+'.png', labels=llabels, loc='upper right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-2.30), 10.0**(+4.30)], font=18, size=(6.4, 4.8))
+    plot_curves(tt, PP, 'Hydrocarbon Pressure (atm)', 'P_'+basename+'.png', labels=llabels, loc='upper right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.70), 10.0**(+3.70)], font=18, size=(6.4, 4.8))
 '''

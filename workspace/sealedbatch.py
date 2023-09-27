@@ -15,8 +15,8 @@ dens    = 940.0
 
 grid = 'logn'
 
-temps  = [ 423.15, 573.15 ]
-masses = [ 100.0, 10.0, 1.0 ]
+temps  = [ 573.15 ] # [ 423.15, 573.15 ]
+masses = [ 10.0/0.3, 1.0/0.3, 0.1/0.3 ] # [ 100.0, 10.0, 1.0 ]
 mus    = [ 3.0 ]
 sigmas = [ 0.1 ]
 
@@ -56,14 +56,13 @@ for temp, mass, mu, sigma in itertools.product(temps, masses, mus, sigmas):
     # plot_populations(t, n, dwdlogn, alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png')
     # plot_populations(t, n, rho, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax], font=16)
     # plot_populations(t, n, dwdlogn*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', xlim=[1.0, nmax], font=16)
-    # plot_populations(t, n, rho, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=18)
-    # plot_populations(t, n, dwdn, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=18)
+    # plot_populations(t, n, rho, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
+    # plot_populations(t, n, dwdn, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
     # xa = n[(n > 1.0) & (alpha1m < 0.5)].max()
     # xb = n[(n > 1.0) & (alpha1m > 0.5)].min()
     # ya = alpha1m[(n > 1.0) & (alpha1m < 0.5)].max()
     # yb = alpha1m[(n > 1.0) & (alpha1m > 0.5)].min()
     # print(temp, mass, xa+(xb-xa)/(yb-ya)*(0.5-ya), n[numpy.argmax(dwdn[:, -1])], n[numpy.argmax(dwdlogn[:, -1])])
-    ## plot_populations(t, n, dwdlogn*numpy.log(10.0), alpha1m, 'Chain Length', 'Mass Fraction', 'dwdlogn_'+basename+'.png', tlabel='Dimensionless Time', alabel=r'Liquid-Phase Fraction', xlim=[1.0, nmax], font=18)
 
     # nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=rho)
     # plot_two_axes(t, nn, Dn, r'$\widetilde{M}_N$', '$'+u'\u0110'+'$', 'disp_'+basename+'.png', xlim=[0.0, 1.0])
@@ -125,7 +124,7 @@ for temp in temps:
 
         tt.append(t)
         PP.append(P)
-        llabels.append('$V / W =$'+'{:g}'.format(1000.0/mass)+' cm$^3$$\cdot$g$^{-1}$')
+        llabels.append('$V / W =$'+'{:g}'.format(1000.0/mass)+' cm$^3$ g$^{-1}$')
 
-    # plot_curves(tt, PP, 'Hydrocarbon Pressure (atm)', 'P_'+basename+'.png', labels=llabels, loc='lower right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.20), 10.0**(+4.20)], font=18, size=(6.4, 4.8))
+    plot_curves(tt, PP, 'Hydrocarbon Pressure (atm)', 'P_'+basename+'.png', labels=llabels, loc='lower right', yscale='log', xlim=[0.0, 1.0], ylim=[10.0**(-0.70), 10.0**(+3.70)], font=18, size=(6.4, 4.8))
 '''
