@@ -61,7 +61,7 @@ def plot_two_axes( x, y1, y2, y1label, y2label, filename, xlabel=r'$\tilde{t}$',
 
     return
 
-def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=10, tlabel=r'$\tilde{t}$', alabel=r'$1-\alpha$', xscale='log', xlim=None, ytick=None, font=14, size=(6.4, 4.8) ):
+def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=10, tlabel=r'$\tilde{t}$', alabel=r'$1-\alpha$', xscale='log', xlim=None, ytick=None, font=16, size=(6.4, 4.8) ):
 
     pyplot.rcParams.update({'font.size': font})
 
@@ -90,7 +90,7 @@ def plot_populations( t, x, y, a, xlabel, ylabel, filename, prune=10, tlabel=r'$
         ax2.set_xlim(*xlim)
     ax2.set_ylim(-0.05, 1.05)
 
-    pyplot.colorbar(mappable=cm.ScalarMappable(cmap='viridis', norm=colors.Normalize(vmin=t.min(), vmax=t.max())), location='top', label=tlabel) ##
+    pyplot.colorbar(mappable=cm.ScalarMappable(cmap='viridis', norm=colors.Normalize(vmin=t.min(), vmax=t.max())), location='top', label=tlabel)
 
     pyplot.tight_layout()
     if filename is None or filename == '':

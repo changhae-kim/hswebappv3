@@ -3,7 +3,7 @@ import numpy
 import os, sys
 
 from matplotlib import pyplot
-pyplot.rcParams.update({'font.size': 14})
+pyplot.rcParams.update({'font.size': 16})
 
 from reactor import BatchReactor
 from utils import plot_curves, plot_two_axes, plot_populations
