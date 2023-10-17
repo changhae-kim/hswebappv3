@@ -10,11 +10,11 @@ from utils import plot_curves, plot_two_axes, plot_populations
 
 
 temp    = 573.15
-mass    = 1.0
 influx  = 1.0
 outflux = 1.0
 
 volume  = 1.0
+mass    = 1.0
 monomer = 14.027
 dens    = 940.0
 mu      = 3.0
@@ -22,7 +22,7 @@ sigma   = 0.1
 
 grid = 'logn'
 
-basename = '{temp:g}K_{mass:g}gpL_in{influx:g}_out{outflux:g}'.format(temp=temp, mass=mass, mu=mu, sigma=sigma, influx=influx, outflux=outflux)
+basename = '{temp:g}K_in{influx:g}_out{outflux:g}'.format(temp=temp, mu=mu, sigma=sigma, influx=influx, outflux=outflux)
 
 nmin = 1e-2
 nmax = 10.0**(mu+4.0*sigma)
