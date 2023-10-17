@@ -730,3 +730,65 @@ class SemiBatchReactor(BatchReactor):
 
         return G, Gin, Gout
 
+
+class CSTReactor(SemiBatchReactor):
+
+    def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
+            rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None,
+            concs=[0.0, 0.0, 0.0, 0.0, 1.0], influx=[0.0, 0.0, 0.0, 0.0, 0.0], outflux=[0.0, 0.0],
+            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
+
+        super().__init__(nmin, nmax, mesh, grid, rho, W, V, alpha, alpha1m, rho_M, H0, H1, fin, fout, concs, influx*numpy.array(concs), outflux, temp, volume, mass, monomer, dens, rand)
+
+        n = self.n
+        fin = self.fin
+        if grid == 'discrete':
+            Da = numpy.inner(n, fin)
+        elif grid == 'continuum':
+            dn = n[1] - n[0]
+            g = n * fin
+            Da = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn
+        elif grid == 'logn':
+            logn = numpy.log(n)
+            dlogn = logn[1] - logn[0]
+            g = n**2 * fin
+            Da = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn
+        self.Da = 1.0 / Da
+
+        return
+
+    def solve( self, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if W is None:
+            W = self.W
+        if V is None:
+            V = self.V
+        if alpha is None:
+            alpha = self.alpha
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if rho_M is None:
+            rho_M = self.rho_M
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+        if fin is None:
+            fin = self.fin
+        if fout is None:
+            fout = self.fout
+        if rand is None:
+            rand = self.rand
+
+        def fun( x ):
+            dydt = self.get_func(n, numpy.exp(x), W, V, alpha, alpha1m, rho_M, H0, H1, fin, fout, rand, gtol)
+            return numpy.inner(dydt, dydt)
+
+        solver = minimize(fun, rho+1e-99, method='BFGS', jac=False, options={'gtol': gtol})
+
+        return numpy.exp(solver.x)
+

@@ -52,9 +52,9 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
         rho = numpy.load('rho_'+basename+'.npy')
 
     G, Gin, Gout = reactor.cointegrate(t=t, rho=rho)
-    rho1 = ( reactor.rho + ( G + Gin - Gout ).T ).T
-    rho2 = Gout
-    rho3 = ( reactor.rho + ( G + Gin ).T ).T
+    rho_reac = ( reactor.rho + ( G + Gin - Gout ).T ).T
+    rho_cond = Gout
+    rho_comb = ( reactor.rho + ( G + Gin ).T ).T
 
     # n, dwdn = reactor.postprocess('dwdn', t=t, rho=rho)
     # n, dwdlogn = reactor.postprocess('dwdlogn', t=t, rho=rho)
@@ -73,38 +73,38 @@ for temp, mass, mu, sigma, flux in itertools.product(temps, masses, mus, sigmas,
     # plot_curves(t, [p], r'$\widetilde{P}$', 'p_'+basename+'.png')
     # plot_curves(t, [P], 'Vapor Pressure (atm)', 'P_'+basename+'.png')
 
-    # n, dwdn1 = reactor.postprocess('dwdn', t=t, rho=rho1)
-    # n, dwdlogn1 = reactor.postprocess('dwdlogn', t=t, rho=rho1)
-    # plot_populations(t, n, rho1, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax])
-    # plot_populations(t, n, dwdlogn1*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', xlim=[1.0, nmax])
-    # plot_populations(t, n, rho1, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
-    # plot_populations(t, n, dwdn1, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
+    # n, dwdn_reac = reactor.postprocess('dwdn', t=t, rho=rho_reac)
+    # n, dwdlogn_reac = reactor.postprocess('dwdlogn', t=t, rho=rho_reac)
+    # plot_populations(t, n, rho_reac, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_reac_'+basename+'.png', xlim=[1.0, nmax])
+    # plot_populations(t, n, dwdlogn_reac*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_reac_'+basename+'.png', xlim=[1.0, nmax])
+    # plot_populations(t, n, rho_reac, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_reac_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
+    # plot_populations(t, n, dwdn_reac, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_reac_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
 
-    # n, dwdn2 = reactor.postprocess('dwdn', t=t, rho=rho2)
-    # n, dwdlogn2 = reactor.postprocess('dwdlogn', t=t, rho=rho2)
-    # plot_populations(t, n, rho2, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax])
-    # plot_populations(t, n, dwdlogn2*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', xlim=[1.0, nmax])
-    # plot_populations(t, n, rho2, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
-    # plot_populations(t, n, dwdn2, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
+    # n, dwdn_cond = reactor.postprocess('dwdn', t=t, rho=rho_cond)
+    # n, dwdlogn_cond = reactor.postprocess('dwdlogn', t=t, rho=rho_cond)
+    # plot_populations(t, n, rho_cond, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_cond_'+basename+'.png', xlim=[1.0, nmax])
+    # plot_populations(t, n, dwdlogn_cond*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_cond_'+basename+'.png', xlim=[1.0, nmax])
+    # plot_populations(t, n, rho_cond, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_cond_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
+    # plot_populations(t, n, dwdn_cond, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_cond_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
 
-    # n, dwdn3 = reactor.postprocess('dwdn', t=t, rho=rho3)
-    # n, dwdlogn3 = reactor.postprocess('dwdlogn', t=t, rho=rho3)
-    # plot_populations(t, n, rho3, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xlim=[1.0, nmax])
-    # plot_populations(t, n, dwdlogn3*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_'+basename+'.png', xlim=[1.0, nmax])
-    # plot_populations(t, n, rho3, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
-    # plot_populations(t, n, dwdn3, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
+    # n, dwdn_comb = reactor.postprocess('dwdn', t=t, rho=rho_comb)
+    # n, dwdlogn_comb = reactor.postprocess('dwdlogn', t=t, rho=rho_comb)
+    # plot_populations(t, n, rho_comb, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_comb_'+basename+'.png', xlim=[1.0, nmax])
+    # plot_populations(t, n, dwdlogn_comb*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W}/d\log{n}$', 'dwdlogn_comb_'+basename+'.png', xlim=[1.0, nmax])
+    # plot_populations(t, n, rho_comb, alpha1m, '$n$', r'$\tilde{\rho}$', 'rho_n_comb_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
+    # plot_populations(t, n, dwdn_comb, alpha1m, '$n$', r'$d\widetilde{W}/d{n}$', 'dwdn_comb_'+basename+'.png', xscale='linear', xlim=[1.0, 29.0], font=16)
     # xa = n[(n > 1.0) & (alpha1m < 0.5)].max()
     # xb = n[(n > 1.0) & (alpha1m > 0.5)].min()
     # ya = alpha1m[(n > 1.0) & (alpha1m < 0.5)].max()
     # yb = alpha1m[(n > 1.0) & (alpha1m > 0.5)].min()
-    # print(flux, xa+(xb-xa)/(yb-ya)*(0.5-ya), n[numpy.argmax(dwdn3[:, -1])], n[numpy.argmax(dwdlogn3[:, -1])])
+    # print(flux, xa+(xb-xa)/(yb-ya)*(0.5-ya), n[numpy.argmax(dwdn_comb[:, -1])], n[numpy.argmax(dwdlogn_comb[:, -1])])
 
-    # nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=rho3)
+    # nn, nw, Dn = reactor.postprocess('D_logn', t=t, rho=rho_comb)
     # plot_two_axes(t, nn, Dn, r'$\widetilde{M}_N$', '$'+u'\u0110'+'$', 'disp_'+basename+'.png')
     # print(mass, flux, nn[-1], nw[-1], Dn[-1])
 
-    # rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho3, state_cutoffs=[7.5, 25.5])
-    # wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho3, state_cutoffs=[7.5, 25.5])
+    # rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho_comb, state_cutoffs=[7.5, 25.5])
+    # wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho_comb, state_cutoffs=[7.5, 25.5])
     # labels = ['C$_{26}$$_{+}$', 'C$_{8}$$_{-}$$_{25}$', 'C$_{1}$$_{-}$$_{7}$', ]
     # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
     # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
