@@ -410,7 +410,7 @@ class BatchReactor():
             sf[-2::-1] = numpy.cumsum(f[:0:-1])
             sf[-1    ] = 0.0
 
-        rate = ( 1.0 - rand ) * ( df ) + ( rand ) * ( 2.0 * sf - ( n - 1.0 ) * f )
+        rate = ( 1.0 - rand ) * ( 2.0 * df ) + ( rand ) * ( 2.0 * sf - ( n - 1.0 ) * f )
 
         return rate
 
@@ -456,7 +456,7 @@ class BatchReactor():
             #sf[-1    ] = sf[-2]
             #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
 
-        rate = ( 1.0 - rand ) * ( dfdn + 0.5 * d2fdn2 ) + ( rand ) * ( 2.0 * sf - n * f )
+        rate = ( 1.0 - rand ) * ( 2.0 * dfdn + 1.0 * d2fdn2 ) + ( rand ) * ( 2.0 * sf - n * f )
 
         return rate
 
@@ -504,7 +504,7 @@ class BatchReactor():
             #sf[-1    ] = sf[-2]
             #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
 
-        rate = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/n**2 ) * dfdr + (0.5/n**2) * d2fdr2 ) + ( rand ) * ( 2.0 * sf - n * f )
+        rate = ( 1.0 - rand ) * ( ( 2.0/n - 1.0/n**2 ) * dfdr + ( 1.0/n**2 ) * d2fdr2 ) + ( rand ) * ( 2.0 * sf - n * f )
 
         return rate
 
