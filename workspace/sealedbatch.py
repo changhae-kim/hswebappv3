@@ -75,8 +75,8 @@ plot_populations(t, n, dwdlogn*numpy.log(10.0), alpha1m, '$n$', r'$d\widetilde{W
 # plot_curves([t], [p], r'$\widetilde{P}$', 'p_'+basename+'.png', xlim=[0.0, 1.0])
 # plot_curves([t], [P], 'Vapor Pressure (atm)', 'P_'+basename+'.png', xlim=[0.0, 1.0])
 
-# rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho, state_cutoffs=[7.5, 25.5])
-# wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho, state_cutoffs=[7.5, 25.5])
+# rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho, state_cutoffs=[7.5, 25.5], renorm=True)
+# wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho, state_cutoffs=[7.5, 25.5], renorm=True)
 # labels = ['C$_{26}$$_{+}$', 'C$_{8}$$_{-}$$_{25}$', 'C$_{1}$$_{-}$$_{7}$', ]
 # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
 # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)

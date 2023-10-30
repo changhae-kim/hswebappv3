@@ -101,8 +101,8 @@ rho_comb = ( reactor.rho + ( G + Gin ).T ).T
 # plot_two_axes(t, nn, Dn, r'$\widetilde{M}_N$', '$'+u'\u0110'+'$', 'disp_'+basename+'.png')
 # print(mass, flux, nn[-1], nw[-1], Dn[-1])
 
-# rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho_comb, state_cutoffs=[7.5, 25.5])
-# wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho_comb, state_cutoffs=[7.5, 25.5])
+# rho_g, rho_l, rho_s = reactor.postprocess('rho_logn', t=t, rho=rho_comb, state_cutoffs=[7.5, 25.5], renorm=True)
+# wg, wl, ws = reactor.postprocess('w_logn', t=t, rho=rho_comb, state_cutoffs=[7.5, 25.5], renorm=True)
 # labels = ['C$_{26}$$_{+}$', 'C$_{8}$$_{-}$$_{25}$', 'C$_{1}$$_{-}$$_{7}$', ]
 # plot_curves([t, t, t], [rho_s, rho_l, rho_g], r'$\widetilde{N}$', 'rho_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)
 # plot_curves([t, t, t], [ws, wl, wg], r'$\widetilde{W}$', 'w_gls_'+basename+'.png', labels=labels, loc='upper right', xlim=[0.0, 1.0], font=18)

@@ -6,9 +6,9 @@ from scipy.optimize import minimize
 
 def convert_y_to_rho( mode, x, y, mass=10.0, monomer=14.027 ):
 
-    assert mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']
+    assert mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM', 'dndn', 'dndlogn']
 
-    if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn']:
+    if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dndn', 'dndlogn']:
         n = x
     elif mode in ['dWdM', 'dWdlogM']:
         n = x / monomer
@@ -25,14 +25,18 @@ def convert_y_to_rho( mode, x, y, mass=10.0, monomer=14.027 ):
         rho = y.T / n * monomer / mass
     elif mode == 'dWdlogM':
         rho = y.T / n**2 / mass
+    elif mode == 'dndn':
+        rho = y.T
+    elif mode == 'dndlogn':
+        rho = y.T / n
 
     return n, rho.T
 
 def convert_rho_to_y( mode, n, rho, mass=10.0, monomer=14.027 ):
 
-    assert mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']
+    assert mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM', 'dndn', 'dndlogn']
 
-    if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn']:
+    if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dndn', 'dndlogn']:
         x = n
     elif mode in ['dWdM', 'dWdlogM']:
         x = monomer * n
@@ -49,6 +53,10 @@ def convert_rho_to_y( mode, n, rho, mass=10.0, monomer=14.027 ):
         y = mass / monomer * n * rho.T
     elif mode == 'dWdlogM':
         y = mass * n**2 * rho.T
+    elif mode == 'dndn':
+        y = rho.T
+    elif mode == 'dndlogn':
+        y = n * rho.T
 
     return x, y.T
 
@@ -111,7 +119,7 @@ def get_pressure( mode, t, n, rho, V, alpha, temp=573.15, volume=1.0, mass=10.0,
             dPdx = NRT_V * dpdx
         return P, dPdx.T
 
-def get_states( mode, t, n, rho, state_cutoffs=[4.5, 16.5], mass=10.0, monomer=14.027 ):
+def get_states( mode, t, n, rho, state_cutoffs=[4.5, 16.5], mass=10.0, monomer=14.027, renorm=False ):
 
     assert mode in ['rho_n', 'rho_logn', 'concs_n', 'concs_logn', 'w_n', 'w_logn', 'W_n', 'W_logn']
 
@@ -148,7 +156,10 @@ def get_states( mode, t, n, rho, state_cutoffs=[4.5, 16.5], mass=10.0, monomer=1
     yl = Gll + Ggl * ( 1.0 - dxgl / dx[igl] ) + Gls * ( dxls / dx[ils] )
     ys = Gss + Ggl * ( 1.0 - dxls / dx[ils] )
 
-    yg, yl, ys = numpy.array([ yg, yl, ys ]) / numpy.sum([ yg, yl, ys ], axis=0)
+    if renorm:
+        yg, yl, ys = numpy.array([ yg, yl, ys ]) / numpy.sum([ yg, yl, ys ], axis=0)
+    else:
+        yg, yl, ys = numpy.array([ yg, yl, ys ])
 
     if mode in ['rho_n', 'rho_logn', 'w_n', 'w_logn']:
         return yg, yl, ys
@@ -523,7 +534,7 @@ class BatchReactor():
 
         return solver.t, solver.y
 
-    def postprocess( self, mode, t=None, n=None, rho=None, V=None, alpha=None, rho_M=None, H0=None, H1=None, state_cutoffs=[4.5, 16.5], temp=573.15, volume=1.0, mass=10.0, monomer=14.027, gtol=1e-6 ):
+    def postprocess( self, mode, t=None, n=None, rho=None, V=None, alpha=None, rho_M=None, H0=None, H1=None, state_cutoffs=[4.5, 16.5], temp=573.15, volume=1.0, mass=10.0, monomer=14.027, gtol=1e-6, renorm=False ):
 
         if t is None:
             if self.solver is None:
@@ -557,14 +568,14 @@ class BatchReactor():
                 for i, _ in enumerate(t):
                     _, V[i], alpha[:, i], _ = self.get_part(n, rho[:, i], rho_M, H0, H1, gtol, alpha_only=False)
 
-        if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM']:
+        if mode in ['dwdn', 'dwdlogn', 'dWdn', 'dWdlogn', 'dWdM', 'dWdlogM', 'dndn', 'dndlogn']:
             return convert_rho_to_y(mode, n, rho, mass, monomer)
         elif mode in ['D_n', 'D_logn', 'D_M', 'D_logM']:
             return get_dispersity(mode, t, n, rho, monomer)
         elif mode in ['dpdn', 'dpdlogn', 'dPdn', 'dPdlogn', 'dPdM', 'dPdlogM']:
             return get_pressure(mode, t, n, rho, V, alpha, temp, volume, mass, monomer)
         elif mode in ['rho_n', 'rho_logn', 'concs_n', 'concs_logn', 'w_n', 'w_logn', 'W_n', 'W_logn']:
-            return get_states(mode, t, n, rho, state_cutoffs, mass, monomer)
+            return get_states(mode, t, n, rho, state_cutoffs, mass, monomer, renorm)
 
 
 class SemiBatchReactor(BatchReactor):
