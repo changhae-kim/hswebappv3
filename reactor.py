@@ -680,7 +680,7 @@ class SemiBatchReactor(BatchReactor):
 
         return solver.t, solver.y
 
-    def cointegrate( self, t=None, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
+    def cointegrate( self, t=None, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6, integrals_only=True ):
 
         if t is None:
             t = self.solver.t
@@ -739,7 +739,10 @@ class SemiBatchReactor(BatchReactor):
         Gin[:, 1:] = 0.5 * numpy.cumsum( ( gin[:, 1:] + gin[:, :-1] ) * dt, axis=1)
         Gout[:, 1:] = 0.5 * numpy.cumsum( ( gout[:, 1:] + gout[:, :-1] ) * dt, axis=1)
 
-        return G, Gin, Gout
+        if integrals_only:
+            return G, Gin, Gout
+        else:
+            return g, gin, gout, G, Gin, Gout
 
 
 class CSTReactor(SemiBatchReactor):
