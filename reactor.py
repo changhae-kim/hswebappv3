@@ -175,7 +175,7 @@ class BatchReactor():
     def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
             rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0],
-            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
+            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, end=1.0, rand=0.0 ):
 
         if grid == 'discrete':
             self.n = numpy.arange(nmin, nmax+1, 1)
@@ -197,12 +197,12 @@ class BatchReactor():
             elif grid == 'continuum':
                 dn = n[1] - n[0]
                 g = n * concs
-                rho = numpy.array(concs) / ( 0.5 * numpy.sum( g[1:] + g[:-1]) * dn )
+                rho = numpy.array(concs) / ( 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn )
             elif grid == 'logn':
                 logn = numpy.log(n)
                 dlogn = logn[1] - logn[0]
                 g = n**2 * concs
-                rho = numpy.array(concs) / ( 0.5 * numpy.sum( g[1:] + g[:-1]) * dlogn )
+                rho = numpy.array(concs) / ( 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn )
         self.rho = rho
 
         if rho_M is None:
@@ -230,7 +230,15 @@ class BatchReactor():
         self.alpha = alpha
         self.alpha1m = alpha1m
 
-        self.rand = rand
+        if end + rand == 1.0:
+            self.end = end
+            self.rand = rand
+        elif end != 1.0:
+            self.end = end
+            self.rand = 1.0 - end
+        elif rand != 0.0:
+            self.end = 1.0 - rand
+            self.rand = rand
 
         self.solver = None
 
@@ -252,9 +260,9 @@ class BatchReactor():
         W = self.get_melt(n, rho, rho_M, H0, H1, gtol)
         V = 1.0 - W / rho_M
 
-        An = n * H0 * H1**n * ( 1.0 - W / rho_M )
-        alpha = An / ( W + An )
-        alpha1m = W / ( W + An )
+        An = n * H0 * H1**n
+        alpha = ( An * V ) / ( W + An * V )
+        alpha1m = ( W ) / ( W + An * V )
 
         if alpha_only:
             return alpha, alpha1m
@@ -360,7 +368,7 @@ class BatchReactor():
 
         return W
 
-    def get_func( self, n=None, rho=None, alpha1m=None, rho_M=None, H0=None, H1=None, rand=None, gtol=1e-6 ):
+    def get_func( self, n=None, rho=None, alpha1m=None, rho_M=None, H0=None, H1=None, end=None, rand=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -374,19 +382,21 @@ class BatchReactor():
             H0 = self.H0
         if H1 is None:
             H1 = self.H1
+        if end is None:
+            end = self.end
         if rand is None:
             rand = self.rand
 
         if alpha1m is None:
             _, alpha1m = self.get_part(n, rho, rho_M, H0, H1, gtol)
 
-        rate = self.get_rate(n, rho, alpha1m, rand)
+        rate = self.get_rate(n, rho, alpha1m, end, rand)
 
         func = rate
 
         return func
 
-    def get_discrete_rate( self, n=None, rho=None, alpha1m=None, rand=None ):
+    def get_discrete_rate( self, n=None, rho=None, alpha1m=None, end=None, rand=None ):
 
         if n is None:
             n = self.n
@@ -394,13 +404,15 @@ class BatchReactor():
             rho = self.rho
         if alpha1m is None:
             alpha1m = self.alpha1m
+        if end is None:
+            end = self.end
         if rand is None:
             rand = self.rand
 
         f = alpha1m * rho
 
         df = numpy.zeros_like(f)
-        if rand != 1.0:
+        if end != 0.0:
             df[1:-1] = f[2:] - f[1:-1]
             df[0   ] = f[1 ] - f[0   ]
             df[  -1] =       - f[  -1]
@@ -410,11 +422,11 @@ class BatchReactor():
             sf[-2::-1] = numpy.cumsum(f[:0:-1])
             sf[-1    ] = 0.0
 
-        rate = ( 1.0 - rand ) * ( 1.0 * df ) + ( rand ) * ( 2.0 * sf - ( n - 1.0 ) * f )
+        rate = ( end ) * ( 1.0 * df ) + ( rand ) * ( 2.0 * sf - ( n - 1.0 ) * f )
 
         return rate
 
-    def get_continuum_rate( self, n=None, rho=None, alpha1m=None, rand=None ):
+    def get_continuum_rate( self, n=None, rho=None, alpha1m=None, end=None, rand=None ):
 
         if n is None:
             n = self.n
@@ -422,6 +434,8 @@ class BatchReactor():
             rho = self.rho
         if alpha1m is None:
             alpha1m = self.alpha1m
+        if end is None:
+            end = self.end
         if rand is None:
             rand = self.rand
 
@@ -429,7 +443,7 @@ class BatchReactor():
         dn = n[1] - n[0]
 
         dfdn = numpy.zeros_like(f)
-        if rand != 1.0:
+        if end != 0.0:
             dfdn[1:-1] = ( f[2:  ] - f[ :-2] ) / ( 2.0 * dn )
             #dfdn[0   ] = ( f[1   ] - f[0   ] ) / ( dn )
             #dfdn[  -1] = ( f[  -1] - f[  -2] ) / ( dn )
@@ -439,7 +453,7 @@ class BatchReactor():
             #dfdn[-1] = 2.0 * dfdn[-2] - dfdn[-3]
 
         d2fdn2 = numpy.zeros_like(f)
-        if rand != 1.0:
+        if end != 0.0:
             d2fdn2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dn**2.0 )
             #d2fdn2[0   ] = 0.0
             #d2fdn2[  -1] = 0.0
@@ -456,11 +470,11 @@ class BatchReactor():
             #sf[-1    ] = sf[-2]
             #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
 
-        rate = ( 1.0 - rand ) * ( 1.0 * dfdn + 0.5 * d2fdn2 ) + ( rand ) * ( 2.0 * sf - n * f )
+        rate = ( end ) * ( 1.0 * dfdn + 0.5 * d2fdn2 ) + ( rand ) * ( 2.0 * sf - n * f )
 
         return rate
 
-    def get_logn_rate( self, n=None, rho=None, alpha1m=None, rand=None ):
+    def get_logn_rate( self, n=None, rho=None, alpha1m=None, end=None, rand=None ):
 
         if n is None:
             n = self.n
@@ -468,6 +482,8 @@ class BatchReactor():
             rho = self.rho
         if alpha1m is None:
             alpha1m = self.alpha1m
+        if end is None:
+            end = self.end
         if rand is None:
             rand = self.rand
 
@@ -477,7 +493,7 @@ class BatchReactor():
         dlogn = logn[1] - logn[0]
 
         dfdr = numpy.zeros_like(f)
-        if rand != 1.0:
+        if end != 0.0:
             dfdr[1:-1] = ( f[2:  ] - f[ :-2] ) / ( 2.0 * dlogn )
             dfdr[0   ] = ( f[1   ] - f[0   ] ) / ( dlogn )
             dfdr[  -1] = ( f[  -1] - f[  -2] ) / ( dlogn )
@@ -487,7 +503,7 @@ class BatchReactor():
             #dfdr[-1] = 2.0 * dfdr[-2] - dfdr[-3]
 
         d2fdr2 = numpy.zeros_like(f)
-        if rand != 1.0:
+        if end != 0.0:
             d2fdr2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dlogn**2.0 )
             d2fdr2[0   ] = 0.0
             d2fdr2[  -1] = 0.0
@@ -504,11 +520,11 @@ class BatchReactor():
             #sf[-1    ] = sf[-2]
             #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
 
-        rate = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/n**2 ) * dfdr + ( 0.5/n**2 ) * d2fdr2 ) + ( rand ) * ( 2.0 * sf - n * f )
+        rate = ( end ) * ( ( 1.0/n - 0.5/n**2 ) * dfdr + ( 0.5/n**2 ) * d2fdr2 ) + ( rand ) * ( 2.0 * sf - n * f )
 
         return rate
 
-    def solve( self, t, n=None, rho=None, alpha1m=None, rho_M=None, H0=None, H1=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
+    def solve( self, t, n=None, rho=None, alpha1m=None, rho_M=None, H0=None, H1=None, end=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -522,11 +538,13 @@ class BatchReactor():
             H0 = self.H0
         if H1 is None:
             H1 = self.H1
+        if end is None:
+            end = self.end
         if rand is None:
             rand = self.rand
 
         def fun( t, y ):
-            return self.get_func(n, y, alpha1m, rho_M, H0, H1, rand, gtol)
+            return self.get_func(n, y, alpha1m, rho_M, H0, H1, end, rand, gtol)
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
@@ -583,9 +601,9 @@ class SemiBatchReactor(BatchReactor):
     def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
             rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0], influx=[0.0, 0.0, 0.0, 0.0, 0.0], outflux=[0.0, 0.0],
-            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
+            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, end=1.0, rand=0.0 ):
 
-        super().__init__(nmin, nmax, mesh, grid, rho, W, V, alpha, alpha1m, rho_M, H0, H1, concs, temp, volume, mass, monomer, dens, rand)
+        super().__init__(nmin, nmax, mesh, grid, rho, W, V, alpha, alpha1m, rho_M, H0, H1, concs, temp, volume, mass, monomer, dens, end, rand)
 
         if fin is None:
             n = self.n
@@ -608,7 +626,7 @@ class SemiBatchReactor(BatchReactor):
 
         return
 
-    def get_func( self, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
+    def get_func( self, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, end=None, rand=None, gtol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -632,19 +650,21 @@ class SemiBatchReactor(BatchReactor):
             fin = self.fin
         if fout is None:
             fout = self.fout
+        if end is None:
+            end = self.end
         if rand is None:
             rand = self.rand
 
         if W is None or V is None or alpha is None or alpha1m is None:
             W, V, alpha, alpha1m = self.get_part(n, rho, rho_M, H0, H1, gtol, alpha_only=False)
 
-        rate = self.get_rate(n, rho, alpha1m, rand)
+        rate = self.get_rate(n, rho, alpha1m, end, rand)
 
-        func = rate + fin - fout[0] * alpha * rho / V - fout[1] * alpha1m * rho / (W + (W == 0.0))
+        func = rate + fin - fout[0] * alpha * rho / V - fout[1] * alpha1m * rho * rho_M / (W + (W == 0.0))
 
         return func
 
-    def solve( self, t, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
+    def solve( self, t, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, end=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
         if n is None:
             n = self.n
@@ -668,11 +688,13 @@ class SemiBatchReactor(BatchReactor):
             fin = self.fin
         if fout is None:
             fout = self.fout
+        if end is None:
+            end = self.end
         if rand is None:
             rand = self.rand
 
         def fun( t, y ):
-            return self.get_func(n, y, W, V, alpha, alpha1m, rho_M, H0, H1, fin, fout, rand, gtol)
+            return self.get_func(n, y, W, V, alpha, alpha1m, rho_M, H0, H1, fin, fout, end, rand, gtol)
 
         solver = solve_ivp(fun, [0.0, t], rho, method='BDF', rtol=rtol, atol=atol)
 
@@ -680,7 +702,7 @@ class SemiBatchReactor(BatchReactor):
 
         return solver.t, solver.y
 
-    def cointegrate( self, t=None, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6, integrals_only=True ):
+    def cointegrate( self, t=None, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, end=None, rand=None, gtol=1e-6, integrals_only=True ):
 
         if t is None:
             t = self.solver.t
@@ -706,6 +728,8 @@ class SemiBatchReactor(BatchReactor):
             fin = self.fin
         if fout is None:
             fout = self.fout
+        if end is None:
+            end = self.end
         if rand is None:
             rand = self.rand
 
@@ -729,7 +753,7 @@ class SemiBatchReactor(BatchReactor):
 
             g[:, i] = rate
             gin[:, i] = fin
-            gout[:, i] = fout[0] * alp * rho[:, i] / v + fout[1] * a1m * rho[:, i] / (w + (w == 0.0))
+            gout[:, i] = fout[0] * alp * rho[:, i] / v + fout[1] * a1m * rho[:, i] * rho_M / (w + (w == 0.0))
 
         G = numpy.zeros_like(rho)
         Gin = numpy.zeros_like(rho)
@@ -750,29 +774,33 @@ class CSTReactor(SemiBatchReactor):
     def __init__( self, nmin=1, nmax=5, mesh=0, grid='discrete',
             rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None,
             concs=[0.0, 0.0, 0.0, 0.0, 1.0], influx=[0.0, 0.0, 0.0, 0.0, 0.0], outflux=[0.0, 0.0],
-            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, rand=0.0 ):
+            temp=573.15, volume=1.0, mass=10.0, monomer=14.027, dens=920.0, end=1.0, rand=0.0 ):
 
-        super().__init__(nmin, nmax, mesh, grid, rho, W, V, alpha, alpha1m, rho_M, H0, H1, fin, fout, concs, influx*numpy.array(concs), outflux, temp, volume, mass, monomer, dens, rand)
+        super().__init__(nmin, nmax, mesh, grid, rho, W, V, alpha, alpha1m, rho_M, H0, H1, fin, fout, concs, influx, outflux, temp, volume, mass, monomer, dens, end, rand)
 
-        n = self.n
-        fin = self.fin
-        if grid == 'discrete':
-            Da = numpy.inner(n, fin)
-        elif grid == 'continuum':
-            dn = n[1] - n[0]
-            g = n * fin
-            Da = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn
-        elif grid == 'logn':
-            logn = numpy.log(n)
-            dlogn = logn[1] - logn[0]
-            g = n**2 * fin
-            Da = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn
-        self.Da = 1.0 / Da
+        self.grid = grid
+
+        ##n = self.n
+        ##fin = self.fin
+        ##if grid == 'discrete':
+        ##    Da = numpy.inner(n, fin)
+        ##elif grid == 'continuum':
+        ##    dn = n[1] - n[0]
+        ##    g = n * fin
+        ##    Da = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn
+        ##elif grid == 'logn':
+        ##    logn = numpy.log(n)
+        ##    dlogn = logn[1] - logn[0]
+        ##    g = n**2 * fin
+        ##    Da = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn
+        ##self.Da = 1.0 / Da
 
         return
 
-    def solve( self, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
+    def solve( self, grid=None, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, end=None, rand=None, Gmax=0.97725, dmax=0.1, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
+        if grid is None:
+            grid = self.grid
         if n is None:
             n = self.n
         if rho is None:
@@ -795,14 +823,35 @@ class CSTReactor(SemiBatchReactor):
             fin = self.fin
         if fout is None:
             fout = self.fout
+        if end is None:
+            end = self.end
         if rand is None:
             rand = self.rand
 
-        def fun( x ):
-            dydt = self.get_func(n, numpy.exp(x), W, V, alpha, alpha1m, rho_M, H0, H1, fin, fout, rand, gtol)
-            return numpy.inner(dydt, dydt)
+        if grid == 'discrete':
+            g = n * rho
+            G = numpy.cumsum(g)
+        elif grid == 'continuum':
+            dn = n[1] - n[0]
+            g = n * rho
+            G = numpy.zeros_like(rho)
+            G[1:] = 0.5 * numpy.cumsum( g[1:] + g[:-1] ) * dn
+        elif grid == 'logn':
+            logn = numpy.log(n)
+            dlogn = logn[1] - logn[0]
+            g = n**2 * rho
+            G = numpy.zeros_like(rho)
+            G[1:] = 0.5 * numpy.cumsum( g[1:] + g[:-1] ) * dlogn
 
-        solver = minimize(fun, rho+1e-99, method='BFGS', jac=False, options={'gtol': gtol})
+        #Gmax = 0.97725
+        #dmax = 0.1
+        imax = numpy.max(numpy.argwhere( G < Gmax ))
+        nmax = n[imax] + ( n[imax+1] - n[imax] ) / ( G[imax+1] - G[imax] ) * ( Gmax - G[imax] )
+        tmax = dmax / ( end / nmax + rand )
 
-        return numpy.exp(solver.x)
+        y = numpy.transpose([ numpy.full_like(rho, numpy.inf), rho ])
+        while numpy.any( numpy.abs( y[:, -1] - y[:, 0] ) > atol + rtol * numpy.abs( y[:, -1] ) ):
+            t, y = super().solve(tmax, n, y[:, -1], W, V, alpha, alpha1m, rho_M, H0, H1, fin, fout, end, rand, gtol, rtol, atol)
+
+        return y[:, -1]
 
