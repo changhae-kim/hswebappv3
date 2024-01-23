@@ -13,7 +13,7 @@ mass    = 1.0
 volume  = 1.0
 mu      = 3.0
 sigma   = 0.1
-influx  = 0.01
+influx  = 1.0
 outflux = 100.0
 
 monomer = 14.027
@@ -40,8 +40,8 @@ inconcs = ( dens / monomer ) * rho
 influx = influx*inconcs
 outflux = [outflux, 0.0]
 
-reactor = CSTReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
-#reactor = SemiBatchReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
+#reactor = CSTReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
+reactor = SemiBatchReactor(nmin=nmin, nmax=nmax, mesh=mesh, grid=grid, influx=influx, outflux=outflux, concs=concs, temp=temp, volume=volume, mass=mass, monomer=monomer, dens=dens, rand=1.0)
 n = reactor.n
 reactor.W = None
 reactor.V = None
@@ -49,19 +49,19 @@ reactor.alpha = None
 reactor.alpha1m = None
 
 if not os.path.exists('rho_'+basename+'.npy'):
-    rho = reactor.solve(gtol=1e-12, rtol=1e-12, atol=1e-12)
-    numpy.save('rho_'+basename+'.npy', rho)
-    t = numpy.array([0.0, 0.5, 1.0])
-    rho = numpy.transpose([rho, rho, rho])
-    #t, rho = reactor.solve(tmax, gtol=1e-12, rtol=1e-12, atol=1e-12)
-    #numpy.save('t_'+basename+'.npy', t)
+    #rho = reactor.solve(gtol=1e-12, rtol=1e-12, atol=1e-12)
     #numpy.save('rho_'+basename+'.npy', rho)
+    #t = numpy.array([0.0, 0.5, 1.0])
+    #rho = numpy.transpose([rho, rho, rho])
+    t, rho = reactor.solve(tmax, gtol=1e-12, rtol=1e-12, atol=1e-12)
+    numpy.save('t_'+basename+'.npy', t)
+    numpy.save('rho_'+basename+'.npy', rho)
 else:
-    rho = numpy.load('rho_'+basename+'.npy')
-    t = numpy.array([0.0, 0.5, 1.0])
-    rho = numpy.transpose([rho, rho, rho])
-    #t = numpy.load('t_'+basename+'.npy')
     #rho = numpy.load('rho_'+basename+'.npy')
+    #t = numpy.array([0.0, 0.5, 1.0])
+    #rho = numpy.transpose([rho, rho, rho])
+    t = numpy.load('t_'+basename+'.npy')
+    rho = numpy.load('rho_'+basename+'.npy')
 
 alpha, alpha1m = reactor.get_part(rho=rho[:, -1])
 
