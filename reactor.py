@@ -526,7 +526,6 @@ class BatchReactor():
 
         return rate
 
-<<<<<<< HEAD
     def get_jac( self, n=None, rho=None, W=None, alpha1m=None, rho_M=None, H0=None, H1=None, rand=None, gtol=1e-6 ):
 
         if n is None:
@@ -855,7 +854,6 @@ class SemiBatchReactor(BatchReactor):
 
         return func
 
-<<<<<<< HEAD
     def get_jac( self, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
 
         if n is None:
