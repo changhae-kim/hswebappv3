@@ -181,14 +181,17 @@ class BatchReactor():
             self.n = numpy.arange(nmin, nmax+1, 1)
             self.get_melt = self.get_discrete_melt
             self.get_rate = self.get_discrete_rate
+            self.get_deriv = self.get_discrete_deriv
         elif grid == 'continuum':
             self.n = numpy.linspace(nmin, nmax, mesh)
             self.get_melt = self.get_continuum_melt
             self.get_rate = self.get_continuum_rate
+            self.get_deriv = self.get_continuum_deriv
         elif grid == 'logn':
             self.n = numpy.logspace(numpy.log10(nmin), numpy.log10(nmax), mesh)
             self.get_melt = self.get_logn_melt
             self.get_rate = self.get_logn_rate
+            self.get_deriv = self.get_logn_deriv
 
         if rho is None:
             n = self.n
@@ -472,7 +475,6 @@ class BatchReactor():
             rand = self.rand
 
         f = alpha1m * rho
-
         logn = numpy.log(n)
         dlogn = logn[1] - logn[0]
 
@@ -507,6 +509,194 @@ class BatchReactor():
         rate = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/n**2 ) * dfdr + ( 0.5/n**2 ) * d2fdr2 ) + ( rand ) * ( 2.0 * sf - n * f )
 
         return rate
+
+    def get_jac( self, n=None, rho=None, W=None, alpha1m=None, rho_M=None, H0=None, H1=None, rand=None, gtol=1e-6 ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if W is None:
+            W = self.W
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if rho_M is None:
+            rho_M = self.rho_M
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+        if rand is None:
+            rand = self.rand
+
+        if W is None or alpha1m is None:
+            W, _, _, alpha1m = self.get_part(n, rho, rho_M, H0, H1, gtol, alpha_only=False)
+
+        deriv = self.get_deriv(n, rho, W, alpha1m, H0, H1, rand)
+
+        jac = deriv
+
+        return jac
+
+    def get_discrete_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if W is None:
+            W = self.W
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+        if rand is None:
+            rand = self.rand
+
+        # f = alpha1m * rho
+        aux = numpy.outer( n * H0 * H1**n * ( alph1m / W )**2 * rho, n * alpha1m )
+        f = numpy.diag(alpha1m) + aux
+
+        df = numpy.zeros_like(f)
+        if rand != 1.0:
+            df[1:-1] = f[2:] - f[1:-1]
+            df[0   ] = f[1 ] - f[0   ]
+            df[  -1] =       - f[  -1]
+
+        sf = numpy.zeros_like(f)
+        if rand != 0.0:
+            sf[-2::-1] = numpy.cumsum(f[:0:-1], axis=0)
+            sf[-1    ] = 0.0
+
+        deriv = ( 1.0 - rand ) * ( 1.0 * df ) + ( rand ) * ( 2.0 * sf - ( n - 1.0 ) * f )
+
+        if rate_only:
+            return deriv
+        else:
+            return aux, deriv
+
+    def get_continuum_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if W is None:
+            W = self.W
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+        if rand is None:
+            rand = self.rand
+
+        # f = alpha1m * rho
+        dn = n[1] - n[0]
+
+        w = numpy.ones_like(n)
+        w[0] = w[-1] = 0.5
+        aux = numpy.outer( n * H0 * H1**n * ( alph1m / W )**2 * rho, w * n * alpha1m * dn )
+        f = numpy.diag(alpha1m) + aux
+
+        dfdn = numpy.zeros_like(f)
+        if rand != 1.0:
+            dfdn[1:-1] = ( f[2:  ] - f[ :-2] ) / ( 2.0 * dn )
+            #dfdn[0   ] = ( f[1   ] - f[0   ] ) / ( dn )
+            #dfdn[  -1] = ( f[  -1] - f[  -2] ) / ( dn )
+            dfdn[0   ] = dfdn[1   ]
+            dfdn[  -1] = dfdn[  -2]
+            #dfdn[ 0] = 2.0 * dfdn[ 1] - dfdn[ 2]
+            #dfdn[-1] = 2.0 * dfdn[-2] - dfdn[-3]
+
+        d2fdn2 = numpy.zeros_like(f)
+        if rand != 1.0:
+            d2fdn2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dn**2.0 )
+            #d2fdn2[0   ] = 0.0
+            #d2fdn2[  -1] = 0.0
+            d2fdn2[0   ] = d2fdn2[1   ]
+            d2fdn2[  -1] = d2fdn2[  -2]
+            #d2fdn2[ 0] = 2.0 * d2fdn2[ 1] - d2fdn2[ 2]
+            #d2fdn2[-1] = 2.0 * d2fdn2[-2] - d2fdn2[-3]
+
+        sf = numpy.zeros_like(f)
+        if rand != 0.0:
+            g = f
+            sf[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1], axis=0) * dn
+            sf[-1    ] = 0.0
+            #sf[-1    ] = sf[-2]
+            #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
+
+        deriv = ( 1.0 - rand ) * ( 1.0 * dfdn + 0.5 * d2fdn2 ) + ( rand ) * ( 2.0 * sf - n * f )
+
+        if rate_only:
+            return deriv
+        else:
+            return aux, deriv
+
+    def get_logn_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if W is None:
+            W = self.W
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+        if rand is None:
+            rand = self.rand
+
+        # f = alpha1m * rho
+        logn = numpy.log(n)
+        dlogn = logn[1] - logn[0]
+
+        w = numpy.ones_like(n)
+        w[0] = w[-1] = 0.5
+        aux = numpy.outer( n * H0 * H1**n * ( alph1m / W )**2 * rho, w * n**2 * alpha1m * dlogn )
+        f = numpy.diag(alpha1m) + aux
+
+        dfdr = numpy.zeros_like(f)
+        if rand != 1.0:
+            dfdr[1:-1] = ( f[2:  ] - f[ :-2] ) / ( 2.0 * dlogn )
+            dfdr[0   ] = ( f[1   ] - f[0   ] ) / ( dlogn )
+            dfdr[  -1] = ( f[  -1] - f[  -2] ) / ( dlogn )
+            #dfdr[0   ] = dfdr[1   ]
+            #dfdr[  -1] = dfdr[  -2]
+            #dfdr[ 0] = 2.0 * dfdr[ 1] - dfdr[ 2]
+            #dfdr[-1] = 2.0 * dfdr[-2] - dfdr[-3]
+
+        d2fdr2 = numpy.zeros_like(f)
+        if rand != 1.0:
+            d2fdr2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dlogn**2.0 )
+            d2fdr2[0   ] = 0.0
+            d2fdr2[  -1] = 0.0
+            #d2fdr2[0   ] = d2fdr2[1   ]
+            #d2fdr2[  -1] = d2fdr2[  -2]
+            #d2fdr2[ 0] = 2.0 * d2fdr2[ 1] - d2fdr2[ 2]
+            #d2fdr2[-1] = 2.0 * d2fdr2[-2] - d2fdr2[-3]
+
+        sf = numpy.zeros_like(f)
+        if rand != 0.0:
+            g = n * f
+            sf[-2::-1] = 0.5 * numpy.cumsum( g[:0:-1] + g[-2::-1] ) * dlogn
+            sf[-1    ] = 0.0
+            #sf[-1    ] = sf[-2]
+            #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
+
+        deriv = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/n**2 ) * dfdr + ( 0.5/n**2 ) * d2fdr2 ) + ( rand ) * ( 2.0 * sf - n * f )
+
+        if rate_only:
+            return deriv
+        else:
+            return aux, deriv
 
     def solve( self, t, n=None, rho=None, alpha1m=None, rho_M=None, H0=None, H1=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
@@ -643,6 +833,42 @@ class SemiBatchReactor(BatchReactor):
         func = rate + fin - fout[0] * alpha * rho / V - fout[1] * alpha1m * rho / (W + (W == 0.0))
 
         return func
+
+    def get_jac( self, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6 ):
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if W is None:
+            W = self.W
+        if V is None:
+            V = self.V
+        if alpha is None:
+            alpha = self.alpha
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if rho_M is None:
+            rho_M = self.rho_M
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+        if fin is None:
+            fin = self.fin
+        if fout is None:
+            fout = self.fout
+        if rand is None:
+            rand = self.rand
+
+        if W is None or V is None or alpha is None or alpha1m is None:
+            W, V, alpha, alpha1m = self.get_part(n, rho, rho_M, H0, H1, gtol, alpha_only=False)
+
+        aux, deriv = self.get_deriv(n, rho, W, alpha1m, H0, H1, rand, rate_only=False)
+
+        jac = deriv - fout[0] * ( numpy.diag(alpha) - aux ) / V - fout[1] * ( numpy.diag(alpha1m) + aux ) / (W + (W == 0.0))
+
+        return jac
 
     def solve( self, t, n=None, rho=None, W=None, V=None, alpha=None, alpha1m=None, rho_M=None, H0=None, H1=None, fin=None, fout=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
