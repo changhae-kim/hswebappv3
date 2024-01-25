@@ -468,7 +468,7 @@ class BatchReactor():
         sf = numpy.zeros_like(f)
         if rand != 0.0:
             g = f
-            sf[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1]) * dn
+            sf[-2::-1] = 0.5 * numpy.cumsum( g[:0:-1] + g[-2::-1] ) * dn
             sf[-1    ] = 0.0
             #sf[-1    ] = sf[-2]
             #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
@@ -554,6 +554,9 @@ class BatchReactor():
 
         return jac
 
+    def get_discrete_aux( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None ):
+        exit(0)
+
     def get_discrete_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
 
         if n is None:
@@ -572,7 +575,7 @@ class BatchReactor():
             rand = self.rand
 
         # f = alpha1m * rho
-        aux = numpy.outer( n * H0 * H1**n * ( alph1m / W )**2 * rho, n * alpha1m )
+        aux = get_discrete_aux(n, rho, W, alpha1m, H0, H1)
         f = numpy.diag(alpha1m) + aux
 
         df = numpy.zeros_like(f)
@@ -586,12 +589,15 @@ class BatchReactor():
             sf[-2::-1] = numpy.cumsum(f[:0:-1], axis=0)
             sf[-1    ] = 0.0
 
-        deriv = ( 1.0 - rand ) * ( 1.0 * df ) + ( rand ) * ( 2.0 * sf - ( n - 1.0 ) * f )
+        deriv = ( 1.0 - rand ) * ( 1.0 * df.T ).T + ( rand ) * ( 2.0 * sf.T - ( n - 1.0 ) * f.T ).T
 
         if rate_only:
             return deriv
         else:
             return aux, deriv
+
+    def get_continuum_aux( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None ):
+        exit(0)
 
     def get_continuum_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
 
@@ -613,9 +619,7 @@ class BatchReactor():
         # f = alpha1m * rho
         dn = n[1] - n[0]
 
-        w = numpy.ones_like(n)
-        w[0] = w[-1] = 0.5
-        aux = numpy.outer( n * H0 * H1**n * ( alph1m / W )**2 * rho, w * n * alpha1m * dn )
+        aux = get_continuum_aux(n, rho, W, alpha1m, H0, H1)
         f = numpy.diag(alpha1m) + aux
 
         dfdn = numpy.zeros_like(f)
@@ -641,17 +645,20 @@ class BatchReactor():
         sf = numpy.zeros_like(f)
         if rand != 0.0:
             g = f
-            sf[-2::-1] = 0.5 * numpy.cumsum(g[:0:-1] + g[-2::-1], axis=0) * dn
+            sf[-2::-1] = 0.5 * numpy.cumsum( g[:0:-1] + g[-2::-1], axis=0 ) * dn
             sf[-1    ] = 0.0
             #sf[-1    ] = sf[-2]
             #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
 
-        deriv = ( 1.0 - rand ) * ( 1.0 * dfdn + 0.5 * d2fdn2 ) + ( rand ) * ( 2.0 * sf - n * f )
+        deriv = ( 1.0 - rand ) * ( 1.0 * dfdn.T + 0.5 * d2fdn2.T ).T + ( rand ) * ( 2.0 * sf.T - n * f.T ).T
 
         if rate_only:
             return deriv
         else:
             return aux, deriv
+
+    def get_logn_aux( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None ):
+        exit(0)
 
     def get_logn_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
 
@@ -674,9 +681,7 @@ class BatchReactor():
         logn = numpy.log(n)
         dlogn = logn[1] - logn[0]
 
-        w = numpy.ones_like(n)
-        w[0] = w[-1] = 0.5
-        aux = numpy.outer( n * H0 * H1**n * ( alph1m / W )**2 * rho, w * n**2 * alpha1m * dlogn )
+        aux = get_logn_aux(n, rho, W, alpha1m, H0, H1)
         f = numpy.diag(alpha1m) + aux
 
         dfdr = numpy.zeros_like(f)
@@ -702,12 +707,12 @@ class BatchReactor():
         sf = numpy.zeros_like(f)
         if rand != 0.0:
             g = n * f
-            sf[-2::-1] = 0.5 * numpy.cumsum( g[:0:-1] + g[-2::-1] ) * dlogn
+            sf[-2::-1] = 0.5 * numpy.cumsum( g[:0:-1] + g[-2::-1], axis=0 ) * dlogn
             sf[-1    ] = 0.0
             #sf[-1    ] = sf[-2]
             #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
 
-        deriv = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/n**2 ) * dfdr + ( 0.5/n**2 ) * d2fdr2 ) + ( rand ) * ( 2.0 * sf - n * f )
+        deriv = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/n**2 ) * dfdr.T + ( 0.5/n**2 ) * d2fdr2.T ).T + ( rand ) * ( 2.0 * sf.T - n * f.T ).T
 
         if rate_only:
             return deriv
