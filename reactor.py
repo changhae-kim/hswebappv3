@@ -555,7 +555,29 @@ class BatchReactor():
         return jac
 
     def get_discrete_aux( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None ):
-        exit(0)
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if W is None:
+            W = self.W
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+
+        A = n * H0 * H1**n * ( alpha1m / W )**2
+        B = n * alpha1m
+        C = n * rho
+
+        b = numpy.outer(A, B)
+        a = numpy.identity(len(n)) - numpy.outer(A, C)
+        x = numpy.linalg.solve(a, b)
+
+        return x
 
     def get_discrete_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
 
@@ -575,8 +597,8 @@ class BatchReactor():
             rand = self.rand
 
         # f = alpha1m * rho
-        aux = get_discrete_aux(n, rho, W, alpha1m, H0, H1)
-        f = numpy.diag(alpha1m) + aux
+        aux = self.get_discrete_aux(n, rho, W, alpha1m, H0, H1)
+        f = numpy.diag(alpha1m) + ( aux.T * rho ).T
 
         df = numpy.zeros_like(f)
         if rand != 1.0:
@@ -597,7 +619,33 @@ class BatchReactor():
             return aux, deriv
 
     def get_continuum_aux( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None ):
-        exit(0)
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if W is None:
+            W = self.W
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+
+        dn = n[1] - n[0]
+        w = numpy.ones_like(n)
+        w[0] = w[-1] = 0.5
+
+        A = n * H0 * H1**n * ( alpha1m / W )**2
+        B = w * n * alpha1m * dn
+        C = w * n * rho * dn
+
+        b = numpy.outer(A, B)
+        a = numpy.identity(len(n)) - numpy.outer(A, C)
+        x = numpy.linalg.solve(a, b)
+
+        return x
 
     def get_continuum_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
 
@@ -619,8 +667,8 @@ class BatchReactor():
         # f = alpha1m * rho
         dn = n[1] - n[0]
 
-        aux = get_continuum_aux(n, rho, W, alpha1m, H0, H1)
-        f = numpy.diag(alpha1m) + aux
+        aux = self.get_continuum_aux(n, rho, W, alpha1m, H0, H1)
+        f = numpy.diag(alpha1m) + ( aux.T * rho ).T
 
         dfdn = numpy.zeros_like(f)
         if rand != 1.0:
@@ -658,7 +706,34 @@ class BatchReactor():
             return aux, deriv
 
     def get_logn_aux( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None ):
-        exit(0)
+
+        if n is None:
+            n = self.n
+        if rho is None:
+            rho = self.rho
+        if W is None:
+            W = self.W
+        if alpha1m is None:
+            alpha1m = self.alpha1m
+        if H0 is None:
+            H0 = self.H0
+        if H1 is None:
+            H1 = self.H1
+
+        logn = numpy.log(n)
+        dlogn = logn[1] - logn[0]
+        w = numpy.ones_like(n)
+        w[0] = w[-1] = 0.5
+
+        A = n * H0 * H1**n * ( alpha1m / W )**2
+        B = w * n**2 * alpha1m * dlogn
+        C = w * n**2 * rho * dlogn
+
+        b = numpy.outer(A, B)
+        a = numpy.identity(len(n)) - numpy.outer(A, C)
+        x = numpy.linalg.solve(a, b)
+
+        return x
 
     def get_logn_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
 
@@ -681,8 +756,8 @@ class BatchReactor():
         logn = numpy.log(n)
         dlogn = logn[1] - logn[0]
 
-        aux = get_logn_aux(n, rho, W, alpha1m, H0, H1)
-        f = numpy.diag(alpha1m) + aux
+        aux = self.get_logn_aux(n, rho, W, alpha1m, H0, H1)
+        f = numpy.diag(alpha1m) + ( aux.T * rho ).T
 
         dfdr = numpy.zeros_like(f)
         if rand != 1.0:
@@ -706,7 +781,7 @@ class BatchReactor():
 
         sf = numpy.zeros_like(f)
         if rand != 0.0:
-            g = n * f
+            g = ( n * f.T ).T
             sf[-2::-1] = 0.5 * numpy.cumsum( g[:0:-1] + g[-2::-1], axis=0 ) * dlogn
             sf[-1    ] = 0.0
             #sf[-1    ] = sf[-2]
@@ -891,7 +966,7 @@ class SemiBatchReactor(BatchReactor):
 
         aux, deriv = self.get_deriv(n, rho, W, alpha1m, H0, H1, rand, rate_only=False)
 
-        jac = deriv - fout[0] * ( numpy.diag(alpha) - aux ) / V - fout[1] * ( numpy.diag(alpha1m) + aux ) / (W + (W == 0.0))
+        jac = deriv - fout[0] * ( numpy.diag(alpha) - ( aux.T * rho ).T ) / V - fout[1] * ( numpy.diag(alpha1m) + ( aux.T * rho ).T ) / (W + (W == 0.0))
 
         return jac
 
