@@ -16,15 +16,15 @@ def convert_y_to_rho( mode, x, y, mass=10.0, monomer=14.027 ):
     if mode == 'dwdn':
         rho = y.T / n
     elif mode == 'dwdlogn':
-        rho = y.T / n**2
+        rho = y.T / ( n * n )
     elif mode == 'dWdn':
         rho = y.T / n / mass
     elif mode == 'dWdlogn':
-        rho = y.T / n**2 / mass
+        rho = y.T / ( n * n ) / mass
     elif mode == 'dWdM':
         rho = y.T / n * monomer / mass
     elif mode == 'dWdlogM':
-        rho = y.T / n**2 / mass
+        rho = y.T / ( n * n ) / mass
     elif mode == 'dndn':
         rho = y.T
     elif mode == 'dndlogn':
@@ -44,15 +44,15 @@ def convert_rho_to_y( mode, n, rho, mass=10.0, monomer=14.027 ):
     if mode == 'dwdn':
         y = n * rho.T
     elif mode == 'dwdlogn':
-        y = n**2 * rho.T
+        y = n * n * rho.T
     elif mode == 'dWdn':
         y = mass * n * rho.T
     elif mode == 'dWdlogn':
-        y = mass * n**2 * rho.T
+        y = mass * n * n * rho.T
     elif mode == 'dWdM':
         y = mass / monomer * n * rho.T
     elif mode == 'dWdlogM':
-        y = mass * n**2 * rho.T
+        y = mass * n * n * rho.T
     elif mode == 'dndn':
         y = rho.T
     elif mode == 'dndlogn':
@@ -66,16 +66,16 @@ def get_dispersity( mode, t, n, rho, monomer=14.027 ):
 
     if mode in ['D_n', 'D_M']:
         dx = n[1:] - n[:-1]
-        g0 = n**0 * rho.T
-        g1 = n**1 * rho.T
-        g2 = n**2 * rho.T
+        g0 = rho.T
+        g1 = n * rho.T
+        g2 = n * n * rho.T
 
     elif mode in ['D_logn', 'D_logM']:
         logn = numpy.log(n)
         dx = logn[1:] - logn[:-1]
-        g0 = n**1 * rho.T
-        g1 = n**2 * rho.T
-        g2 = n**3 * rho.T
+        g0 = n * rho.T
+        g1 = n * n * rho.T
+        g2 = n * n * n * rho.T
 
     G0 = 0.5 * numpy.sum( ( g0.T[1:] + g0.T[:-1] ).T * dx, axis=1 )
     G1 = 0.5 * numpy.sum( ( g1.T[1:] + g1.T[:-1] ).T * dx, axis=1 )
@@ -144,7 +144,7 @@ def get_states( mode, t, n, rho, state_cutoffs=[4.5, 16.5], mass=10.0, monomer=1
     elif mode in ['w_n', 'W_n']:
         g = n * rho.T
     elif mode in ['w_logn', 'W_logn']:
-        g = n**2 * rho.T
+        g = n * n * rho.T
 
     Ggg = 0.5 * numpy.sum( ( g.T[    1:igl+1] + g.T[     :igl  ] ).T * dx[     :igl  ], axis=1 )
     Ggl = 0.5 * numpy.sum( ( g.T[igl+1:igl+2] + g.T[igl  :igl+1] ).T * dx[igl  :igl+1], axis=1 )
@@ -204,7 +204,7 @@ class BatchReactor():
             elif grid == 'logn':
                 logn = numpy.log(n)
                 dlogn = logn[1] - logn[0]
-                g = n**2 * concs
+                g = n * n * concs
                 rho = numpy.array(concs) / ( 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn )
         self.rho = rho
 
@@ -290,8 +290,8 @@ class BatchReactor():
         def fun(x):
             W = numpy.exp(x)
             dW = numpy.sum( ( n * rho ) * ( W ) / ( W + An * ( 1.0 - W / rho_M ) ) ) - W
-            dWdx = numpy.sum( ( n * rho ) * ( An * W ) / ( W + An * ( 1.0 - W / rho_M ) )**2 ) - W
-            f = dW**2
+            dWdx = numpy.sum( ( n * rho ) * ( An * W ) / ( W + An * ( 1.0 - W / rho_M ) )**2.0 ) - W
+            f = dW * dW
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
@@ -322,9 +322,9 @@ class BatchReactor():
             W = numpy.exp(x)
             g = ( n * rho ) * ( W ) / ( W + An * ( 1.0 - W / rho_M ) )
             dW = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn - W
-            g = ( n * rho ) * ( An * W ) / ( W + An * ( 1.0 - W / rho_M ) )**2
+            g = ( n * rho ) * ( An * W ) / ( W + An * ( 1.0 - W / rho_M ) )**2.0
             dWdx = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dn - W
-            f = dW**2
+            f = dW * dW
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
@@ -355,15 +355,15 @@ class BatchReactor():
 
         def fun(x):
             W = numpy.exp(x)
-            g = ( n**2 * rho ) * ( W ) / ( W + An * ( 1.0 - W / rho_M ) )
+            g = ( n * n * rho ) * ( W ) / ( W + An * ( 1.0 - W / rho_M ) )
             dW = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn - W
-            g = ( n**2 * rho ) * ( An * W ) / ( W + An * ( 1.0 - W / rho_M ) )**2
+            g = ( n * n * rho ) * ( An * W ) / ( W + An * ( 1.0 - W / rho_M ) )**2.0
             dWdx = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn - W
-            f = dW**2
+            f = dW * dW
             dfdx = 2.0 * dW * dWdx
             return f, dfdx
 
-        g = ( n**2 * rho ) / ( 1.0 + An )
+        g = ( n * n * rho ) / ( 1.0 + An )
         W = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn
         if W > 0.0:
             solver = minimize(fun, numpy.log(W), method='BFGS', jac=True, options={'gtol': gtol})
@@ -457,7 +457,7 @@ class BatchReactor():
 
         d2fdn2 = numpy.zeros_like(f)
         if end != 0.0:
-            d2fdn2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dn**2.0 )
+            d2fdn2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dn * dn )
             #d2fdn2[0   ] = 0.0
             #d2fdn2[  -1] = 0.0
             d2fdn2[0   ] = d2fdn2[1   ]
@@ -506,7 +506,7 @@ class BatchReactor():
 
         d2fdr2 = numpy.zeros_like(f)
         if end != 0.0:
-            d2fdr2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dlogn**2.0 )
+            d2fdr2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dlogn * dlogn )
             d2fdr2[0   ] = 0.0
             d2fdr2[  -1] = 0.0
             #d2fdr2[0   ] = d2fdr2[1   ]
@@ -522,7 +522,7 @@ class BatchReactor():
             #sf[-1    ] = sf[-2]
             #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
 
-        rate = ( end ) * ( ( 1.0/n - 0.5/n**2 ) * dfdr + ( 0.5/n**2 ) * d2fdr2 ) + ( rand ) * ( 2.0 * sf - n * f )
+        rate = ( end ) * ( ( 1.0/n - 0.5/(n*n) ) * dfdr + ( 0.5/(n*n) ) * d2fdr2 ) + ( rand ) * ( 2.0 * sf - n * f )
 
         return rate
 
@@ -569,7 +569,7 @@ class BatchReactor():
         if H1 is None:
             H1 = self.H1
 
-        A = n * H0 * H1**n * ( alpha1m / W )**2
+        A = n * H0 * H1**n * ( alpha1m / W )**2.0
         B = n * alpha1m
         C = n * rho
 
@@ -577,7 +577,10 @@ class BatchReactor():
         a = numpy.identity(len(n)) - numpy.outer(A, C)
         x = numpy.linalg.solve(a, b)
 
-        return x
+        dady = x
+        dwdy = B + numpy.einsum('i,ij->j', C, x)
+
+        return dady, dwdy
 
     def get_discrete_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
 
@@ -597,8 +600,8 @@ class BatchReactor():
             rand = self.rand
 
         # f = alpha1m * rho
-        aux = self.get_discrete_aux(n, rho, W, alpha1m, H0, H1)
-        f = numpy.diag(alpha1m) + ( aux.T * rho ).T
+        dady, dwdy = self.get_discrete_aux(n, rho, W, alpha1m, H0, H1)
+        f = numpy.diag(alpha1m) + ( dady.T * rho ).T
 
         df = numpy.zeros_like(f)
         if rand != 1.0:
@@ -616,7 +619,7 @@ class BatchReactor():
         if rate_only:
             return deriv
         else:
-            return aux, deriv
+            return dady, dwdy, deriv
 
     def get_continuum_aux( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None ):
 
@@ -637,7 +640,7 @@ class BatchReactor():
         w = numpy.ones_like(n)
         w[0] = w[-1] = 0.5
 
-        A = n * H0 * H1**n * ( alpha1m / W )**2
+        A = n * H0 * H1**n * ( alpha1m / W )**2.0
         B = w * n * alpha1m * dn
         C = w * n * rho * dn
 
@@ -645,7 +648,10 @@ class BatchReactor():
         a = numpy.identity(len(n)) - numpy.outer(A, C)
         x = numpy.linalg.solve(a, b)
 
-        return x
+        dady = x
+        dwdy = B + numpy.einsum('i,ij->j', C, x)
+
+        return dady, dwdy
 
     def get_continuum_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
 
@@ -667,8 +673,8 @@ class BatchReactor():
         # f = alpha1m * rho
         dn = n[1] - n[0]
 
-        aux = self.get_continuum_aux(n, rho, W, alpha1m, H0, H1)
-        f = numpy.diag(alpha1m) + ( aux.T * rho ).T
+        dady, dwdy = self.get_continuum_aux(n, rho, W, alpha1m, H0, H1)
+        f = numpy.diag(alpha1m) + ( dady.T * rho ).T
 
         dfdn = numpy.zeros_like(f)
         if rand != 1.0:
@@ -682,7 +688,7 @@ class BatchReactor():
 
         d2fdn2 = numpy.zeros_like(f)
         if rand != 1.0:
-            d2fdn2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dn**2.0 )
+            d2fdn2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dn * dn )
             #d2fdn2[0   ] = 0.0
             #d2fdn2[  -1] = 0.0
             d2fdn2[0   ] = d2fdn2[1   ]
@@ -703,7 +709,7 @@ class BatchReactor():
         if rate_only:
             return deriv
         else:
-            return aux, deriv
+            return dady, dwdy, deriv
 
     def get_logn_aux( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None ):
 
@@ -725,15 +731,18 @@ class BatchReactor():
         w = numpy.ones_like(n)
         w[0] = w[-1] = 0.5
 
-        A = n * H0 * H1**n * ( alpha1m / W )**2
-        B = w * n**2 * alpha1m * dlogn
-        C = w * n**2 * rho * dlogn
+        A = n * H0 * H1**n * ( alpha1m / W )**2.0
+        B = w * n * n * alpha1m * dlogn
+        C = w * n * n * rho * dlogn
 
         b = numpy.outer(A, B)
         a = numpy.identity(len(n)) - numpy.outer(A, C)
         x = numpy.linalg.solve(a, b)
 
-        return x
+        dady = x
+        dwdy = B + numpy.einsum('i,ij->j', C, x)
+
+        return dady, dwdy
 
     def get_logn_deriv( self, n=None, rho=None, W=None, alpha1m=None, H0=None, H1=None, rand=None, rate_only=True ):
 
@@ -756,8 +765,8 @@ class BatchReactor():
         logn = numpy.log(n)
         dlogn = logn[1] - logn[0]
 
-        aux = self.get_logn_aux(n, rho, W, alpha1m, H0, H1)
-        f = numpy.diag(alpha1m) + ( aux.T * rho ).T
+        dady, dwdy = self.get_logn_aux(n, rho, W, alpha1m, H0, H1)
+        f = numpy.diag(alpha1m) + ( dady.T * rho ).T
 
         dfdr = numpy.zeros_like(f)
         if rand != 1.0:
@@ -771,7 +780,7 @@ class BatchReactor():
 
         d2fdr2 = numpy.zeros_like(f)
         if rand != 1.0:
-            d2fdr2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dlogn**2.0 )
+            d2fdr2[1:-1] = ( f[2:  ] - 2.0 * f[1:-1] + f[ :-2] ) / ( dlogn * dlogn )
             d2fdr2[0   ] = 0.0
             d2fdr2[  -1] = 0.0
             #d2fdr2[0   ] = d2fdr2[1   ]
@@ -787,12 +796,12 @@ class BatchReactor():
             #sf[-1    ] = sf[-2]
             #sf[-1    ] = 2.0 * sf[-2] - sf[-3]
 
-        deriv = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/n**2 ) * dfdr.T + ( 0.5/n**2 ) * d2fdr2.T ).T + ( rand ) * ( 2.0 * sf.T - n * f.T ).T
+        deriv = ( 1.0 - rand ) * ( ( 1.0/n - 0.5/(n*n) ) * dfdr.T + ( 0.5/(n*n) ) * d2fdr2.T ).T + ( rand ) * ( 2.0 * sf.T - n * f.T ).T
 
         if rate_only:
             return deriv
         else:
-            return aux, deriv
+            return dady, dwdy, deriv
 
     def solve( self, t, n=None, rho=None, alpha1m=None, rho_M=None, H0=None, H1=None, end=None, rand=None, gtol=1e-6, rtol=1e-6, atol=1e-6 ):
 
@@ -886,7 +895,7 @@ class SemiBatchReactor(BatchReactor):
             elif grid == 'logn':
                 logn = numpy.log(n)
                 dlogn = logn[1] - logn[0]
-                g = n**2 * concs
+                g = n * n * concs
                 fin = numpy.array(influx) / ( 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn )
         self.fin = fin
 
@@ -964,9 +973,13 @@ class SemiBatchReactor(BatchReactor):
         if W is None or V is None or alpha is None or alpha1m is None:
             W, V, alpha, alpha1m = self.get_part(n, rho, rho_M, H0, H1, gtol, alpha_only=False)
 
-        aux, deriv = self.get_deriv(n, rho, W, alpha1m, H0, H1, rand, rate_only=False)
+        dady, dwdy, deriv = self.get_deriv(n, rho, W, alpha1m, H0, H1, rand, rate_only=False)
 
-        jac = deriv - fout[0] * ( numpy.diag(alpha) - ( aux.T * rho ).T ) / V - fout[1] * ( numpy.diag(alpha1m) + ( aux.T * rho ).T ) / (W + (W == 0.0))
+        jac = deriv \
+                - fout[0] * ( numpy.diag(alpha) - ( dady.T * rho ).T ) / V \
+                - fout[0] * numpy.outer( alpha * rho, dwdy ) / ( rho_M * V * V ) \
+                - fout[1] * ( numpy.diag(alpha1m) + ( dady.T * rho ).T ) * rho_M / ( W + ( W == 0.0 ) ) \
+                + fout[1] * numpy.outer( alpha1m * rho, dwdy ) * rho_M / ( W * W + ( W == 0.0 ) )
 
         return jac
 
@@ -1097,7 +1110,7 @@ class CSTReactor(SemiBatchReactor):
         ##elif grid == 'logn':
         ##    logn = numpy.log(n)
         ##    dlogn = logn[1] - logn[0]
-        ##    g = n**2 * fin
+        ##    g = n * n * fin
         ##    Da = 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn
         ##self.Da = 1.0 / Da
 
@@ -1145,7 +1158,7 @@ class CSTReactor(SemiBatchReactor):
         elif grid == 'logn':
             logn = numpy.log(n)
             dlogn = logn[1] - logn[0]
-            g = n**2 * rho
+            g = n * n * rho
             G = numpy.zeros_like(rho)
             G[1:] = 0.5 * numpy.cumsum( g[1:] + g[:-1] ) * dlogn
 
