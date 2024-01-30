@@ -34,8 +34,8 @@ dlogn = logn[1] - logn[0]
 rho = (1.0/n**2)*numpy.exp(-0.5*((numpy.log10(n)-mu)/(sigma))**2)
 g = n**2 * rho
 rho = rho / ( 0.5 * numpy.sum( g[1:] + g[:-1] ) * dlogn )
-concs = ( mass / volume / monomer ) * rho
-inconcs = ( dens / monomer ) * rho
+concs = ( mass / volume ) * rho
+inconcs = ( dens ) * rho
 
 influx = influx*inconcs
 outflux = [outflux, 0.0]
